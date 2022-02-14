@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">LUWES Mobile Apps</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">LUWES Mobile Apps</string>
+    <string name="nav_header_subtitle">Version 2.0.0</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_spp">SPP Device</string>
+    <string name="menu_ble">BLE Device</string>
+    <string-array name="interval_option_arrays">
+        <item>Minutes</item>
+        <item>Hour</item>
+    </string-array>
+    <string-array name="setting_option_arrays">
+        <item>[Select parameter to set]</item>
+        <item>Site Name</item>
+        <item>IP Address and Port</item>
+        <item>Sensor Offset and Zero Values</item>
+        <item>Record Interval</item>
+    </string-array>
+</resources>

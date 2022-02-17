@@ -9,17 +9,62 @@
         android:id="@+id/nav_home"
         android:name="com.example.luwesmobileapps.ui.home.HomeFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_nav_home_to_nav_spp"
+            app:destination="@id/nav_spp"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_ble"
+            app:destination="@id/nav_ble"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_spp"
         android:name="com.example.luwesmobileapps.ui.sppdevice.SPPDeviceFragment"
         android:label="@string/menu_spp"
-        tools:layout="@layout/fragment_sppdevice" />
+        tools:layout="@layout/fragment_sppdevice" >
+        <action
+            android:id="@+id/action_nav_spp_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_nav_spp_to_nav_ble"
+            app:destination="@id/nav_ble"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_ble"
         android:name="com.example.luwesmobileapps.ui.bledevice.BLEDeviceFragment"
         android:label="@string/menu_ble"
-        tools:layout="@layout/fragment_bledevice" />
+        tools:layout="@layout/fragment_bledevice" >
+        <action
+            android:id="@+id/action_nav_ble_to_nav_spp"
+            app:destination="@id/nav_spp"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_nav_ble_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+    </fragment>
 </navigation>

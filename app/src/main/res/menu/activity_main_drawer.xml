@@ -9,12 +9,12 @@
             android:icon="@drawable/ic_menu_home"
             android:title="@string/menu_home" />
         <item
-            android:id="@+id/nav_spp"
-            android:icon="@drawable/ic_menu_bluetooth"
-            android:title="@string/menu_spp" />
+            android:id="@+id/nav_devicepage"
+            android:icon="@drawable/ic_page"
+            android:title="@string/menu_devicepage" />
         <item
             android:id="@+id/nav_ble"
-            android:icon="@drawable/ic_menu_bluetooth"
-            android:title="@string/menu_ble" />
+            android:icon="@drawable/ic_graph"
+            android:title="@string/menu_graphviewer" />
     </group>
 </menu>

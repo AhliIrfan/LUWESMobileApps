@@ -1,7 +1,5 @@
 package com.example.luwesmobileapps;
 
-import static android.view.View.VISIBLE;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -14,22 +12,31 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+
+import android.transition.AutoTransition;
+import android.transition.Fade;
+import android.transition.TransitionManager;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
+import android.view.translation.TranslationManager;
+import android.widget.LinearLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -62,11 +69,33 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        LinearLayout ScanAction = findViewById(R.id.connectmenu);
+//        BottomNavigationView BottomNav = findViewById(R.id.BottomNav);
+//        BottomNav.setOnNavigationItemSelectedListener(navListener);
         FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton BTScan = findViewById(R.id.action_bluetoothscan);
+        FloatingActionButton BLEScan = findViewById(R.id.action_blescan);
+        FloatingActionButton Disconnect = findViewById(R.id.action_disconnect);
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         registerReceiver(BTReceiver,filter);
 
         fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (fab.isExpanded()){
+                    fab.setExpanded(false);
+                    TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
+                    ScanAction.setVisibility(View.INVISIBLE);
+                }
+                else{
+                    fab.setExpanded(true);
+                    TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
+                    ScanAction.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        BTScan.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("MissingPermission")
             @Override
             public void onClick(View view) {
@@ -102,6 +131,19 @@ public class MainActivity extends AppCompatActivity {
                     });
                     alertDialog.show();
                 }
+                fab.setExpanded(false);
+                TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
+                ScanAction.setVisibility(View.INVISIBLE);
+            }
+        });
+        Disconnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent ServiceIntent = new Intent(MainActivity, BluetoothService.class);
+                stopService(ServiceIntent);
+                fab.setExpanded(false);
+                TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
+                ScanAction.setVisibility(View.INVISIBLE);
             }
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -109,18 +151,19 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_spp, R.id.nav_ble)
+                R.id.nav_home, R.id.nav_devicepage, R.id.nav_ble)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.activity_main_appbar, menu);
         return true;
     }
 

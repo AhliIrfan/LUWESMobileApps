@@ -5,7 +5,6 @@ import static com.example.luwesmobileapps.MainActivity.bluetoothAdapter;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
@@ -14,10 +13,10 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +52,7 @@ public class BluetoothService extends Service {
         Notification notification = new NotificationCompat.Builder(this,Channel_1_ID)
                 .setContentTitle("Device Connection")
                 .setContentText("Trying to connect with "+getMyDeviceName())
-                .setSmallIcon(R.drawable.ic_menu_bluetooth)
+                .setSmallIcon(R.drawable.ic_bluetooth)
                 .setContentIntent(pendingIntent)
                 .build();
         startForeground(1,notification);
@@ -62,7 +61,7 @@ public class BluetoothService extends Service {
             Notification notification2 = new NotificationCompat.Builder(this,Channel_1_ID)
                     .setContentTitle("Device Connection")
                     .setContentText("Now connected with "+getMyDeviceName())
-                    .setSmallIcon(R.drawable.ic_menu_bluetooth)
+                    .setSmallIcon(R.drawable.ic_bluetooth)
                     .setContentIntent(pendingIntent)
                     .build();
             myNotificationManager = NotificationManagerCompat.from(this);
@@ -132,23 +131,14 @@ public class BluetoothService extends Service {
                 } catch (IOException closeException) {
                     Log.e("BT Connection", "Could not close the client socket", closeException);
                 }
+                setConnectStatus(false);
                 return;
             }
 
             // The connection attempt succeeded. Perform work associated with
             // the connection in a separate thread.
-            if(mmSocket.isConnected()) {
-                BTStream = new BluetoothService.ConnectedThread(mmSocket);
-                setConnectStatus(true);
-            }
-            else if(!mmSocket.isConnected()){
-                myServiceHandler.post(new Runnable(){
-                    public void run(){
-                        stopSelf();
-                    }
-                });
-                setConnectStatus(false);
-            }
+            BTStream = new BluetoothService.ConnectedThread(mmSocket);
+            setConnectStatus(true);
         }
 
 
@@ -188,6 +178,7 @@ public class BluetoothService extends Service {
             // member streams are final.
             try {
                 tmpIn = socket.getInputStream();
+                Log.e(TAG, String.valueOf(tmpIn));
             } catch (IOException e) {
                 Log.e(TAG, "Error occurred when creating input stream", e);
             }

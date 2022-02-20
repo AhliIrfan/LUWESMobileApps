@@ -1,33 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="wrap_content">
 
-        <android.support.v7.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:menu="@menu/activity_main_appbar"
+            style="@style/Widget.MaterialComponents.Toolbar.Primary"/>
 
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main" />
 
-    <android.support.design.widget.FloatingActionButton
+
+    <LinearLayout
+        android:id="@+id/connectmenu"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_margin="@dimen/border_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_anchor="@id/fab"
+        app:layout_behavior="com.google.android.material.transformation.FabTransformationScrimBehavior"
+        app:layout_anchorGravity="top|center_horizontal"
+        android:visibility="invisible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="end"
+            android:layout_marginBottom="2dp">
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BLE Scan"
+                android:elevation="2dp"
+                android:checkable="false"
+                android:clickable="false"/>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/action_blescan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:backgroundTint="@color/colorSecondaryVariant"
+                app:srcCompat="@drawable/ic_bluetoothle"
+                app:fabSize="mini"
+                app:elevation="2dp"
+                android:layout_gravity="end"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="end"
+            android:layout_marginBottom="2dp">
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BT Scan"
+                android:elevation="2dp"
+                android:checkable="false"
+                android:clickable="false"/>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/action_bluetoothscan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:backgroundTint="@color/colorSecondaryVariant"
+                app:srcCompat="@drawable/ic_bluetooth"
+                app:fabSize="mini"
+                app:elevation="2dp"
+                android:layout_gravity="end"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="end"
+            android:layout_marginBottom="5dp"
+            android:backgroundTint="@color/colorSecondary">
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disconnect"
+                android:elevation="2dp"
+                android:checkable="false"
+                android:clickable="false"/>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/action_disconnect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                app:backgroundTint="@color/colorSecondaryVariant"
+                app:elevation="2dp"
+                app:fabSize="mini"
+                app:srcCompat="@drawable/ic_disconnect" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_device_add" />
+        android:layout_gravity="bottom|end"
+        app:elevation="2dp"
+        app:srcCompat="@drawable/ic_search" />
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

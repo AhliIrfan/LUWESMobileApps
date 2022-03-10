@@ -10,12 +10,18 @@
         <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/drawable/side_nav_bar.xml" value="0.128" />
         <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/activity_main.xml" value="0.3333333333333333" />
         <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/app_bar_main.xml" value="0.1" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/ble_device_listview.xml" value="0.1" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/ble_scan_dialog.xml" value="0.2132564841498559" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/blescan_dialog.xml" value="0.1" />
         <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/bottom_nav_bar.xml" value="0.1" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/bt_device_listview.xml" value="0.1" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/bt_scan_dialog.xml" value="0.43478260869565216" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/btscan_dialog.xml" value="0.22945736434108527" />
         <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/content_main.xml" value="0.1" />
-        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/device_listview.xml" value="0.1" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/device_listview.xml" value="0.4466666666666667" />
         <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/fragment_bledevice.xml" value="0.1" />
-        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/fragment_devicepage.xml" value="0.22" />
-        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/fragment_home.xml" value="0.1" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/fragment_devicepage.xml" value="0.3333333333333333" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/fragment_home.xml" value="0.3333333333333333" />
         <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/fragment_sppdevice.xml" value="0.22" />
         <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/layout_device_info.xml" value="0.2" />
         <entry key="..\:/Users/User/AndroidStudioProjects/LUWESMobileApps/app/src/main/res/layout/nav_header_main.xml" value="0.15307971014492755" />

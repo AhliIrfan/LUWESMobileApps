@@ -1,4 +1,4 @@
-package com.example.luwesmobileapps;
+package com.example.luwesmobileapps.service;
 
 import static com.example.luwesmobileapps.App.Channel_1_ID;
 import static com.example.luwesmobileapps.MainActivity.bluetoothAdapter;
@@ -17,17 +17,36 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
 import android.util.Log;
+
+import com.example.luwesmobileapps.MainActivity;
+import com.example.luwesmobileapps.R;
+import com.example.luwesmobileapps.data_layer.SharedData;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
-public class BluetoothService extends Service {
+public class BTService extends Service {
     private ConnectThread BTConnect;
+    private ConnectedThread BTStream;
     private String myDeviceName;
-    public final Handler myServiceHandler = new Handler();
+    private SharedData DeviceData;
+    private boolean isRunning;
     public NotificationManagerCompat myNotificationManager;
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public void setRunning(boolean running) {
+        isRunning = running;
+    }
 
     public String getMyDeviceName() {
         return myDeviceName;
@@ -39,43 +58,53 @@ public class BluetoothService extends Service {
 
     @Override
     public void onCreate() {
-    super.onCreate();
+        super.onCreate();
+        DeviceData = new SharedData();
     }
 
     @SuppressLint("MissingPermission")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        BluetoothDevice mmDevice =intent.getParcelableExtra("Device Input");
-        setMyDeviceName(mmDevice.getName());
-        Intent notificationintent = new Intent(this,MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,0, notificationintent,0 );
-        Notification notification = new NotificationCompat.Builder(this,Channel_1_ID)
-                .setContentTitle("Device Connection")
-                .setContentText("Trying to connect with "+getMyDeviceName())
-                .setSmallIcon(R.drawable.ic_bluetooth)
-                .setContentIntent(pendingIntent)
-                .build();
-        startForeground(1,notification);
-        BTConnect = new ConnectThread(mmDevice);
-        if(BTConnect.isConnected()){
-            Notification notification2 = new NotificationCompat.Builder(this,Channel_1_ID)
+        if (!isRunning()) {
+            BluetoothDevice mmDevice = intent.getParcelableExtra("Device Input");
+            setMyDeviceName(mmDevice.getName());
+            Intent notificationintent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationintent, 0);
+            Notification notification = new NotificationCompat.Builder(this, Channel_1_ID)
                     .setContentTitle("Device Connection")
-                    .setContentText("Now connected with "+getMyDeviceName())
+                    .setContentText("Trying to connect with " + getMyDeviceName())
                     .setSmallIcon(R.drawable.ic_bluetooth)
                     .setContentIntent(pendingIntent)
                     .build();
-            myNotificationManager = NotificationManagerCompat.from(this);
-                    myNotificationManager.notify(1,notification2);
+            startForeground(1, notification);
+            BTConnect = new ConnectThread(mmDevice);
+            BTConnect.start();
+            if (BTConnect.isConnected()) {
+                Notification notification2 = new NotificationCompat.Builder(this, Channel_1_ID)
+                        .setContentTitle("Device Connection")
+                        .setContentText("Connected with " + getMyDeviceName())
+                        .setSmallIcon(R.drawable.ic_bluetooth)
+                        .setContentIntent(pendingIntent)
+                        .setOngoing(false)
+                        .build();
+                myNotificationManager = NotificationManagerCompat.from(this);
+                myNotificationManager.notify(1, notification2);
+                setRunning(true);
+                DeviceData.postConnectStatus(true);
+            } else if (!BTConnect.isConnected())
+                stopSelf();
+        } else if (isRunning()) {
+            String input = intent.getStringExtra("String Input");
+            Log.d("Sent Data", input);
+            BTStream.write(input.getBytes());
         }
-        else if(!BTConnect.isConnected())
-            stopSelf();
-
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        DeviceData.postConnectStatus(false);
         BTConnect.disconnect();
     }
 
@@ -90,7 +119,6 @@ public class BluetoothService extends Service {
     public class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
-        private BluetoothService.ConnectedThread BTStream;
         private boolean ConnectStatus = false;
 
         public boolean isConnected() {
@@ -116,10 +144,8 @@ public class BluetoothService extends Service {
                 Log.e(TAG, "Socket's create() method failed", e);
             }
             mmSocket = tmp;
-
             // Cancel discovery because it otherwise slows down the connection.
             bluetoothAdapter.cancelDiscovery();
-
             try {
                 // Connect to the remote device through the socket. This call blocks
                 // until it succeeds or throws an exception.
@@ -137,7 +163,8 @@ public class BluetoothService extends Service {
 
             // The connection attempt succeeded. Perform work associated with
             // the connection in a separate thread.
-            BTStream = new BluetoothService.ConnectedThread(mmSocket);
+            BTStream = new BTService.ConnectedThread(mmSocket);
+            BTStream.start();
             setConnectStatus(true);
         }
 
@@ -149,21 +176,14 @@ public class BluetoothService extends Service {
             } catch (IOException e) {
                 Log.d("BT Connection","Could not close connection:" + e);
             }
+            if(BTStream!=null)
+                BTStream.cancel();
         }
     }
 
     public class ConnectedThread extends Thread {
         private InputStream mmInStream;
         private OutputStream mmOutStream;
-        private boolean ConnectStatus;
-
-        public boolean isConnected() {
-            return ConnectStatus;
-        }
-
-        public void setConnectStatus(boolean connectStatus) {
-            ConnectStatus = connectStatus;
-        }
 
         static final int LWRT=1;
         static final int LWST=2;
@@ -178,7 +198,6 @@ public class BluetoothService extends Service {
             // member streams are final.
             try {
                 tmpIn = socket.getInputStream();
-                Log.e(TAG, String.valueOf(tmpIn));
             } catch (IOException e) {
                 Log.e(TAG, "Error occurred when creating input stream", e);
             }
@@ -194,7 +213,6 @@ public class BluetoothService extends Service {
 
         public void run() {
             // mmBuffer store for the stream
-            byte[] mmBuffer = new byte[1024];
             int numBytes; // bytes returned from read()
             StringBuilder Payload = new StringBuilder();
 
@@ -202,8 +220,7 @@ public class BluetoothService extends Service {
             while (true) {
                 try {
                     // Read from the InputStream.
-                    numBytes = mmInStream.read(mmBuffer);
-                    setConnectStatus(true);
+                    numBytes = mmInStream.read();
                 } catch (IOException e) {
                     Log.d(TAG, "Input stream was disconnected", e);
                     break;
@@ -211,7 +228,7 @@ public class BluetoothService extends Service {
                 Payload.append((char) numBytes);
                 if (numBytes == '\n') {
                     //rawData = res.toString();
-                    Log.d("RAWDATA", Payload.toString());
+                    Log.d("Received Data", Payload.toString());
                     if(Payload.toString().contains("LWRT")){
                         handler.obtainMessage(LWRT,-1,-1,Payload.toString()).sendToTarget();
                     }
@@ -236,19 +253,77 @@ public class BluetoothService extends Service {
                     case LWRT:
                         String RealTimeString = (String) message.obj;
                         String[] splitString1 = RealTimeString.split(",");
-                        myServiceHandler.post(new Runnable(){
-                            public void run(){
-                                stopSelf();
-                            }
-                        });
+                        DeviceData.postRecordStatus(splitString1[1]+"/"+splitString1[2]);
+                        DeviceData.postDeviceDateTime(splitString1[3]);
+                        DeviceData.postWaterLevel(splitString1[4]+" m");
+                        DeviceData.postDeviceBattery(splitString1[5]+" v");
+                        if (Integer.parseInt(splitString1[6].substring(0, 1)) > 1) {
+                            DeviceData.postInternetConnection("Connected");
+                        } else
+                            DeviceData.postInternetConnection("Not connected");
                         return true;
                     case LWST:
                         String SettingString = (String) message.obj;
-                        String[] splitString2 = SettingString.split(",");
+                        DeviceData.postRealTimeStatus(false);
+                        if(SettingString.contains("SET OK")){
+                            write("LWST,7000000#\r\n".getBytes());
+                            DeviceData.postSettingStatus(false);
+                        }
+                        else if(SettingString.contains("SYNC OK")){
+                            DeviceData.postSyncStatus(true);
+                        }
+                        else{
+                            String[] splitString2 = SettingString.split(",");
+                            DeviceData.postSiteName(splitString2[1]);
+                            DeviceData.postIPAddress(splitString2[2]);
+                            DeviceData.postPort(splitString2[3]);
+                            DeviceData.postSensorOffset(splitString2[4]);
+                            DeviceData.postSensorZeroValues(splitString2[5]);
+                            DeviceData.postRecordInterval(splitString2[6]);
+                        }
                         return true;
                     case LWDI:
                         String DeviceInfoString = (String) message.obj;
                         String[] splitString3 = DeviceInfoString.split(",");
+                        DeviceData.postSiteName(getMyDeviceName());
+                        DeviceData.postDeviceModel(splitString3[1]);
+                        DeviceData.postFirmwareVersion(splitString3[2]);
+                        if((splitString3[4].length()<5)){
+                            DeviceData.postMACAddress("Not Registered");
+                        }
+                        else{
+                            DeviceData.postMACAddress(splitString3[4].substring(0,15));
+                        }
+                        if(splitString3[5].length()<3){
+                            DeviceData.postFirstRecord("No Records");
+                        }else{
+                            SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/DDD");
+                            Date FirstRecordDate = null;
+                            try {
+                                FirstRecordDate = sdf2.parse(splitString3[4]);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            if (FirstRecordDate != null) {
+                                DeviceData.postFirstRecord(new SimpleDateFormat("dd/MM/yyyy").format(FirstRecordDate));
+                            }
+                        }
+                        if(splitString3[6].length()<3){
+                            DeviceData.postLastRecord("No Records");
+                        }else{
+                            String[] splitString4 = splitString3[6].split("/r");
+                            SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/DDD");
+                            Date LastRecordDate = null;
+                            try {
+                                LastRecordDate = sdf2.parse(splitString4[0]);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            if (LastRecordDate != null) {
+                                DeviceData.postLastRecord(new SimpleDateFormat("dd/MM/yyyy").format(LastRecordDate));
+                            }
+                        }
+
                         return true;
                     case LWDL:
                         return true;

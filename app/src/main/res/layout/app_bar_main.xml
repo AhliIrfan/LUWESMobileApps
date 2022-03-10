@@ -30,7 +30,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_anchor="@id/fab"
-        app:layout_behavior="com.google.android.material.transformation.FabTransformationScrimBehavior"
         app:layout_anchorGravity="top|center_horizontal"
         android:visibility="invisible">
 

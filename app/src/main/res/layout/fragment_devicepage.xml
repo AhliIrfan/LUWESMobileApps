@@ -453,7 +453,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:inputType="number"
                             android:enabled="false"/>
 
                     </LinearLayout>
@@ -475,6 +474,29 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
+                            android:maxLength="6"
+                            android:inputType="number"
+                            android:enabled="false"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/SensorOffsetTitle"
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Sensor Offset"
+                            android:textSize="@dimen/text_content"/>
+                        <EditText
+                            android:id="@+id/SensorOffset"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/start_margin"
+                            android:singleLine="true"
+                            android:textAlignment="textEnd"
+                            android:textSize="@dimen/text_content"
+                            android:maxLength="6"
                             android:inputType="number"
                             android:enabled="false"/>
                     </LinearLayout>
@@ -490,27 +512,6 @@
                             android:textSize="@dimen/text_content"/>
                         <EditText
                             android:id="@+id/ZeroValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/start_margin"
-                            android:singleLine="true"
-                            android:textAlignment="textEnd"
-                            android:inputType="number"
-                            android:textSize="@dimen/text_content"
-                            android:enabled="false"/>
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:id="@+id/SensorOffsetTitle"
-                            android:layout_width="@dimen/title_size"
-                            android:layout_height="wrap_content"
-                            android:text="Sensor Offset"
-                            android:textSize="@dimen/text_content"/>
-                        <EditText
-                            android:id="@+id/SensorOffset"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/start_margin"
@@ -546,7 +547,7 @@
                             android:layout_marginStart="10dp"
                             android:layout_weight=".35"
                             android:entries="@array/interval_option_arrays"
-                            android:layout_gravity="end"/>
+                            android:layout_gravity="center_vertical"/>
                     </LinearLayout>
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/settingButton"
@@ -604,11 +605,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/start_margin"
-                            android:singleLine="true"
                             android:textAlignment="textEnd"
+                            android:focusableInTouchMode="false"
                             android:textSize="@dimen/text_content"
-                            android:enabled="true"
-                            android:inputType="date"
                             android:hint="Input start date here"/>
                     </LinearLayout>
                     <LinearLayout
@@ -628,9 +627,8 @@
                             android:layout_marginStart="@dimen/start_margin"
                             android:singleLine="true"
                             android:textAlignment="textEnd"
+                            android:focusableInTouchMode="false"
                             android:textSize="@dimen/text_content"
-                            android:enabled="true"
-                            android:inputType="date"
                             android:hint="Input end date here"/>
                     </LinearLayout>
                     <com.google.android.material.button.MaterialButton
@@ -643,13 +641,6 @@
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-
-
-
-
-
-
-
 
     </RelativeLayout>
 </ScrollView>

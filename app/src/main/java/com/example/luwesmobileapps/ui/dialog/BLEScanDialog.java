@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +24,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 public class BLEScanDialog extends AppCompatDialogFragment {
     private fragmentListener listener;
     private BLEViewAdaper adapter;
+    private ProgressBar progressBar;
     private Button dismiss;
     private Button scan;
     @NonNull
@@ -42,6 +44,7 @@ public class BLEScanDialog extends AppCompatDialogFragment {
         adapter = new BLEViewAdaper();
         recyclerView.setAdapter(adapter);
 
+        progressBar = view.findViewById(R.id.scanProgress);
         scan = view.findViewById(R.id.scanbutton);
         dismiss = view.findViewById(R.id.dismissbutton);
 
@@ -87,6 +90,16 @@ public class BLEScanDialog extends AppCompatDialogFragment {
         }
     }
 
+    public void showProgressbar(boolean status){
+        if(status){
+            progressBar.setVisibility(View.VISIBLE);
+            scan.setEnabled(false);
+        }
+        else{
+            progressBar.setVisibility(View.INVISIBLE);
+            scan.setEnabled(true);
+        }
+    }
     @Override
     public void onDetach() {
         super.onDetach();

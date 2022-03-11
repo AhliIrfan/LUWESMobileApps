@@ -4,35 +4,49 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/dialog_margin"
     tools:context=".MainActivity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Nearby BLE Device"
-            android:textSize="@dimen/text_title"
-            android:textStyle="bold"
-            android:layout_marginStart="@dimen/fab_margin"
-            android:layout_marginEnd="@dimen/fab_margin"
-            android:layout_marginTop="@dimen/inner_margin"
-            android:layout_marginBottom="@dimen/inner_margin"/>
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/scanTitle">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Nearby BLE Device"
+                android:textSize="@dimen/text_title"
+                android:textStyle="bold"
+                android:layout_margin="@dimen/dialog_margin"
+                android:paddingHorizontal="@dimen/fab_margin"
+                android:paddingTop="@dimen/inner_margin"/>
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/scanProgress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="invisible" />
+        </LinearLayout>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/deviceList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/dialog_margin"
+            android:paddingTop="5dp"
+            android:paddingBottom="@dimen/dialog_margin"
             tools:listitem="@layout/ble_device_listview"/>
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_gravity="end">
+            android:layout_gravity="end"
+            android:padding="@dimen/dialog_margin">
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
     private UUID ServiceUUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
     private UUID CharacteristicUUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
     // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 65000;
 
     public Activity MainActivity;
     private NotificationManagerCompat myNotificationManager;
@@ -439,14 +439,18 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
                 public void run() {
                     scanning = false;
                     bluetoothLeScanner.stopScan(leScanCallback);
+                    bluetoothLeScanner.stopScan(leScanCallback);
+                    bleScanDialog.showProgressbar(false);
                 }
             }, SCAN_PERIOD);
 
             scanning = true;
             bluetoothLeScanner.startScan(scanFilters(),scanSetting(),leScanCallback);
+            bleScanDialog.showProgressbar(true);
         } else {
             scanning = false;
             bluetoothLeScanner.stopScan(leScanCallback);
+            bleScanDialog.showProgressbar(false);
         }
     }
 

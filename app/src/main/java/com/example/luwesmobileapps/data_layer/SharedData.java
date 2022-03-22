@@ -26,7 +26,8 @@ public class SharedData {
     private static MutableLiveData<Boolean> SettingStatus = new MutableLiveData<>();
     private static MutableLiveData<Boolean> SyncStatus= new MutableLiveData<>();
     private static MutableLiveData<Boolean> RealTimeStatus= new MutableLiveData<>();
-    private static MutableLiveData<Boolean> ConnectStatus= new MutableLiveData<>();
+    private static MutableLiveData<Boolean> DownloadStatus= new MutableLiveData<>();
+    private static MutableLiveData<Integer> ConnectStatus= new MutableLiveData<>();
 
     public void postSiteName(String string){
         SiteName.postValue(string);
@@ -85,7 +86,10 @@ public class SharedData {
     public void postRealTimeStatus(boolean input){
         RealTimeStatus.postValue(input);
     }
-    public void postConnectStatus(boolean input){
+    public void postDownloadStatus(boolean input){
+        DownloadStatus.postValue(input);
+    }
+    public void postConnectStatus(int input){
         ConnectStatus.postValue(input);
     }
 
@@ -165,7 +169,11 @@ public class SharedData {
         return RealTimeStatus;
     }
 
-    public static MutableLiveData<Boolean> getConnectStatus() {
+    public static MutableLiveData<Boolean> getDownloadStatus() {
+        return DownloadStatus;
+    }
+
+    public static MutableLiveData<Integer> getConnectStatus() {
         return ConnectStatus;
     }
 }

@@ -10,35 +10,63 @@ import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import com.example.luwesmobileapps.MainActivity;
 import com.example.luwesmobileapps.R;
+import com.example.luwesmobileapps.data_layer.FileAccess;
 import com.example.luwesmobileapps.data_layer.SharedData;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class BTService extends Service {
+    private FileAccess myFileAccess = new FileAccess();
     private ConnectThread BTConnect;
     private ConnectedThread BTStream;
-    private String myDeviceName;
+    private BluetoothDevice myDevice;
     private SharedData DeviceData;
     private boolean isRunning;
     public NotificationManagerCompat myNotificationManager;
+
+    int downloadCounter=0;
+    int downloadLength=0;
+    int startDoY=0;
+    int startYear=0;
+    long downloadStart=0;
 
     public boolean isRunning() {
         return isRunning;
@@ -48,55 +76,65 @@ public class BTService extends Service {
         isRunning = running;
     }
 
-    public String getMyDeviceName() {
-        return myDeviceName;
-    }
-
-    public void setMyDeviceName(String myDeviceName) {
-        this.myDeviceName = myDeviceName;
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
         DeviceData = new SharedData();
+        DeviceData.postDownloadStatus(false);
     }
 
     @SuppressLint("MissingPermission")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!isRunning()) {
-            BluetoothDevice mmDevice = intent.getParcelableExtra("Device Input");
-            setMyDeviceName(mmDevice.getName());
+            myDevice = intent.getParcelableExtra("Device Input");
             Intent notificationintent = new Intent(this, MainActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationintent, 0);
+            PendingIntent pendingIntent = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                pendingIntent = PendingIntent.getActivity(this, 0, notificationintent, PendingIntent.FLAG_IMMUTABLE);
+            }else{
+                pendingIntent = PendingIntent.getActivity(this, 0, notificationintent, 0);
+            }
             Notification notification = new NotificationCompat.Builder(this, Channel_1_ID)
                     .setContentTitle("Device Connection")
-                    .setContentText("Trying to connect with " + getMyDeviceName())
+                    .setContentText("Trying to connect with " + myDevice.getName())
                     .setSmallIcon(R.drawable.ic_bluetooth)
                     .setContentIntent(pendingIntent)
                     .build();
             startForeground(1, notification);
-            BTConnect = new ConnectThread(mmDevice);
+            BTConnect = new ConnectThread(myDevice);
             BTConnect.start();
             if (BTConnect.isConnected()) {
                 Notification notification2 = new NotificationCompat.Builder(this, Channel_1_ID)
                         .setContentTitle("Device Connection")
-                        .setContentText("Connected with " + getMyDeviceName())
-                        .setSmallIcon(R.drawable.ic_bluetooth)
+                        .setContentText("Connected with " + myDevice.getName())
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentIntent(pendingIntent)
                         .setOngoing(false)
                         .build();
                 myNotificationManager = NotificationManagerCompat.from(this);
                 myNotificationManager.notify(1, notification2);
                 setRunning(true);
-                DeviceData.postConnectStatus(true);
+                DeviceData.postConnectStatus(1);
             } else if (!BTConnect.isConnected())
                 stopSelf();
         } else if (isRunning()) {
             String input = intent.getStringExtra("String Input");
-            Log.d("Sent Data", input);
-            BTStream.write(input.getBytes());
+            try{
+                downloadLength= Integer.parseInt(input);
+
+                String input2 = intent.getStringExtra("String Input2");
+                String input3 = intent.getStringExtra("String Input3");
+                startDoY= Integer.parseInt(input2);
+                startYear= Integer.parseInt(input3);
+
+                downloadStart= new Date().getTime();
+                downloadRunNotification(downloadCounter,downloadLength);
+                myFileAccess.WriteDeviceList(DeviceData.getSiteName().getValue());
+            }catch (Exception e){
+                Log.d("Sent Data BT", input);
+                BTStream.write(input.getBytes());
+            }
         }
         return START_NOT_STICKY;
     }
@@ -104,7 +142,9 @@ public class BTService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DeviceData.postConnectStatus(false);
+        if(myNotificationManager!=null)
+            myNotificationManager.cancelAll();
+        DeviceData.postConnectStatus(0);
         BTConnect.disconnect();
     }
 
@@ -118,7 +158,6 @@ public class BTService extends Service {
 
     public class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
-        private final BluetoothDevice mmDevice;
         private boolean ConnectStatus = false;
 
         public boolean isConnected() {
@@ -134,7 +173,6 @@ public class BTService extends Service {
             // Use a temporary object that is later assigned to mmSocket
             // because mmSocket is final.
             BluetoothSocket tmp = null;
-            mmDevice = device;
 
             try {
                 // Get a BluetoothSocket to connect with the given BluetoothDevice.
@@ -247,6 +285,7 @@ public class BTService extends Service {
         }
 
         Handler handler = new Handler(new Handler.Callback() {
+            @SuppressLint("MissingPermission")
             @Override
             public boolean handleMessage(@NonNull Message message) {
                 switch (message.what){
@@ -280,12 +319,30 @@ public class BTService extends Service {
                             DeviceData.postSensorOffset(splitString2[4]);
                             DeviceData.postSensorZeroValues(splitString2[5]);
                             DeviceData.postRecordInterval(splitString2[6]);
+
+                            Intent notificationintent = new Intent(getBaseContext(), MainActivity.class);
+                            PendingIntent pendingIntent = null;
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                                pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationintent, PendingIntent.FLAG_IMMUTABLE);
+                            }else{
+                                pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationintent, 0);
+                            }
+                            Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
+                                    .setContentTitle("Device Connection")
+                                    .setContentText("Connected with " + DeviceData.getSiteName().getValue())
+                                    .setSmallIcon(R.mipmap.ic_launcher)
+                                    .setContentIntent(pendingIntent)
+                                    .setOnlyAlertOnce(true)
+                                    .setOngoing(false)
+                                    .build();
+                            myNotificationManager = NotificationManagerCompat.from(getBaseContext());
+                            myNotificationManager.notify(1, notification2);
                         }
                         return true;
                     case LWDI:
                         String DeviceInfoString = (String) message.obj;
                         String[] splitString3 = DeviceInfoString.split(",");
-                        DeviceData.postSiteName(getMyDeviceName());
+                        DeviceData.postSiteName(myDevice.getName());
                         DeviceData.postDeviceModel(splitString3[1]);
                         DeviceData.postFirmwareVersion(splitString3[2]);
                         if((splitString3[4].length()<5)){
@@ -300,7 +357,7 @@ public class BTService extends Service {
                             SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/DDD");
                             Date FirstRecordDate = null;
                             try {
-                                FirstRecordDate = sdf2.parse(splitString3[4]);
+                                FirstRecordDate = sdf2.parse(splitString3[5]);
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
@@ -326,6 +383,53 @@ public class BTService extends Service {
 
                         return true;
                     case LWDL:
+                        String DownloadString = (String) message.obj;
+                        String[] splitString5 = DownloadString.split(",");
+                        if(splitString5.length==2){
+                            String[] splitString6;
+                            splitString6 = splitString5[1].split("\r");
+                            if(splitString6[0].contains("000")){
+                                myFileAccess.BatchSort(DeviceData.getSiteName().getValue(),startYear,startDoY,downloadLength);
+                                downloadEndNotification();
+                                downloadCounter=0;
+                                DeviceData.postDownloadStatus(false);
+                            }
+                        }
+                        else if(splitString5.length==4) {
+                            downloadCounter++;
+                            downloadRunNotification(downloadCounter,downloadLength);
+                        }
+                        else{
+                            String[] splitString7;
+                            splitString7 = splitString5[2].split("#");
+                            String dataToSave = splitString7[0]+" "+splitString7[1]+
+                                    ","+splitString7[2]+","+splitString7[3]+","+splitString7[4];
+
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                            Date dateData = null;
+                            try {
+                                dateData = sdf.parse(splitString7[0]);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            if(dateData!=null) {
+
+                                String year = new SimpleDateFormat("yyyy").format(dateData);
+
+                                Date startFirstFayOfTheYear = null;
+                                try {
+                                    startFirstFayOfTheYear = sdf.parse(1 + "/" + 1 + "/" + year);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+
+                                long diff = dateData.getTime() - startFirstFayOfTheYear.getTime();
+                                int DoY = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
+
+                                myFileAccess.WriteDataToFile(dataToSave, DeviceData.getSiteName().getValue(), year, String.valueOf(DoY));
+                                downloadRunNotification(downloadCounter, downloadLength);
+                            }
+                        }
                         return true;
                 }
                 return false;
@@ -361,5 +465,52 @@ public class BTService extends Service {
                 }
             }
         }
+    }
+
+    public void downloadRunNotification(int progress,int max){
+        int percentage = (int) ((Float.intBitsToFloat(downloadCounter)/Float.intBitsToFloat(downloadLength))*100);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Channel_1_ID)
+                .setSmallIcon(R.drawable.ic_devices)
+                .setContentTitle("Download")
+                .setContentText("Download progress "+percentage+"%")
+                .setCategory(NotificationCompat.CATEGORY_EVENT)
+                .setShowWhen(false)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .setProgress(max,progress,false);
+        myNotificationManager.notify(2,builder.build());
+    }
+
+    public void downloadEndNotification(){
+        long duration = (new Date().getTime()-downloadStart)/1000;
+        long Hour = duration/3600;
+        long Minutes = (duration/60) % 60;
+        long Seconds= duration % 60;
+        String timeElapsed;
+        if(Hour>0){
+            timeElapsed = String.format(" %d hours %d minutes %d seconds",Hour,Minutes,Seconds);
+        }else{
+            if(Minutes>0){
+                timeElapsed = String.format(" %d minutes %d seconds",Minutes,Seconds);
+
+            }else{
+                timeElapsed = String.format(" %d seconds",Seconds);
+            }
+        }
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        myNotificationManager.cancel(2);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Channel_1_ID)
+                .setSmallIcon(R.drawable.ic_devices)
+                .setContentTitle("Download")
+                .setContentText("Download complete")
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText("Your download is complete, "+downloadCounter+" of "+downloadLength+
+                                " days records downloaded in"+timeElapsed))
+                .setCategory(NotificationCompat.CATEGORY_EVENT)
+                .setSound(defaultSoundUri)
+                .setShowWhen(false)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+        myNotificationManager.notify(3, builder.build());
     }
 }

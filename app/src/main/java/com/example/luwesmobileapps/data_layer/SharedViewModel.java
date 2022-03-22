@@ -28,10 +28,11 @@ public class SharedViewModel extends ViewModel {
     private MutableLiveData<Boolean> SettingStatus;
     private MutableLiveData<Boolean> SyncStatus;
     private MutableLiveData<Boolean> RealTimeStatus;
+    private MutableLiveData<Boolean> DownloadStatus;
     private MutableLiveData<Boolean> BTPermission = new MutableLiveData<>();
     private MutableLiveData<Boolean> LocPermission = new MutableLiveData<>();
     private MutableLiveData<Boolean> FilePermission = new MutableLiveData<>();
-    private MutableLiveData<Boolean> ConnectStatus = new MutableLiveData<>();
+    private MutableLiveData<Integer> ConnectStatus;
 
     public SharedViewModel() {
         DeviceData = new SharedData();
@@ -57,73 +58,8 @@ public class SharedViewModel extends ViewModel {
         SyncStatus = DeviceData.getSyncStatus();
         RealTimeStatus = DeviceData.getRealTimeStatus();
         ConnectStatus = DeviceData.getConnectStatus();
+        DownloadStatus = DeviceData.getDownloadStatus();
     }
-
-//    private MutableLiveData<String> SiteName = new MutableLiveData<>();
-//    private MutableLiveData<String> MACAddress = new MutableLiveData<>();
-//    private MutableLiveData<String> FirmWareVersion = new MutableLiveData<>();
-//    private MutableLiveData<String> DeviceModel = new MutableLiveData<>();
-//    private MutableLiveData<String> DeviceDateTime = new MutableLiveData<>();
-//    private MutableLiveData<String> FirstRecord = new MutableLiveData<>();
-//    private MutableLiveData<String> LastRecord = new MutableLiveData<>();
-//    private MutableLiveData<String> WaterLevel = new MutableLiveData<>();
-//    private MutableLiveData<String> DeviceBattery = new MutableLiveData<>();
-//    private MutableLiveData<String> IPAddress = new MutableLiveData<>();
-//    private MutableLiveData<String> Port = new MutableLiveData<>();
-//    private MutableLiveData<String> SensorZeroValues = new MutableLiveData<>();
-//    private MutableLiveData<String> SensorOffset = new MutableLiveData<>();
-//    private MutableLiveData<String> RecordInterval = new MutableLiveData<>();
-//    private MutableLiveData<String> RecordStatus = new MutableLiveData<>();
-//    private MutableLiveData<String> InternetConnectionStatus = new MutableLiveData<>();
-//
-//    public void postSiteName(String string){
-//        SiteName.postValue(string);
-//    }
-//    public void postMACAddress(String string){
-//        MACAddress.postValue(string);
-//    }
-//    public void postFirmwareVersion(String string){
-//        FirmWareVersion.postValue(string);
-//    }
-//    public void postDeviceModel(String string){
-//        DeviceModel.postValue(string);
-//    }
-//    public void postDeviceDateTime(String string){
-//        DeviceDateTime.postValue(string);
-//    }
-//    public void postFirstRecord(String string){
-//        FirstRecord.postValue(string);
-//    }
-//    public void postLastRecord(String string){
-//        LastRecord.postValue(string);
-//    }
-//    public void postWaterLevel(String string){
-//        WaterLevel.postValue(string);
-//    }
-//    public void postDeviceBattery(String string){
-//        DeviceBattery.postValue(string);
-//    }
-//    public void postIPAddress(String string){
-//        IPAddress.postValue(string);
-//    }
-//    public void postPort(String string){
-//        Port.postValue(string);
-//    }
-//    public void postSensorZeroValues(String string){
-//        SensorZeroValues.postValue(string);
-//    }
-//    public void postSensorOffset(String string){
-//        SensorOffset.postValue(string);
-//    }
-//    public void postRecordInterval(String string){
-//        RecordInterval.postValue(string);
-//    }
-//    public void postRecordStatus(String string){
-//        RecordStatus.postValue(string);
-//    }
-//    public void postInternetConnection(String string){
-//        InternetConnectionStatus.postValue(string);
-//    }
 
     public LiveData<String> getSiteName() {
         return SiteName;
@@ -213,7 +149,11 @@ public class SharedViewModel extends ViewModel {
         return FilePermission;
     }
 
-    public LiveData<Boolean> getConnectStatus() {
+    public LiveData<Boolean> getDownloadStatus() {
+        return DownloadStatus;
+    }
+
+    public LiveData<Integer> getConnectStatus() {
         return ConnectStatus;
     }
 
@@ -303,6 +243,10 @@ public class SharedViewModel extends ViewModel {
 
     public void setFilePermission(boolean FilePermissionSet) {
         FilePermission.setValue(FilePermissionSet);
+    }
+
+    public void setDownloadStatus(boolean DownloadStatusSet) {
+        DownloadStatus.setValue(DownloadStatusSet);
     }
 
     public void ClearAll(){

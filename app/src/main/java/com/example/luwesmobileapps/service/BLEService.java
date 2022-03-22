@@ -7,7 +7,6 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -16,11 +15,15 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
-import android.os.Binder;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -28,10 +31,14 @@ import androidx.core.app.NotificationManagerCompat;
 import com.example.luwesmobileapps.BuildConfig;
 import com.example.luwesmobileapps.MainActivity;
 import com.example.luwesmobileapps.R;
+import com.example.luwesmobileapps.data_layer.FileAccess;
 import com.example.luwesmobileapps.data_layer.SharedData;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 public class BLEService extends Service {
@@ -44,6 +51,16 @@ public class BLEService extends Service {
     private SharedData DeviceData;
     private boolean isRunning;
     private NotificationManagerCompat myNotificationManager;
+    private FileAccess myFileAccess = new FileAccess();
+
+    int downloadCounter=0;
+    int downloadLength=0;
+
+    static final int LWRT=1;
+    static final int LWST=2;
+    static final int LWDL=3;
+    static final int LWDI=4;
+
     public static final String TAG = "BLEService";
 
     public final static String ACTION_GATT_CONNECTED =
@@ -55,12 +72,9 @@ public class BLEService extends Service {
     public String Characteristic_uuid_tx = "0000ffe2-0000-1000-8000-00805f9b34fb";
     public String Service_uuid = "0000ffe0-0000-1000-8000-00805f9b34fb";
 
-    byte[] WriteBytes = new byte[2000];
-
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTED = 2;
 
-    private int connectionState;
 
     public boolean isRunning() {
         return isRunning;
@@ -68,13 +82,6 @@ public class BLEService extends Service {
 
     public void setRunning(boolean running) {
         isRunning = running;
-    }
-
-
-    class LocalBinder extends Binder {
-        public BLEService getService() {
-            return BLEService.this;
-        }
     }
 
     @Override
@@ -100,7 +107,14 @@ public class BLEService extends Service {
             connect(mmDevice.getAddress());
         } else if (isRunning()) {
             String input = intent.getStringExtra("String Input");
-            Log.d("Sent Data", input);
+            try{
+                downloadLength= Integer.parseInt(input);
+                downloadRunNotification(downloadCounter,downloadLength);
+                myFileAccess.WriteDeviceList(mmDevice.getName());
+            }catch (Exception e){
+                Log.d("Sent Data BLE", input);
+                sendBLE(input);
+            }
         }
         return START_NOT_STICKY;
     }
@@ -111,7 +125,6 @@ public class BLEService extends Service {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 // successfully connected to the GATT Server
-                connectionState = STATE_CONNECTED;
                 Log.w(TAG,String.valueOf(STATE_CONNECTED));
                 @SuppressLint("MissingPermission") Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
                         .setContentTitle("Device Connection")
@@ -123,11 +136,10 @@ public class BLEService extends Service {
                 myNotificationManager = NotificationManagerCompat.from(getBaseContext());
                 myNotificationManager.notify(1, notification2);
                 setRunning(true);
-                DeviceData.postConnectStatus(true);
+                DeviceData.postConnectStatus(2);
                 bluetoothGatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
-                connectionState = STATE_DISCONNECTED;
                 Log.w(TAG,String.valueOf(STATE_DISCONNECTED));
                 stopSelf();
             }
@@ -156,6 +168,18 @@ public class BLEService extends Service {
                 if(rawPayload.length>0&&rawPayload!=null){
                     payLoad = new String(rawPayload);
                     Log.d(TAG, "onCharacteristicRead: "+payLoad);
+                    if(payLoad.contains("LWRT")){
+                        handler.obtainMessage(LWRT,-1,-1,payLoad).sendToTarget();
+                    }
+                    else if(payLoad.contains("SET OK")||payLoad.contains("LWST")){
+                        handler.obtainMessage(LWST,-1,-1,payLoad).sendToTarget();
+                    }
+                    else if(payLoad.contains("LWDL")){
+                        handler.obtainMessage(LWDL,-1,-1,payLoad).sendToTarget();
+                    }
+                    else if(payLoad.contains("LWDI")){
+                        handler.obtainMessage(LWDI,-1,-1,payLoad).sendToTarget();
+                    }
                 }
             }
         }
@@ -169,22 +193,22 @@ public class BLEService extends Service {
                 if(rawPayload.length>0&&rawPayload!=null){
                     payLoad = new String(rawPayload);
                     Log.d(TAG, "onCharacteristicRead: "+payLoad);
-                    if(payLoad.equals("Hello World"));
-                        sendBLE("Rise and Shine");
+                    if(payLoad.contains("LWRT")){
+                        handler.obtainMessage(LWRT,-1,-1,payLoad).sendToTarget();
+                    }
+                    else if(payLoad.contains("SET OK")||payLoad.contains("LWST")){
+                        handler.obtainMessage(LWST,-1,-1,payLoad).sendToTarget();
+                    }
+                    else if(payLoad.contains("LWDL")){
+                        handler.obtainMessage(LWDL,-1,-1,payLoad).sendToTarget();
+                    }
+                    else if(payLoad.contains("LWDI")){
+                        handler.obtainMessage(LWDI,-1,-1,payLoad).sendToTarget();
+                    }
                 }
             }
         }
     };
-
-
-
-    public boolean initialize() {
-        if (bluetoothAdapter == null) {
-            Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
-            return false;
-        }
-        return true;
-    }
 
     @Nullable
     @Override
@@ -213,14 +237,12 @@ public class BLEService extends Service {
             }
             Log.d(TAG, "Trying to create a new connection.");
             bluetoothAddress = address;
-            connectionState= 1;
             return true;
         }
         Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
         if (!bluetoothGatt.connect()) {
             return false;
         }
-        connectionState = 1;
         return true;
     }
 
@@ -249,7 +271,7 @@ public class BLEService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DeviceData.postConnectStatus(false);
+        DeviceData.postConnectStatus(0);
         disconnect();
     }
 
@@ -301,5 +323,143 @@ public class BLEService extends Service {
         rxChar.setValue(string.getBytes());
         bluetoothGatt.writeCharacteristic(rxChar);
         delay(25);
+    }
+
+
+    Handler handler = new Handler(new Handler.Callback() {
+        @SuppressLint("MissingPermission")
+        @Override
+        public boolean handleMessage(@NonNull Message message) {
+            switch (message.what){
+                case LWRT:
+                    String RealTimeString = (String) message.obj;
+                    String[] splitString1 = RealTimeString.split(",");
+                    DeviceData.postRecordStatus(splitString1[1]+"/"+splitString1[2]);
+                    DeviceData.postDeviceDateTime(splitString1[3]);
+                    DeviceData.postWaterLevel(splitString1[4]+" m");
+                    DeviceData.postDeviceBattery(splitString1[5]+" v");
+                    if (Integer.parseInt(splitString1[6].substring(0, 1)) > 1) {
+                        DeviceData.postInternetConnection("Connected");
+                    } else
+                        DeviceData.postInternetConnection("Not connected");
+                    return true;
+                case LWST:
+                    String SettingString = (String) message.obj;
+                    DeviceData.postRealTimeStatus(false);
+                    if(SettingString.contains("SET OK")){
+                        sendBLE("LWST,7000000#\r\n");
+                        DeviceData.postSettingStatus(false);
+                    }
+                    else if(SettingString.contains("SYNC OK")){
+                        DeviceData.postSyncStatus(true);
+                    }
+                    else{
+                        String[] splitString2 = SettingString.split(",");
+                        DeviceData.postSiteName(splitString2[1]);
+                        DeviceData.postIPAddress(splitString2[2]);
+                        DeviceData.postPort(splitString2[3]);
+                        DeviceData.postSensorOffset(splitString2[4]);
+                        DeviceData.postSensorZeroValues(splitString2[5]);
+                        DeviceData.postRecordInterval(splitString2[6]);
+                    }
+                    return true;
+                case LWDI:
+                    String DeviceInfoString = (String) message.obj;
+                    String[] splitString3 = DeviceInfoString.split(",");
+                    DeviceData.postSiteName(mmDevice.getName());
+                    DeviceData.postDeviceModel(splitString3[1]);
+                    DeviceData.postFirmwareVersion(splitString3[2]);
+                    if((splitString3[4].length()<5)){
+                        DeviceData.postMACAddress("Not Registered");
+                    }
+                    else{
+                        DeviceData.postMACAddress(splitString3[4].substring(0,15));
+                    }
+                    if(splitString3[5].length()<3){
+                        DeviceData.postFirstRecord("No Records");
+                    }else{
+                        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/DDD");
+                        Date FirstRecordDate = null;
+                        try {
+                            FirstRecordDate = sdf2.parse(splitString3[5]);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        if (FirstRecordDate != null) {
+                            DeviceData.postFirstRecord(new SimpleDateFormat("dd/MM/yyyy").format(FirstRecordDate));
+                        }
+                    }
+                    if(splitString3[6].length()<3){
+                        DeviceData.postLastRecord("No Records");
+                    }else{
+                        String[] splitString4 = splitString3[6].split("/r");
+                        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/DDD");
+                        Date LastRecordDate = null;
+                        try {
+                            LastRecordDate = sdf2.parse(splitString4[0]);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        if (LastRecordDate != null) {
+                            DeviceData.postLastRecord(new SimpleDateFormat("dd/MM/yyyy").format(LastRecordDate));
+                        }
+                    }
+
+                    return true;
+                case LWDL:
+                    String DownloadString = (String) message.obj;
+                    String[] splitString5 = DownloadString.split(",");
+                    if(splitString5.length==2){
+                        String[] splitString6;
+                        splitString6 = splitString5[1].split("\r");
+                        if(splitString6[0].contains("000")){
+                            downloadCounter=0;
+//                            myFileAccess.SortFile(mmDevice.getName());
+                            downloadEndNotification();
+                            DeviceData.postDownloadStatus(false);
+                        }
+                    }
+                    else if(splitString5.length==4) {
+                        downloadRunNotification(downloadCounter++,downloadLength);
+                    }
+                    else{
+                        String[] splitString7;
+                        splitString7 = splitString5[2].split("#");
+                        String dataToSave = splitString7[0]+" "+splitString7[1]+
+                                ","+splitString7[2]+","+splitString7[3]+","+splitString7[4];
+//                        myFileAccess.WriteDataToFile(dataToSave,mmDevice.getName());
+                    }
+                    return true;
+            }
+            return false;
+        }
+    });
+
+    public void downloadRunNotification(int progress,int max){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Channel_1_ID)
+                .setSmallIcon(R.drawable.ic_download)
+                .setContentTitle("Download Notification")
+                .setContentText("Your download is in progress")
+                .setCategory(NotificationCompat.CATEGORY_EVENT)
+                .setShowWhen(false)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .setProgress(max,progress,false);
+        myNotificationManager.notify(2,builder.build());
+    }
+
+    public void downloadEndNotification(){
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        myNotificationManager.cancel(2);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Channel_1_ID)
+                .setSmallIcon(R.drawable.ic_download)
+                .setContentTitle("Download Notification")
+                .setContentText("Your download is complete")
+                .setCategory(NotificationCompat.CATEGORY_EVENT)
+                .setSound(defaultSoundUri)
+                .setShowWhen(false)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+        myNotificationManager.notify(3, builder.build());
     }
 }

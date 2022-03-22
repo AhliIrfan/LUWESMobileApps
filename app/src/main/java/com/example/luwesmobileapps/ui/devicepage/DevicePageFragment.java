@@ -37,6 +37,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class DevicePageFragment extends Fragment {
     private SharedViewModel DeviceViewModel;
@@ -100,6 +101,9 @@ public class DevicePageFragment extends Fragment {
 
     public interface fragmentListener{
         void BTSend(String string);
+        void BTStartDownload(int downloadLength, int startDoY, int startYear);
+        void BLESend(String string);
+        void BLEStartDownload(int downloadLength, int startDoY, int startYear);
     }
 
     @Override
@@ -219,7 +223,10 @@ public class DevicePageFragment extends Fragment {
             else{
                 TransitionManager.beginDelayedTransition(SettingCard, new AutoTransition());
                 SettingLayout.setVisibility(View.VISIBLE);
-                listener.BTSend("LWST,7000000#\r\n");
+                if(DeviceViewModel.getConnectStatus().getValue()==1)
+                    listener.BTSend("LWST,7000000#\r\n");
+                else if(DeviceViewModel.getConnectStatus().getValue()==2)
+                    listener.BLESend("LWST,7000000#\r\n");
             }
         });
         Download.setOnClickListener(view -> {
@@ -296,23 +303,35 @@ public class DevicePageFragment extends Fragment {
             String text = String.valueOf(SettingOpt.getText());
             if ("Site Name".equals(text)) {
                 if (SiteName.getText().toString().trim().length() > 4 && SiteName.getText().toString().trim().length() < 21) {
-                    listener.BTSend(("LWST,7780000#" + SiteName.getText().toString().trim()));
+                    if(DeviceViewModel.getConnectStatus().getValue()==1)
+                        listener.BTSend(("LWST,7780000#" + SiteName.getText().toString().trim()));
+                    else if(DeviceViewModel.getConnectStatus().getValue()==2)
+                        listener.BLESend(("LWST,7780000#" + SiteName.getText().toString().trim()));
+                    DeviceViewModel.setSettingStatus(true);
                 } else {
-                    SiteName.setError("Site Name must be 5-20 character");
+                  Toast.makeText(getContext(),"Site Name must be 5-20 character",Toast.LENGTH_SHORT).show();
                 }
             } else if ("IP Address and Port".equals(text)) {
                 if (IPAddress.getText().toString().trim().length() != 0 && Port.getText().toString().trim().length() != 0) {
-                    listener.BTSend(("LWST,SIP0000#" + IPAddress.getText().toString().trim() + "#" + Port.getText().toString().trim()));
-                } else if (IPAddress.getText().toString().trim().length() < 1) {
-                    IPAddress.setError("This field cannot be empty");
+                    if(DeviceViewModel.getConnectStatus().getValue()==1)
+                        listener.BTSend(("LWST,SIP0000#" + IPAddress.getText().toString().trim() + "#" + Port.getText().toString().trim()));
+                    else if(DeviceViewModel.getConnectStatus().getValue()==2)
+                        listener.BLESend(("LWST,SIP0000#" + IPAddress.getText().toString().trim() + "#" + Port.getText().toString().trim()));
+                    DeviceViewModel.setSettingStatus(true);
+                 }else if (IPAddress.getText().toString().trim().length() < 1) {
+                    Toast.makeText(getContext(),"Please fill the IP address field",Toast.LENGTH_SHORT).show();
                 } else if (Port.getText().toString().trim().length() < 1) {
-                    Port.setError("This field cannot be empty");
+                    Toast.makeText(getContext(),"Please fill the port field",Toast.LENGTH_SHORT).show();
                 }
             } else if ("Sensor Offset and Zero Values".equals(text)) {
                 if(Offset.getText().toString().trim().length() != 0){
-                    listener.BTSend(("LWST,7100000#" + Offset.getText().toString().trim()));
+                    if(DeviceViewModel.getConnectStatus().getValue()==1)
+                        listener.BTSend(("LWST,7100000#" + Offset.getText().toString().trim()));
+                    else if(DeviceViewModel.getConnectStatus().getValue()==2)
+                        listener.BLESend(("LWST,7100000#" + Offset.getText().toString().trim()));
+                    DeviceViewModel.setSettingStatus(true);
                 } else{
-                    Offset.setError("This field cannot be empty");
+                    Toast.makeText(getContext(),"Please fill the offset value field",Toast.LENGTH_SHORT).show();
                 }
             } else if ("Record Interval".equals(text)) {
                 int interval =0;
@@ -321,22 +340,32 @@ public class DevicePageFragment extends Fragment {
                         interval = 60 * Integer.parseInt(String.valueOf(RecordInterval.getText()));
                     else
                         interval = 3600 * Integer.parseInt(String.valueOf(RecordInterval.getText()));
-                    listener.BTSend(("LWST,7220000#" + interval));
+
+                    if(DeviceViewModel.getConnectStatus().getValue()==1)
+                        listener.BTSend(("LWST,7220000#" + interval));
+                    else if(DeviceViewModel.getConnectStatus().getValue()==2)
+                        listener.BLESend(("LWST,7220000#" + interval));
+                    DeviceViewModel.setSettingStatus(true);
                 } else{
-                    RecordInterval.setError("This field cannot be empty");
+                    Toast.makeText(getContext(),"Please fill the record interval field",Toast.LENGTH_SHORT).show();
                 }
             }
-            DeviceViewModel.setSettingStatus(true);
         });
 
         //Real Time Input Handler//
         Listen.setOnClickListener(view -> {
             if((Listen.getText().toString()).equalsIgnoreCase("Listen")){
-                listener.BTSend("LWRT,\r\n");
+                if(DeviceViewModel.getConnectStatus().getValue()==1)
+                    listener.BTSend("LWRT,\r\n");
+                else if(DeviceViewModel.getConnectStatus().getValue()==2)
+                    listener.BLESend("LWRT,\r\n");
                 DeviceViewModel.setRealTimeStatus(true);
             }
             else if((Listen.getText().toString()).equalsIgnoreCase("Stop")){
-                listener.BTSend("LWST,7000000#\r\n");
+                if(DeviceViewModel.getConnectStatus().getValue()==1)
+                    listener.BTSend("LWST,7000000#\r\n");
+                else if(DeviceViewModel.getConnectStatus().getValue()==2)
+                    listener.BLESend("LWST,7000000#\r\n");
             }
         });
 
@@ -350,10 +379,18 @@ public class DevicePageFragment extends Fragment {
                 TimeZone = new SimpleDateFormat("Z").format(new Date());
             }
             int TimeZoneInt = Integer.parseInt(TimeZone) * 4;
-            if(TimeZoneInt>0)
-                listener.BTSend("LWTS\""+ TimeSynchronize+"+"+TimeZoneInt+"\"\r\n");
-            else
-                listener.BTSend("LWTS\""+ TimeSynchronize+TimeZoneInt+"\"\r\n");
+            if(TimeZoneInt>0){
+                if(DeviceViewModel.getConnectStatus().getValue()==1)
+                    listener.BTSend("LWTS\""+ TimeSynchronize+"+"+TimeZoneInt+"\"\r\n");
+                else if(DeviceViewModel.getConnectStatus().getValue()==2)
+                    listener.BLESend("LWTS\""+ TimeSynchronize+"+"+TimeZoneInt+"\"\r\n");
+            }
+            else{
+                if(DeviceViewModel.getConnectStatus().getValue()==1)
+                    listener.BTSend("LWTS\""+ TimeSynchronize+TimeZoneInt+"\"\r\n");
+                else if(DeviceViewModel.getConnectStatus().getValue()==2)
+                    listener.BLESend("LWTS\""+ TimeSynchronize+TimeZoneInt+"\"\r\n");
+            }
             DeviceViewModel.setSyncStatus(false);
         });
 
@@ -489,7 +526,55 @@ public class DevicePageFragment extends Fragment {
         });
 
         StartDownload.setOnClickListener(view -> {
+            int DayofTheYear = 0;
+            int DownloadLength =0;
+            if(StartDate.getText().toString().isEmpty())
+                Toast.makeText(getContext(),"Please fill the start date",Toast.LENGTH_SHORT).show();
+            else if(EndDate.getText().toString().isEmpty())
+                Toast.makeText(getContext(),"Please fill the end date",Toast.LENGTH_SHORT).show();
+            else if(FirstRecordedDate==null||LastRecordedDate==null)
+                Toast.makeText(getContext(), "There is currently no data to be downloaded", Toast.LENGTH_SHORT).show();
+            else {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                Date endDateValue = null;
+                try {
+                    endDateValue = sdf.parse(EndDate.getText().toString());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                Date startDateValue = null;
+                try {
+                    startDateValue = sdf.parse(StartDate.getText().toString());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
+                Date startFirstFayOfTheYear = null;
+                try {
+                    startFirstFayOfTheYear = sdf.parse(1 + "/" + 1 + "/" + sYear);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                long diff = endDateValue.getTime() - startDateValue.getTime();
+                long diff2 = startDateValue.getTime() - startFirstFayOfTheYear.getTime();
+                DownloadLength = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
+                DayofTheYear = (int) TimeUnit.DAYS.convert(diff2, TimeUnit.MILLISECONDS) + 1;
+
+                if (DownloadLength <= 0) {
+                    Toast.makeText(getContext(), "Start date must be older than end date", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    if(DeviceViewModel.getConnectStatus().getValue()==1){
+                        listener.BTStartDownload(DownloadLength,DayofTheYear,sYear);
+                        listener.BTSend(String.format("LWDL,%02d,%03d,%03d,\r\n",(sYear - 2000),DayofTheYear,DownloadLength));
+                    }else if(DeviceViewModel.getConnectStatus().getValue()==2){
+                        listener.BLEStartDownload(DownloadLength,DayofTheYear,sYear);
+                        listener.BLESend(String.format("LWDL,%02d,%03d,%03d,\r\n",(sYear - 2000),DayofTheYear,DownloadLength));
+                    }
+                }
+                DeviceViewModel.setDownloadStatus(true);
+            }
         });
 
         //View Model Callbacks Response//
@@ -534,7 +619,7 @@ public class DevicePageFragment extends Fragment {
         DeviceViewModel.getInternetConnectionStatus().observe(getViewLifecycleOwner(), s -> InternetConnectionStatus.setText(s));
         DeviceViewModel.getSettingStatus().observe(getViewLifecycleOwner(), aBoolean -> {
             if(!aBoolean) {
-                Toast.makeText(getActivity(), "Setting Success", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Setting Success", Toast.LENGTH_SHORT).show();
                 SetSetting.setEnabled(true);
             }else{
                 SetSetting.setEnabled(false);
@@ -550,7 +635,7 @@ public class DevicePageFragment extends Fragment {
         });
         DeviceViewModel.getSyncStatus().observe(getViewLifecycleOwner(), aBoolean -> {
             if(aBoolean)
-                Toast.makeText(getActivity(), "Time Synchronization Success", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Time Synchronization Success", Toast.LENGTH_SHORT).show();
         });
         DeviceViewModel.getFilePermission().observe(getViewLifecycleOwner(), aBoolean -> {
             if(aBoolean){
@@ -559,8 +644,15 @@ public class DevicePageFragment extends Fragment {
                 StartDownload.setEnabled(false);
             }
         });
-        DeviceViewModel.getConnectStatus().observe(getViewLifecycleOwner(), aBoolean -> {
-            if(!aBoolean){
+        DeviceViewModel.getDownloadStatus().observe(getViewLifecycleOwner(), aBoolean -> {
+            if(aBoolean){
+                StartDownload.setEnabled(false);
+            }else{
+                StartDownload.setEnabled(true);
+            }
+        });
+        DeviceViewModel.getConnectStatus().observe(getViewLifecycleOwner(), integer -> {
+            if(integer==0){
                 getActivity().onBackPressed();
             }
         });

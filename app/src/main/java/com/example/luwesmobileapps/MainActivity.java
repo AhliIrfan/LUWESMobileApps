@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -51,6 +52,7 @@ import com.example.luwesmobileapps.ui.home.HomeFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
 
     public Activity MainActivity;
     private NotificationManagerCompat myNotificationManager;
-    myReceiver BTReceiver = new myReceiver();
+    private final actReceiver BTReceiver = new actReceiver();
     private BTScanDialog btScanDialog;
     private BLEScanDialog bleScanDialog;
     private FloatingActionButton fab;
@@ -106,13 +108,9 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         FloatingActionButton BTScan = findViewById(R.id.action_bluetoothscan);
         FloatingActionButton BLEScan = findViewById(R.id.action_blescan);
         FloatingActionButton Disconnect = findViewById(R.id.action_disconnect);
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        IntentFilter filter2 = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         IntentFilter filter3 = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         IntentFilter filter4 = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         IntentFilter filter5 = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        registerReceiver(BTReceiver,filter);
-        registerReceiver(BTReceiver,filter2);
         registerReceiver(BTReceiver,filter3);
         registerReceiver(BTReceiver,filter4);
         registerReceiver(BTReceiver,filter5);
@@ -223,17 +221,17 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         // menu should be considered as top level destinations.
         Menu nav_menu = navigationView.getMenu();
         nav_menu.findItem(R.id.nav_devicepage).setEnabled(false);
-        DeviceViewModel.getConnectStatus().observe(this, aBoolean -> {
-            if(aBoolean){
-                Menu nav_menu1 = navigationView.getMenu();
-                nav_menu1.findItem(R.id.nav_devicepage).setEnabled(true);
 
-            }
-            else{
-                Menu nav_menu1 = navigationView.getMenu();
+        DeviceViewModel.getConnectStatus().observe(this, integer -> {
+            Menu nav_menu1 = navigationView.getMenu();
+            if(integer==0){
                 nav_menu1.findItem(R.id.nav_devicepage).setEnabled(false);
             }
+            else{
+                nav_menu1.findItem(R.id.nav_devicepage).setEnabled(true);
+            }
         });
+
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.nav_devicepage, R.id.nav_ble)
                 .setOpenableLayout(drawer)
@@ -281,34 +279,10 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         bluetoothLeScanner.stopScan(leScanCallback);
     }
 
-    public class myReceiver extends BroadcastReceiver {
+    public class actReceiver extends BroadcastReceiver {
         @SuppressLint("MissingPermission")
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(intent.getAction())){
-                Intent ServiceIntent = new Intent(MainActivity, BTService.class);
-                stopService(ServiceIntent);
-                Notification notification2 = new NotificationCompat.Builder(MainActivity,Channel_1_ID)
-                        .setContentTitle("Device Connection")
-                        .setContentText("Last connection disconnected")
-                        .setSmallIcon(R.drawable.ic_bluetooth)
-                        .build();
-                myNotificationManager = NotificationManagerCompat.from(MainActivity);
-                myNotificationManager.notify(1,notification2);
-            }
-            if(BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())){
-                if(intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,BluetoothAdapter.ERROR)==BluetoothAdapter.STATE_OFF) {
-                    Intent ServiceIntent = new Intent(MainActivity, BTService.class);
-                    stopService(ServiceIntent);
-                    Notification notification2 = new NotificationCompat.Builder(MainActivity, Channel_1_ID)
-                            .setContentTitle("Device Connection")
-                            .setContentText("Bluetooth Turned Off")
-                            .setSmallIcon(R.drawable.ic_bluetooth)
-                            .build();
-                    myNotificationManager = NotificationManagerCompat.from(MainActivity);
-                    myNotificationManager.notify(1, notification2);
-                }
-            }
             if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
                 // Discovery has found a device. Get the BluetoothDevice
                 // object and its info from the Intent.
@@ -319,11 +293,13 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
                 }
             }
             if(BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(intent.getAction())){
-                btScanDialog.ScanButton(0,false);
+                if(btScanDialog!=null)
+                    btScanDialog.ScanButton(0,false);
                 Log.d("Device Discovery","Start Discovering");
             }
             if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())){
-                btScanDialog.ScanButton(4,true);
+                if(btScanDialog!=null)
+                    btScanDialog.ScanButton(4,true);
                 Log.d("Device Discovery","Stop Discovering");
             }
         }
@@ -349,6 +325,31 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
     public void BTSend(String string){
         Intent ServiceIntent = new Intent(MainActivity, BTService.class);
         ServiceIntent.putExtra("String Input",string);
+        startService(ServiceIntent);
+    }
+
+    @Override
+    public void BTStartDownload(int downloadLength, int startDoY, int startYear) {
+        Intent ServiceIntent = new Intent(MainActivity, BTService.class);
+        ServiceIntent.putExtra("String Input",String.valueOf(downloadLength));
+        ServiceIntent.putExtra("String Input2",String.valueOf(startDoY));
+        ServiceIntent.putExtra("String Input3",String.valueOf(startYear));
+        startService(ServiceIntent);
+    }
+
+    @Override
+    public void BLESend(String string){
+        Intent ServiceIntent = new Intent(MainActivity, BLEService.class);
+        ServiceIntent.putExtra("String Input",string);
+        startService(ServiceIntent);
+    }
+
+    @Override
+    public void BLEStartDownload(int downloadLength, int startDoY, int startYear) {
+        Intent ServiceIntent = new Intent(MainActivity, BLEService.class);
+        ServiceIntent.putExtra("String Input",String.valueOf(downloadLength));
+        ServiceIntent.putExtra("String Input2",String.valueOf(startDoY));
+        ServiceIntent.putExtra("String Input3",String.valueOf(startYear));
         startService(ServiceIntent);
     }
 

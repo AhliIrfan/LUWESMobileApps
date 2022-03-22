@@ -34,9 +34,9 @@
 
     <fragment
         android:id="@+id/nav_ble"
-        android:name="com.example.luwesmobileapps.ui.bledevice.BLEDeviceFragment"
+        android:name="com.example.luwesmobileapps.ui.graphviewer.GraphViewerFragment"
         android:label="@string/menu_graphviewer"
-        tools:layout="@layout/fragment_bledevice" >
+        tools:layout="@layout/fragment_graphviewer" >
         <action
             android:id="@+id/action_nav_ble_to_nav_spp"
             app:destination="@id/nav_devicepage"

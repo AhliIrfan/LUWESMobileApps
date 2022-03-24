@@ -1,11 +1,8 @@
 package com.example.luwesmobileapps;
 
-import static com.example.luwesmobileapps.App.Channel_1_ID;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -14,26 +11,22 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
@@ -41,6 +34,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.example.luwesmobileapps.service.BLEService;
@@ -48,13 +42,14 @@ import com.example.luwesmobileapps.service.BTService;
 import com.example.luwesmobileapps.ui.devicepage.DevicePageFragment;
 import com.example.luwesmobileapps.ui.dialog.BLEScanDialog;
 import com.example.luwesmobileapps.ui.dialog.BTScanDialog;
-import com.example.luwesmobileapps.ui.home.HomeFragment;
+import com.example.luwesmobileapps.ui.graphviewer.GraphViewerFragment;
+import com.example.luwesmobileapps.ui.setting.SettingFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -67,7 +62,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements DevicePageFragment.fragmentListener, BTScanDialog.fragmentListener, HomeFragment.fragmentListener, BLEScanDialog.fragmentListener {
+public class MainActivity extends AppCompatActivity implements DevicePageFragment.fragmentListener, BTScanDialog.fragmentListener,
+        SettingFragment.fragmentListener, BLEScanDialog.fragmentListener, GraphViewerFragment.fragmentListener {
 
     private AppBarConfiguration mAppBarConfiguration;
     private SharedViewModel DeviceViewModel;
@@ -93,9 +89,6 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
     private boolean fabLoc;
 
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         MainActivity = this;
@@ -103,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        LinearLayout ScanAction = findViewById(R.id.connectmenu);
+        RelativeLayout ScanAction = findViewById(R.id.connectmenu);
         fab = findViewById(R.id.fab);
         FloatingActionButton BTScan = findViewById(R.id.action_bluetoothscan);
         FloatingActionButton BLEScan = findViewById(R.id.action_blescan);
@@ -233,12 +226,13 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         });
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_devicepage, R.id.nav_ble)
+                R.id.nav_home, R.id.nav_setting, R.id.nav_devicepage, R.id.nav_graph)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
     }
 
     @Override
@@ -355,35 +349,35 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
 
     @Override
     public void checkFilePermission(){
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-        }
-        else {
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+//        }
+//        else {
              ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-        }
+//        }
     }
 
     @Override
     public void checkLocPermission() {
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-        } else {
+//        if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+//                ContextCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//        } else {
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION,}, 2);
-        }
+//        }
     }
 
     @Override
     public void checkBTPermission(){
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED) {
-        } else {
+//        if (ContextCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
+//                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED) {
+//        } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.BLUETOOTH_CONNECT,
                         Manifest.permission.BLUETOOTH_SCAN,}, 3);
             }
-        }
+//        }
     }
 
     @Override

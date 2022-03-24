@@ -25,12 +25,14 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.luwesmobileapps.R;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.example.luwesmobileapps.filter.InputFilterIP;
 import com.example.luwesmobileapps.filter.InputFilterMinMax;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.ParseException;
@@ -43,53 +45,54 @@ public class DevicePageFragment extends Fragment {
     private SharedViewModel DeviceViewModel;
     private fragmentListener listener;
     //Title Expandable View Button//
-    private Button DeviceInfo;
-    private Button RecordHistory;
-    private Button RealTime;
-    private Button Setting;
-    private Button Download;
+    private MaterialButton DeviceInfo;
+    private MaterialButton RecordHistory;
+//    private Button RealTime;
+    private MaterialButton Setting;
+    private MaterialButton Download;
     //Card Container View//
     private CardView DeviceInfoCard;
     private CardView RecordHistoryCard;
-    private CardView RealTimeCard;
+//    private CardView RealTimeCard;
     private CardView SettingCard;
     private CardView DownloadCard;
     //Device Info Group//
     private LinearLayout DeviceInfoLayout;
-    private EditText DeviceName;
-    private EditText DeviceModel;
-    private EditText FirmwareVersion;
-    private EditText MACAddress;
+    private TextView DeviceName;
+    private TextView DeviceModel;
+    private TextView FirmwareVersion;
+    private TextView MACAddress;
     //Record History Group//
     private LinearLayout RecordHistoryLayout;
-    private EditText FirstRecordedDate;
-    private EditText LastRecordedDate;
-    //Real Time Group//
-    private LinearLayout RealTimeLayout;
-    private EditText DeviceDateTime;
-    private EditText WaterLevel;
-    private EditText DeviceBattery;
-    private EditText RecordStatus;
-    private EditText InternetConnectionStatus;
-    private Button Listen;
-    private Button TimeSync;
+    private TextView FirstRecordedDate;
+    private TextView LastRecordedDate;
+//    //Real Time Group//
     //Setting Group//
     private LinearLayout SettingLayout;
-    private EditText SiteName;
-    private EditText IPAddress;
-    private EditText Port;
-    private EditText ZeroValue;
-    private EditText Offset;
-    private EditText RecordInterval;
-    private TextInputLayout SettingOptContainer;
+    private LinearLayout SettingInputLayoutText;
+    private LinearLayout SettingInputLayoutText2;
+    private LinearLayout SettingInputLayoutInterval;
+    private TextView SiteName;
+    private TextView IPAddress;
+    private TextView Port;
+    private TextView ZeroValue;
+    private TextView Offset;
+    private TextView RecordInterval;
     private AutoCompleteTextView SettingOpt;
-    private Spinner IntervalOpt;
-    private Button SetSetting;
+    private TextView IntervalOpt;
+    private EditText SettingInput;
+    private EditText SettingInput2;
+    private TextView SettingInputTitle;
+    private TextView SettingInputTitle2;
+    private EditText RecordIntervalInput;
+    private Spinner IntervalOptInput;
+    private MaterialButton SetSetting;
+    private MaterialButton TimeSync;
     //Download Group//
     private LinearLayout DownloadLayout;
     private EditText StartDate;
     private EditText EndDate;
-    private Button StartDownload;
+    private MaterialButton StartDownload;
 
     static int sDay;
     static int sMonth;
@@ -130,13 +133,13 @@ public class DevicePageFragment extends Fragment {
         //Title Expandable View Button//
         DeviceInfo = v.findViewById(R.id.DeviceInfoTitle);
         RecordHistory = v.findViewById(R.id.RecordHistoryTitle);
-        RealTime = v.findViewById(R.id.RealTimeTitle);
+//        RealTime = v.findViewById(R.id.RealTimeTitle);
         Setting = v.findViewById(R.id.SettingParameterTitle);
         Download = v.findViewById(R.id.DataLogDownloadTitle);
         //Card Container View//
         DeviceInfoCard = v.findViewById(R.id.DeviceInfoCard);
         RecordHistoryCard = v.findViewById(R.id.RecordHistoryCard);
-        RealTimeCard = v.findViewById(R.id.RealTimeCard);
+//        RealTimeCard = v.findViewById(R.id.RealTimeCard);
         SettingCard = v.findViewById(R.id.SettingParameterCard);
         DownloadCard = v.findViewById(R.id.DataLogDownloadCard);
         //Device Info Group//
@@ -149,24 +152,17 @@ public class DevicePageFragment extends Fragment {
         RecordHistoryLayout = v.findViewById(R.id.RecordHistoryGroup);
         FirstRecordedDate = v.findViewById(R.id.FirstRecordDate);
         LastRecordedDate = v.findViewById(R.id.LastRecordedDate);
-        //Real Time Group//
-        RealTimeLayout = v.findViewById(R.id.RealTimeGroup);
-        DeviceDateTime = v.findViewById(R.id.DateTime);
-        WaterLevel = v.findViewById(R.id.LevelRange);
-        DeviceBattery = v.findViewById(R.id.Battery);
-        RecordStatus = v.findViewById(R.id.Record);
-        InternetConnectionStatus = v.findViewById(R.id.InternetConnection);
-        Listen = v.findViewById(R.id.realtimebutton);
-        TimeSync = v.findViewById(R.id.timesyncbutton);
         //Setting Group//
         SettingLayout = v.findViewById(R.id.SettingParameterGroup);
+        SettingInputLayoutText = v.findViewById(R.id.SettingInputText);
+        SettingInputLayoutText2 = v.findViewById(R.id.SettingInputText2);
+        SettingInputLayoutInterval = v.findViewById(R.id.SettingInputInterval);
         SiteName = v.findViewById(R.id.SiteName);
         IPAddress = v.findViewById(R.id.IPAddress);
         Port = v.findViewById(R.id.Port);
         ZeroValue = v.findViewById(R.id.ZeroValue);
         Offset = v.findViewById(R.id.SensorOffset);
         RecordInterval = v.findViewById(R.id.Interval);
-        SettingOptContainer = v.findViewById(R.id.spinner2);
         SettingOpt = v.findViewById(R.id.spinner2content);
 
         String[] Options = new String[]{
@@ -178,7 +174,14 @@ public class DevicePageFragment extends Fragment {
         );
 
         IntervalOpt = v.findViewById(R.id.spinner3);
+        IntervalOptInput = v.findViewById(R.id.spinner4);
+        RecordIntervalInput = v.findViewById(R.id.IntervalInput);
+        SettingInputTitle = v.findViewById(R.id.InputSettingTitle);
+        SettingInputTitle2 = v.findViewById(R.id.InputSettingTitle2);
+        SettingInput2 = v.findViewById(R.id.InputSetting2);
+        SettingInput = v.findViewById(R.id.InputSetting);
         SetSetting = v.findViewById(R.id.settingButton);
+        TimeSync = v.findViewById(R.id.timesyncbutton);
         //Download Group//
         DownloadLayout = v.findViewById(R.id.DataLogDownloadGroup);
         StartDate = v.findViewById(R.id.StartDate);
@@ -205,16 +208,16 @@ public class DevicePageFragment extends Fragment {
                 RecordHistoryLayout.setVisibility(View.VISIBLE);
             }
         });
-        RealTime.setOnClickListener(view -> {
-            if(RealTimeLayout.getVisibility()==View.VISIBLE){
-                TransitionManager.beginDelayedTransition(RealTimeCard, new AutoTransition());
-                RealTimeLayout.setVisibility(View.GONE);
-            }
-            else{
-                TransitionManager.beginDelayedTransition(RealTimeCard, new AutoTransition());
-                RealTimeLayout.setVisibility(View.VISIBLE);
-            }
-        });
+//        RealTime.setOnClickListener(view -> {
+//            if(RealTimeLayout.getVisibility()==View.VISIBLE){
+//                TransitionManager.beginDelayedTransition(RealTimeCard, new AutoTransition());
+//                RealTimeLayout.setVisibility(View.GONE);
+//            }
+//            else{
+//                TransitionManager.beginDelayedTransition(RealTimeCard, new AutoTransition());
+//                RealTimeLayout.setVisibility(View.VISIBLE);
+//            }
+//        });
         Setting.setOnClickListener(view -> {
             if(SettingLayout.getVisibility()==View.VISIBLE){
                 TransitionManager.beginDelayedTransition(SettingCard, new AutoTransition());
@@ -244,35 +247,35 @@ public class DevicePageFragment extends Fragment {
         SettingOpt.setOnItemClickListener((adapterView, view, i, l) -> {
             switch (i){
                 case 0:
-                    SiteName.setEnabled(true);
-                    IPAddress.setEnabled(false);
-                    Port.setEnabled(false);
-                    Offset.setEnabled(false);
-                    RecordInterval.setEnabled(false);
+                    TransitionManager.beginDelayedTransition(SettingLayout, new AutoTransition());
+                    SettingInputLayoutText.setVisibility(View.VISIBLE);
+                    SettingInputLayoutText2.setVisibility(View.GONE);
+                    SettingInputLayoutInterval.setVisibility(View.GONE);
+                    SettingInputTitle.setText("Site Name");
                     SetSetting.setEnabled(true);
                     break;
                 case 1:
-                    SiteName.setEnabled(false);
-                    IPAddress.setEnabled(true);
-                    Port.setEnabled(true);
-                    Offset.setEnabled(false);
-                    RecordInterval.setEnabled(false);
+                    TransitionManager.beginDelayedTransition(SettingLayout, new AutoTransition());
+                    SettingInputLayoutText.setVisibility(View.VISIBLE);
+                    SettingInputLayoutText2.setVisibility(View.VISIBLE);
+                    SettingInputLayoutInterval.setVisibility(View.GONE);
+                    SettingInputTitle.setText("IP Address");
+                    SettingInputTitle2.setText("Port");
                     SetSetting.setEnabled(true);
                     break;
                 case 2:
-                    SiteName.setEnabled(false);
-                    IPAddress.setEnabled(false);
-                    Port.setEnabled(false);
-                    Offset.setEnabled(true);
-                    RecordInterval.setEnabled(false);
+                    TransitionManager.beginDelayedTransition(SettingLayout, new AutoTransition());
+                    SettingInputLayoutText.setVisibility(View.VISIBLE);
+                    SettingInputLayoutText2.setVisibility(View.GONE);
+                    SettingInputLayoutInterval.setVisibility(View.GONE);
+                    SettingInputTitle.setText("Offset");
                     SetSetting.setEnabled(true);
                     break;
                 case 3:
-                    SiteName.setEnabled(false);
-                    IPAddress.setEnabled(false);
-                    Port.setEnabled(false);
-                    Offset.setEnabled(false);
-                    RecordInterval.setEnabled(true);
+                    TransitionManager.beginDelayedTransition(SettingLayout, new AutoTransition());
+                    SettingInputLayoutText.setVisibility(View.GONE);
+                    SettingInputLayoutText2.setVisibility(View.GONE);
+                    SettingInputLayoutInterval.setVisibility(View.VISIBLE);
                     SetSetting.setEnabled(true);
                     break;
             }
@@ -280,16 +283,16 @@ public class DevicePageFragment extends Fragment {
 
         IPAddress.setFilters(new InputFilter[]{new InputFilterIP()});
 
-        IntervalOpt.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        IntervalOptInput.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (parent.getItemAtPosition(position).toString()){
                     case "Minutes":
-                        RecordInterval.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "59")});
+                        RecordIntervalInput.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "59")});
                         break;
                     case "Hours":
-                        RecordInterval.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "24")});
+                        RecordIntervalInput.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "24")});
                         break;
                 }
             }
@@ -299,24 +302,25 @@ public class DevicePageFragment extends Fragment {
             }
         });
 
+
         SetSetting.setOnClickListener(view -> {
             String text = String.valueOf(SettingOpt.getText());
             if ("Site Name".equals(text)) {
-                if (SiteName.getText().toString().trim().length() > 4 && SiteName.getText().toString().trim().length() < 21) {
+                if (SettingInput.getText().toString().trim().length() > 4 && SettingInput.getText().toString().trim().length() < 21) {
                     if(DeviceViewModel.getConnectStatus().getValue()==1)
-                        listener.BTSend(("LWST,7780000#" + SiteName.getText().toString().trim()));
+                        listener.BTSend(("LWST,7780000#" + SettingInput.getText().toString().trim()));
                     else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                        listener.BLESend(("LWST,7780000#" + SiteName.getText().toString().trim()));
+                        listener.BLESend(("LWST,7780000#" + SettingInput.getText().toString().trim()));
                     DeviceViewModel.setSettingStatus(true);
                 } else {
                   Toast.makeText(getContext(),"Site Name must be 5-20 character",Toast.LENGTH_SHORT).show();
                 }
             } else if ("IP Address and Port".equals(text)) {
-                if (IPAddress.getText().toString().trim().length() != 0 && Port.getText().toString().trim().length() != 0) {
+                if (SettingInput.getText().toString().trim().length() != 0 && SettingInput2.getText().toString().trim().length() != 0) {
                     if(DeviceViewModel.getConnectStatus().getValue()==1)
-                        listener.BTSend(("LWST,SIP0000#" + IPAddress.getText().toString().trim() + "#" + Port.getText().toString().trim()));
+                        listener.BTSend(("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()));
                     else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                        listener.BLESend(("LWST,SIP0000#" + IPAddress.getText().toString().trim() + "#" + Port.getText().toString().trim()));
+                        listener.BLESend(("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()));
                     DeviceViewModel.setSettingStatus(true);
                  }else if (IPAddress.getText().toString().trim().length() < 1) {
                     Toast.makeText(getContext(),"Please fill the IP address field",Toast.LENGTH_SHORT).show();
@@ -324,22 +328,22 @@ public class DevicePageFragment extends Fragment {
                     Toast.makeText(getContext(),"Please fill the port field",Toast.LENGTH_SHORT).show();
                 }
             } else if ("Sensor Offset and Zero Values".equals(text)) {
-                if(Offset.getText().toString().trim().length() != 0){
+                if(SettingInput.getText().toString().trim().length() != 0){
                     if(DeviceViewModel.getConnectStatus().getValue()==1)
-                        listener.BTSend(("LWST,7100000#" + Offset.getText().toString().trim()));
+                        listener.BTSend(("LWST,7100000#" + SettingInput.getText().toString().trim()));
                     else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                        listener.BLESend(("LWST,7100000#" + Offset.getText().toString().trim()));
+                        listener.BLESend(("LWST,7100000#" + SettingInput.getText().toString().trim()));
                     DeviceViewModel.setSettingStatus(true);
                 } else{
                     Toast.makeText(getContext(),"Please fill the offset value field",Toast.LENGTH_SHORT).show();
                 }
             } else if ("Record Interval".equals(text)) {
                 int interval =0;
-                if(RecordInterval.getText().toString().trim().length() != 0) {
-                    if(IntervalOpt.getSelectedItemPosition()==0)
-                        interval = 60 * Integer.parseInt(String.valueOf(RecordInterval.getText()));
+                if(RecordIntervalInput.getText().toString().trim().length() != 0) {
+                    if(IntervalOptInput.getSelectedItemPosition()==0)
+                        interval = 60 * Integer.parseInt(String.valueOf(RecordIntervalInput.getText()));
                     else
-                        interval = 3600 * Integer.parseInt(String.valueOf(RecordInterval.getText()));
+                        interval = 3600 * Integer.parseInt(String.valueOf(RecordIntervalInput.getText()));
 
                     if(DeviceViewModel.getConnectStatus().getValue()==1)
                         listener.BTSend(("LWST,7220000#" + interval));
@@ -352,22 +356,22 @@ public class DevicePageFragment extends Fragment {
             }
         });
 
-        //Real Time Input Handler//
-        Listen.setOnClickListener(view -> {
-            if((Listen.getText().toString()).equalsIgnoreCase("Listen")){
-                if(DeviceViewModel.getConnectStatus().getValue()==1)
-                    listener.BTSend("LWRT,\r\n");
-                else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                    listener.BLESend("LWRT,\r\n");
-                DeviceViewModel.setRealTimeStatus(true);
-            }
-            else if((Listen.getText().toString()).equalsIgnoreCase("Stop")){
-                if(DeviceViewModel.getConnectStatus().getValue()==1)
-                    listener.BTSend("LWST,7000000#\r\n");
-                else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                    listener.BLESend("LWST,7000000#\r\n");
-            }
-        });
+//        //Real Time Input Handler//
+//        Listen.setOnClickListener(view -> {
+//            if((Listen.getText().toString()).equalsIgnoreCase("Listen")){
+//                if(DeviceViewModel.getConnectStatus().getValue()==1)
+//                    listener.BTSend("LWRT,\r\n");
+//                else if(DeviceViewModel.getConnectStatus().getValue()==2)
+//                    listener.BLESend("LWRT,\r\n");
+//                DeviceViewModel.setRealTimeStatus(true);
+//            }
+//            else if((Listen.getText().toString()).equalsIgnoreCase("Stop")){
+//                if(DeviceViewModel.getConnectStatus().getValue()==1)
+//                    listener.BTSend("LWST,7000000#\r\n");
+//                else if(DeviceViewModel.getConnectStatus().getValue()==2)
+//                    listener.BLESend("LWST,7000000#\r\n");
+//            }
+//        });
 
         TimeSync.setOnClickListener(view -> {
             String TimeSynchronize = new SimpleDateFormat("yy/MM/dd,HH:mm:ss").format(new Date());
@@ -586,11 +590,8 @@ public class DevicePageFragment extends Fragment {
         DeviceViewModel.getDeviceModel().observe(getViewLifecycleOwner(), s -> DeviceModel.setText(s));
         DeviceViewModel.getFirmWareVersion().observe(getViewLifecycleOwner(), s -> FirmwareVersion.setText(s));
         DeviceViewModel.getMACAddress().observe(getViewLifecycleOwner(), s -> MACAddress.setText(s));
-        DeviceViewModel.getDeviceDateTime().observe(getViewLifecycleOwner(), s -> DeviceDateTime.setText(s));
         DeviceViewModel.getFirstRecord().observe(getViewLifecycleOwner(), s -> FirstRecordedDate.setText(s));
         DeviceViewModel.getLastRecord().observe(getViewLifecycleOwner(), s -> LastRecordedDate.setText(s));
-        DeviceViewModel.getWaterLevel().observe(getViewLifecycleOwner(), s -> WaterLevel.setText(s));
-        DeviceViewModel.getDeviceBattery().observe(getViewLifecycleOwner(), s -> DeviceBattery.setText(s));
         DeviceViewModel.getIPAddress().observe(getViewLifecycleOwner(), s -> IPAddress.setText(s));
         DeviceViewModel.getPort().observe(getViewLifecycleOwner(), s -> Port.setText(s));
         DeviceViewModel.getSensorZeroValues().observe(getViewLifecycleOwner(), s -> ZeroValue.setText(s));
@@ -604,10 +605,10 @@ public class DevicePageFragment extends Fragment {
             }
             if(intervalRec>0) {
                 if (intervalRec % 3600 == 0) {
-                    IntervalOpt.setSelection(1);
+                    IntervalOpt.setText("Hours");
                     RecordInterval.setText(String.valueOf(intervalRec / 3600));
                 } else {
-                    IntervalOpt.setSelection(0);
+                    IntervalOpt.setText("Minutes");
                     RecordInterval.setText(String.valueOf(intervalRec / 60));
                 }
             }
@@ -615,22 +616,12 @@ public class DevicePageFragment extends Fragment {
                 RecordInterval.setText(s);
             }
         });
-        DeviceViewModel.getRecordStatus().observe(getViewLifecycleOwner(), s -> RecordStatus.setText(s));
-        DeviceViewModel.getInternetConnectionStatus().observe(getViewLifecycleOwner(), s -> InternetConnectionStatus.setText(s));
         DeviceViewModel.getSettingStatus().observe(getViewLifecycleOwner(), aBoolean -> {
             if(!aBoolean) {
                 Toast.makeText(getContext(), "Setting Success", Toast.LENGTH_SHORT).show();
                 SetSetting.setEnabled(true);
             }else{
                 SetSetting.setEnabled(false);
-            }
-        });
-        DeviceViewModel.getRealTimeStatus().observe(getViewLifecycleOwner(), aBoolean -> {
-            if(aBoolean){
-                Listen.setText("Stop");
-            }
-            else{
-                Listen.setText("Listen");
             }
         });
         DeviceViewModel.getSyncStatus().observe(getViewLifecycleOwner(), aBoolean -> {

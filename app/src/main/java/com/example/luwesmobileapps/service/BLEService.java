@@ -27,19 +27,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-
-import com.example.luwesmobileapps.BuildConfig;
 import com.example.luwesmobileapps.MainActivity;
 import com.example.luwesmobileapps.R;
 import com.example.luwesmobileapps.data_layer.FileAccess;
 import com.example.luwesmobileapps.data_layer.SharedData;
 
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class BLEService extends Service {
     private BluetoothGatt bluetoothGatt;
@@ -51,10 +49,13 @@ public class BLEService extends Service {
     private SharedData DeviceData;
     private boolean isRunning;
     private NotificationManagerCompat myNotificationManager;
-    private FileAccess myFileAccess = new FileAccess();
+    private final FileAccess myFileAccess = new FileAccess();
 
     int downloadCounter=0;
     int downloadLength=0;
+    int startDoY=0;
+    int startYear=0;
+    long downloadStart=0;
 
     static final int LWRT=1;
     static final int LWST=2;
@@ -62,11 +63,6 @@ public class BLEService extends Service {
     static final int LWDI=4;
 
     public static final String TAG = "BLEService";
-
-    public final static String ACTION_GATT_CONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
 
     public String Characteristic_uuid_rx = "0000ffe1-0000-1000-8000-00805f9b34fb";
     public String Characteristic_uuid_tx = "0000ffe2-0000-1000-8000-00805f9b34fb";
@@ -96,7 +92,11 @@ public class BLEService extends Service {
         if (!isRunning()) {
             mmDevice = intent.getParcelableExtra("Device Input");
             notificationIntent = new Intent(this, MainActivity.class);
-            pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+            }else{
+                pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+            }
             Notification notification = new NotificationCompat.Builder(this, Channel_1_ID)
                     .setContentTitle("Device Connection")
                     .setContentText("Trying to connect with " + mmDevice.getName())
@@ -109,8 +109,15 @@ public class BLEService extends Service {
             String input = intent.getStringExtra("String Input");
             try{
                 downloadLength= Integer.parseInt(input);
+
+                String input2 = intent.getStringExtra("String Input2");
+                String input3 = intent.getStringExtra("String Input3");
+                startDoY= Integer.parseInt(input2);
+                startYear= Integer.parseInt(input3);
+
+                downloadStart= new Date().getTime();
                 downloadRunNotification(downloadCounter,downloadLength);
-                myFileAccess.WriteDeviceList(mmDevice.getName());
+                myFileAccess.WriteDeviceList(DeviceData.getSiteName().getValue());
             }catch (Exception e){
                 Log.d("Sent Data BLE", input);
                 sendBLE(input);
@@ -155,7 +162,6 @@ public class BLEService extends Service {
                     setRXNotifier(gatt,mGattService,Characteristic_uuid_rx);
                     Log.d(TAG, "onServicesDiscovered: characteristic notification added");
                 }
-                return;
             }
         }
 
@@ -164,8 +170,7 @@ public class BLEService extends Service {
             Log.d(TAG, "onCharacteristicRead: "+characteristic.getUuid());
             if (status == 0 && UUID.fromString(Characteristic_uuid_rx).equals(characteristic.getUuid())) {
                 byte[] rawPayload = characteristic.getValue();
-                Log.d(TAG, "onCharacteristicRead: "+rawPayload);
-                if(rawPayload.length>0&&rawPayload!=null){
+                if(rawPayload.length>0){
                     payLoad = new String(rawPayload);
                     Log.d(TAG, "onCharacteristicRead: "+payLoad);
                     if(payLoad.contains("LWRT")){
@@ -190,7 +195,7 @@ public class BLEService extends Service {
             Log.d(TAG, "onCharacteristicChanged: "+characteristic.getUuid());
             if (UUID.fromString(Characteristic_uuid_rx).equals(characteristic.getUuid())) {
                 byte[] rawPayload = characteristic.getValue();
-                if(rawPayload.length>0&&rawPayload!=null){
+                if(rawPayload.length>0){
                     payLoad = new String(rawPayload);
                     Log.d(TAG, "onCharacteristicRead: "+payLoad);
                     if(payLoad.contains("LWRT")){
@@ -223,8 +228,7 @@ public class BLEService extends Service {
             Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
-        String str = bluetoothAddress;
-        if (str == null || !address.equals(str) || bluetoothAddress == null) {
+        if (!address.equals(bluetoothAddress)) {
             BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
             if (device == null) {
                 Log.w(TAG, "Device not found.  Unable to connect.");
@@ -286,8 +290,7 @@ public class BLEService extends Service {
 
     @SuppressLint("MissingPermission")
     public void disconnect() {
-        BluetoothGatt cBluetoothGatt;
-        if (bluetoothAdapter == null || (cBluetoothGatt = bluetoothGatt) == null) {
+        if (bluetoothAdapter == null || bluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
@@ -361,6 +364,22 @@ public class BLEService extends Service {
                         DeviceData.postSensorOffset(splitString2[4]);
                         DeviceData.postSensorZeroValues(splitString2[5]);
                         DeviceData.postRecordInterval(splitString2[6]);
+
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+                        }else{
+                            pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, 0);
+                        }
+                        Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
+                                .setContentTitle("Device Connection")
+                                .setContentText("Connected with " + DeviceData.getSiteName().getValue())
+                                .setSmallIcon(R.mipmap.ic_launcher)
+                                .setContentIntent(pendingIntent)
+                                .setOnlyAlertOnce(true)
+                                .setOngoing(false)
+                                .build();
+                        myNotificationManager = NotificationManagerCompat.from(getBaseContext());
+                        myNotificationManager.notify(1, notification2);
                     }
                     return true;
                 case LWDI:
@@ -413,21 +432,46 @@ public class BLEService extends Service {
                         String[] splitString6;
                         splitString6 = splitString5[1].split("\r");
                         if(splitString6[0].contains("000")){
-                            downloadCounter=0;
-//                            myFileAccess.SortFile(mmDevice.getName());
+                            myFileAccess.BatchSort(DeviceData.getSiteName().getValue(),startYear,startDoY,downloadLength);
                             downloadEndNotification();
+                            downloadCounter=0;
                             DeviceData.postDownloadStatus(false);
                         }
                     }
                     else if(splitString5.length==4) {
-                        downloadRunNotification(downloadCounter++,downloadLength);
+                        downloadCounter++;
+                        downloadRunNotification(downloadCounter,downloadLength);
                     }
                     else{
                         String[] splitString7;
                         splitString7 = splitString5[2].split("#");
                         String dataToSave = splitString7[0]+" "+splitString7[1]+
                                 ","+splitString7[2]+","+splitString7[3]+","+splitString7[4];
-//                        myFileAccess.WriteDataToFile(dataToSave,mmDevice.getName());
+
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                        Date dateData = null;
+                        try {
+                            dateData = sdf.parse(splitString7[0]);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        if(dateData!=null) {
+
+                            String year = new SimpleDateFormat("yyyy").format(dateData);
+
+                            Date startFirstFayOfTheYear = null;
+                            try {
+                                startFirstFayOfTheYear = sdf.parse(1 + "/" + 1 + "/" + year);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+
+                            long diff = dateData.getTime() - startFirstFayOfTheYear.getTime();
+                            int DoY = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
+
+                            myFileAccess.WriteDataToFile(dataToSave, DeviceData.getSiteName().getValue(), year, String.valueOf(DoY));
+                            downloadRunNotification(downloadCounter, downloadLength);
+                        }
                     }
                     return true;
             }
@@ -436,10 +480,11 @@ public class BLEService extends Service {
     });
 
     public void downloadRunNotification(int progress,int max){
+        int percentage = (int) ((Float.intBitsToFloat(downloadCounter)/Float.intBitsToFloat(downloadLength))*100);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Channel_1_ID)
-                .setSmallIcon(R.drawable.ic_download)
-                .setContentTitle("Download Notification")
-                .setContentText("Your download is in progress")
+                .setSmallIcon(R.drawable.ic_devices)
+                .setContentTitle("Download")
+                .setContentText("Download progress "+percentage+"%")
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
                 .setShowWhen(false)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -450,12 +495,30 @@ public class BLEService extends Service {
     }
 
     public void downloadEndNotification(){
+        long duration = (new Date().getTime()-downloadStart)/1000;
+        long Hour = duration/3600;
+        long Minutes = (duration/60) % 60;
+        long Seconds= duration % 60;
+        String timeElapsed;
+        if(Hour>0){
+            timeElapsed = String.format(" %d hours %d minutes %d seconds",Hour,Minutes,Seconds);
+        }else{
+            if(Minutes>0){
+                timeElapsed = String.format(" %d minutes %d seconds",Minutes,Seconds);
+
+            }else{
+                timeElapsed = String.format(" %d seconds",Seconds);
+            }
+        }
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         myNotificationManager.cancel(2);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Channel_1_ID)
-                .setSmallIcon(R.drawable.ic_download)
-                .setContentTitle("Download Notification")
-                .setContentText("Your download is complete")
+                .setSmallIcon(R.drawable.ic_devices)
+                .setContentTitle("Download")
+                .setContentText("Download complete")
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText("Your download is complete, "+downloadCounter+" of "+downloadLength+
+                                " days records downloaded in"+timeElapsed))
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
                 .setSound(defaultSoundUri)
                 .setShowWhen(false)

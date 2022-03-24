@@ -48,7 +48,7 @@
                             android:layout_height="wrap_content"
                             android:text="Site Name"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/DeviceName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -56,7 +56,8 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -68,7 +69,7 @@
                             android:layout_height="wrap_content"
                             android:text="Device Model"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/DeviceModel"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -76,7 +77,8 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -88,7 +90,7 @@
                             android:layout_height="wrap_content"
                             android:text="Firmware Version"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/FirmwareVersion"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -96,7 +98,8 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -108,14 +111,15 @@
                             android:layout_height="wrap_content"
                             android:text="MAC Address"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/MACAddress"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/start_margin"
                             android:singleLine="true"
                             android:textAlignment="textEnd"
-                            android:enabled="false"
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"
                             android:textSize="@dimen/text_content"/>
                     </LinearLayout>
                 </LinearLayout>
@@ -161,7 +165,7 @@
                             android:layout_height="wrap_content"
                             android:text="First Recorded Date"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/FirstRecordDate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -169,7 +173,8 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -181,7 +186,7 @@
                             android:layout_height="wrap_content"
                             android:text="Last Recorded Date"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/LastRecordedDate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -189,189 +194,19 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/RealTimeCard"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/RecordHistoryCard">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/RealTimeTitle"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Device Real Time View"
-                    android:textSize="@dimen/text_subtitle"
-                    android:textStyle="normal"
-                    android:textAllCaps="false"
-                    app:icon="@drawable/ic_time"/>
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-                <LinearLayout
-                    android:id="@+id/RealTimeGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/RealTimeTitle"
-                    android:orientation="vertical"
-                    android:layout_margin="@dimen/inner_margin"
-                    android:visibility="gone">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/DateTimeTitle"
-                            android:layout_width="@dimen/title_size"
-                            android:layout_height="wrap_content"
-                            android:text="Date/Time"
-                            android:textSize="@dimen/text_content" />
-
-                        <EditText
-                            android:id="@+id/DateTime"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/start_margin"
-                            android:enabled="false"
-                            android:singleLine="true"
-                            android:textAlignment="textEnd"
-                            android:textSize="@dimen/text_content" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/LevelRangeTitle"
-                            android:layout_width="@dimen/title_size"
-                            android:layout_height="wrap_content"
-                            android:text="Water Level"
-                            android:textSize="@dimen/text_content" />
-
-                        <EditText
-                            android:id="@+id/LevelRange"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/start_margin"
-                            android:enabled="false"
-                            android:singleLine="true"
-                            android:textAlignment="textEnd"
-                            android:textSize="@dimen/text_content" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/BatteryTitle"
-                            android:layout_width="@dimen/title_size"
-                            android:layout_height="wrap_content"
-                            android:text="Device Battery"
-                            android:textSize="@dimen/text_content" />
-
-                        <EditText
-                            android:id="@+id/Battery"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/start_margin"
-                            android:enabled="false"
-                            android:singleLine="true"
-                            android:textAlignment="textEnd"
-                            android:textSize="@dimen/text_content" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/RecordTitle"
-                            android:layout_width="@dimen/title_size"
-                            android:layout_height="wrap_content"
-                            android:text="Record Status"
-                            android:textSize="@dimen/text_content" />
-
-                        <EditText
-                            android:id="@+id/Record"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/start_margin"
-                            android:enabled="false"
-                            android:singleLine="true"
-                            android:textAlignment="textEnd"
-                            android:textSize="@dimen/text_content" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/InternetConnectionTitle"
-                            android:layout_width="@dimen/title_size"
-                            android:layout_height="wrap_content"
-                            android:text="Internet Connection"
-                            android:textSize="@dimen/text_content" />
-
-                        <EditText
-                            android:id="@+id/InternetConnection"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/start_margin"
-                            android:enabled="false"
-                            android:singleLine="true"
-                            android:textAlignment="textEnd"
-                            android:textSize="@dimen/text_content" />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_gravity="end">
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/timesyncbutton"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/realtimebutton"
-                            android:layout_gravity="center_horizontal"
-                            android:text="Sync" />
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/realtimebutton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginStart="10dp"
-                            android:text="Listen" />
-                    </LinearLayout>
-
-
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/SettingParameterCard"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/RealTimeCard">
+            android:layout_below="@id/RecordHistoryCard">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -387,6 +222,7 @@
                     android:textStyle="normal"
                     android:textAllCaps="false"
                     app:icon="@drawable/ic_setting"/>
+
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
@@ -398,21 +234,13 @@
                     android:orientation="vertical"
                     android:layout_margin="@dimen/inner_margin"
                     android:visibility="gone">
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/spinner2"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Select parameter to set">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/spinner2content"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            />
-                    </com.google.android.material.textfield.TextInputLayout>
-
+                        android:text="Last Saved Setting"
+                        android:textSize="@dimen/text_subtitle"
+                        android:textStyle="bold"
+                        android:layout_marginTop="@dimen/inner_margin"/>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -424,7 +252,7 @@
                             android:layout_height="wrap_content"
                             android:text="Site Name"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/SiteName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -432,8 +260,8 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:inputType="text"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -445,7 +273,7 @@
                             android:layout_height="wrap_content"
                             android:text="IP Address"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/IPAddress"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -453,7 +281,8 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
 
                     </LinearLayout>
                     <LinearLayout
@@ -466,7 +295,7 @@
                             android:layout_height="wrap_content"
                             android:text="Port"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/Port"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -474,9 +303,8 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:maxLength="6"
-                            android:inputType="number"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -488,7 +316,7 @@
                             android:layout_height="wrap_content"
                             android:text="Sensor Offset"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/SensorOffset"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -496,9 +324,8 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:maxLength="6"
-                            android:inputType="number"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -510,7 +337,7 @@
                             android:layout_height="wrap_content"
                             android:text="Sensor Zero Value"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/ZeroValue"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -518,7 +345,8 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:enabled="false"/>
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -530,7 +358,7 @@
                             android:layout_height="wrap_content"
                             android:text="Record Interval"
                             android:textSize="@dimen/text_content"/>
-                        <EditText
+                        <TextView
                             android:id="@+id/Interval"
                             android:layout_width="80dp"
                             android:layout_height="wrap_content"
@@ -538,10 +366,110 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:inputType="number"
-                            android:enabled="false"/>
-                        <Spinner
+                            android:textColor="@color/colorDarkGray"
+                            style="@style/Widget.AppCompat.EditText"/>
+                        <TextView
                             android:id="@+id/spinner3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight=".35"
+                            android:text="Minutes"
+                            android:textSize="@dimen/text_content"
+                            android:layout_gravity="center_vertical"
+                            android:focusable="false"/>
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Set New Setting"
+                        android:textSize="@dimen/text_subtitle"
+                        android:textStyle="bold"
+                        android:layout_marginVertical="@dimen/inner_margin"/>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/spinner2"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Select parameter to set"
+                        android:layout_marginBottom="@dimen/dialog_margin">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/spinner2content"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/SettingInputText"
+                        android:visibility="gone">
+                        <TextView
+                            android:id="@+id/InputSettingTitle"
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Sensor Zero Value"
+                            android:textSize="@dimen/text_content"/>
+                        <EditText
+                            android:id="@+id/InputSetting"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/start_margin"
+                            android:singleLine="true"
+                            android:textAlignment="textEnd"
+                            android:textColor="@color/colorDarkGray"
+                            android:textSize="@dimen/text_content"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/SettingInputText2"
+                        android:visibility="gone">
+                        <TextView
+                            android:id="@+id/InputSettingTitle2"
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Sensor Zero Value"
+                            android:textSize="@dimen/text_content"/>
+                        <EditText
+                            android:id="@+id/InputSetting2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/start_margin"
+                            android:singleLine="true"
+                            android:textAlignment="textEnd"
+                            android:textColor="@color/colorDarkGray"
+                            android:textSize="@dimen/text_content"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/SettingInputInterval"
+                        android:visibility="gone">
+                        <TextView
+                            android:id="@+id/IntervalInputTitle"
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Record Interval"
+                            android:textSize="@dimen/text_content"/>
+                        <EditText
+                            android:id="@+id/IntervalInput"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/start_margin"
+                            android:singleLine="true"
+                            android:textAlignment="textEnd"
+                            android:textSize="@dimen/text_content"
+                            android:textColor="@color/colorDarkGray"
+                            android:inputType="number"/>
+                        <Spinner
+                            android:id="@+id/spinner4"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
@@ -549,14 +477,27 @@
                             android:entries="@array/interval_option_arrays"
                             android:layout_gravity="center_vertical"/>
                     </LinearLayout>
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/settingButton"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="10dp"
-                        android:text="Send Setting"
-                        android:enabled="false"/>
+                        android:orientation="horizontal"
+                        android:layout_marginTop="@dimen/inner_margin"
+                        android:layout_gravity="end">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/timesyncbutton"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginEnd="@dimen/dialog_margin"
+                            android:text="Sync" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/settingButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Set"
+                            android:enabled="false"/>
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -608,6 +549,7 @@
                             android:textAlignment="textEnd"
                             android:focusableInTouchMode="false"
                             android:textSize="@dimen/text_content"
+                            android:textColor="@color/colorDarkGray"
                             android:hint="Input start date here"/>
                     </LinearLayout>
                     <LinearLayout
@@ -629,6 +571,7 @@
                             android:textAlignment="textEnd"
                             android:focusableInTouchMode="false"
                             android:textSize="@dimen/text_content"
+                            android:textColor="@color/colorDarkGray"
                             android:hint="Input end date here"/>
                     </LinearLayout>
                     <com.google.android.material.button.MaterialButton

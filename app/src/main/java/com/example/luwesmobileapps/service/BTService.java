@@ -10,53 +10,38 @@ import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import com.example.luwesmobileapps.MainActivity;
 import com.example.luwesmobileapps.R;
 import com.example.luwesmobileapps.data_layer.FileAccess;
 import com.example.luwesmobileapps.data_layer.SharedData;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class BTService extends Service {
-    private FileAccess myFileAccess = new FileAccess();
+    private final FileAccess myFileAccess = new FileAccess();
     private ConnectThread BTConnect;
     private ConnectedThread BTStream;
+    private Intent notificationIntent;
+    private PendingIntent pendingIntent;
     private BluetoothDevice myDevice;
     private SharedData DeviceData;
     private boolean isRunning;
@@ -88,12 +73,11 @@ public class BTService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!isRunning()) {
             myDevice = intent.getParcelableExtra("Device Input");
-            Intent notificationintent = new Intent(this, MainActivity.class);
-            PendingIntent pendingIntent = null;
+            notificationIntent = new Intent(this, MainActivity.class);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                pendingIntent = PendingIntent.getActivity(this, 0, notificationintent, PendingIntent.FLAG_IMMUTABLE);
+                pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
             }else{
-                pendingIntent = PendingIntent.getActivity(this, 0, notificationintent, 0);
+                pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
             }
             Notification notification = new NotificationCompat.Builder(this, Channel_1_ID)
                     .setContentTitle("Device Connection")
@@ -294,8 +278,8 @@ public class BTService extends Service {
                         String[] splitString1 = RealTimeString.split(",");
                         DeviceData.postRecordStatus(splitString1[1]+"/"+splitString1[2]);
                         DeviceData.postDeviceDateTime(splitString1[3]);
-                        DeviceData.postWaterLevel(splitString1[4]+" m");
-                        DeviceData.postDeviceBattery(splitString1[5]+" v");
+                        DeviceData.postWaterLevel(splitString1[4]);
+                        DeviceData.postDeviceBattery(splitString1[5]);
                         if (Integer.parseInt(splitString1[6].substring(0, 1)) > 1) {
                             DeviceData.postInternetConnection("Connected");
                         } else
@@ -320,12 +304,10 @@ public class BTService extends Service {
                             DeviceData.postSensorZeroValues(splitString2[5]);
                             DeviceData.postRecordInterval(splitString2[6]);
 
-                            Intent notificationintent = new Intent(getBaseContext(), MainActivity.class);
-                            PendingIntent pendingIntent = null;
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                                pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationintent, PendingIntent.FLAG_IMMUTABLE);
+                                pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
                             }else{
-                                pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationintent, 0);
+                                pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, 0);
                             }
                             Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
                                     .setContentTitle("Device Connection")

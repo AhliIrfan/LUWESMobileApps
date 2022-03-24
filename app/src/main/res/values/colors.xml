@@ -2,8 +2,9 @@
 <resources>
     <color name="colorPrimary">#0298D7</color>
     <color name="colorPrimaryVariant">#2B6CAB</color>
-    <color name="colorSecondary">#FFEB3B</color>
+    <color name="colorSecondary">#FFEA00</color>
     <color name="colorSecondaryVariant">#FFF176</color>
     <color name="colorError">#E53935</color>
     <color name="colorGranted">#8BC34A</color>
+    <color name="colorDarkGray">#80000000</color>
 </resources>

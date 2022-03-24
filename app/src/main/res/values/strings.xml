@@ -9,6 +9,7 @@
     <string name="action_disconnect">Disconnect</string>
 
     <string name="menu_home">Home</string>
+    <string name="menu_setting">Setting</string>
     <string name="menu_devicepage">Device Page</string>
     <string name="menu_graphviewer">Graph Viewer</string>
     <string name="bt_input">BTInput</string>

@@ -19,100 +19,94 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+
     <include layout="@layout/content_main" />
 
-
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/connectmenu"
-        android:layout_gravity="top|center_horizontal"
+        android:layout_gravity="top"
         android:layout_margin="@dimen/border_margin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_anchor="@id/fab"
-        app:layout_anchorGravity="top|center_horizontal"
-        android:visibility="invisible">
-
-        <LinearLayout
+        app:layout_anchorGravity="top"
+        android:visibility="gone">
+        <com.google.android.material.chip.Chip
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="end"
-            android:layout_marginBottom="2dp">
-            <com.google.android.material.chip.Chip
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="BLE Scan"
-                android:elevation="2dp"
-                android:checkable="false"
-                android:clickable="false"/>
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/action_blescan"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:backgroundTint="@color/colorSecondaryVariant"
-                app:srcCompat="@drawable/ic_bluetoothle"
-                app:fabSize="mini"
-                app:elevation="2dp"
-                android:layout_gravity="end"/>
-        </LinearLayout>
-        <LinearLayout
+            android:layout_toLeftOf="@id/action_blescan"
+            android:text="BLE Scan"
+            android:elevation="2dp"
+            android:checkable="false"
+            android:clickable="false"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/action_blescan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
             android:layout_gravity="end"
-            android:layout_marginBottom="2dp">
-            <com.google.android.material.chip.Chip
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="BT Scan"
-                android:elevation="2dp"
-                android:checkable="false"
-                android:clickable="false"/>
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/action_bluetoothscan"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:backgroundTint="@color/colorSecondaryVariant"
-                app:srcCompat="@drawable/ic_bluetooth"
-                app:fabSize="mini"
-                app:elevation="2dp"
-                android:layout_gravity="end"/>
-        </LinearLayout>
-        <LinearLayout
+            app:backgroundTint="@color/colorSecondaryVariant"
+            app:elevation="2dp"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_bluetoothle" />
+
+        <com.google.android.material.chip.Chip
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_below="@id/action_blescan"
+            android:layout_marginVertical="@dimen/inner_margin"
+            android:layout_toLeftOf="@id/action_bluetoothscan"
+            android:checkable="false"
+            android:clickable="false"
+            android:elevation="2dp"
+            android:text="BT Scan" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/action_bluetoothscan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/action_blescan"
+            android:layout_marginVertical="@dimen/inner_margin"
+            android:layout_alignParentRight="true"
             android:layout_gravity="end"
-            android:layout_marginBottom="5dp"
-            android:backgroundTint="@color/colorSecondary">
-            <com.google.android.material.chip.Chip
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Disconnect"
-                android:elevation="2dp"
-                android:checkable="false"
-                android:clickable="false"/>
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/action_disconnect"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                app:backgroundTint="@color/colorSecondaryVariant"
-                app:elevation="2dp"
-                app:fabSize="mini"
-                app:srcCompat="@drawable/ic_disconnect" />
+            app:backgroundTint="@color/colorSecondaryVariant"
+            app:elevation="2dp"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_bluetooth" />
 
-        </LinearLayout>
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/action_disconnect"
+            android:layout_below="@id/action_bluetoothscan"
+            android:checkable="false"
+            android:clickable="false"
+            android:elevation="2dp"
+            android:text="Disconnect" />
 
-    </LinearLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/action_disconnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/action_bluetoothscan"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/inner_margin"
+            app:backgroundTint="@color/colorSecondaryVariant"
+            app:elevation="2dp"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_disconnect" />
+    </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="bottom|right
+"
         app:elevation="2dp"
         app:srcCompat="@drawable/ic_search" />
 

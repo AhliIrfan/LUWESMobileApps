@@ -15,9 +15,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class FileAccess {
 
@@ -28,10 +27,10 @@ public class FileAccess {
         File subRoot3 = new File(subRoot2, Year);
         if(!subRoot3.exists()){
             if(subRoot3.mkdirs()){
-                Log.d("File Access", "WriteDataToFile: File created");;
+                Log.d("File Access", "WriteDataToFile: File created");
             }
             else
-                Log.d("File Access", "WriteDataToFile: Can't create file");;
+                Log.d("File Access", "WriteDataToFile: Can't create file");
         }
         try{
             File gpxFile = new File(subRoot3, "DOY"+DoY+".txt");
@@ -111,8 +110,6 @@ public class FileAccess {
                 status = 1;
             else if(data.timestamp<t1.timestamp)
                 status = -1;
-            else if(data.timestamp == t1.timestamp)
-                status = 0;
             return status;
         }
     }
@@ -138,10 +135,10 @@ public class FileAccess {
         ArrayList<Data> TotalData = new ArrayList<>();
         if(!subRoot3.exists()){
             if(subRoot3.mkdirs()){
-                Log.d("File Access", "WriteDataToFile: File created");;
+                Log.d("File Access", "WriteDataToFile: File created");
             }
             else
-                Log.d("File Access", "WriteDataToFile: Can't create file");;
+                Log.d("File Access", "WriteDataToFile: Can't create file");
         }
         try{
             File gpxFile = new File(subRoot3, "DOY"+DoY+".txt");
@@ -191,54 +188,72 @@ public class FileAccess {
     }
 
     public void LoadPlotData(String DeviceName , ArrayList<plottingData> TotalData , Date startDate, Date endDate){
-        File root = new File(Environment.getExternalStorageDirectory(),"LUWESLogger");
-        File subRoot = new File(root, DeviceName);
-        if(!subRoot.exists()){
-            if(subRoot.mkdirs()){
-                Log.d("File Access", "WriteDataToFile: File created");;
-            }
-            else
-                Log.d("File Access", "WriteDataToFile: Can't create file");;
-        }
-        String fileName = "Record"+".txt";
+        int Year = Integer.parseInt(new SimpleDateFormat("yyyy").format(startDate));
+        Date startFirstFayOfTheYear = null;
         try {
-            File gpxFile = new File(subRoot, fileName);
-            BufferedReader br
-                    = new BufferedReader(new FileReader(gpxFile));
-            String currentLine = br.readLine();
-            while (currentLine != null) {
-                String[] bufferData = currentLine.split(",");
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                Date DateToConvert = null;
-                if (bufferData[0] != null) {
-                    try {
-                        DateToConvert = sdf.parse(bufferData[0]);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
+            startFirstFayOfTheYear = new SimpleDateFormat("dd/MM/yyyy").parse(1 + "/" + 1 + "/" + Year);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        long diff = endDate.getTime() - startDate.getTime();
+        long diff2 = startDate.getTime() - startFirstFayOfTheYear.getTime();
+        int DownloadLength = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
+        int DoY = (int) TimeUnit.DAYS.convert(diff2, TimeUnit.MILLISECONDS) + 1;
+
+        for(int i=0;i<DownloadLength;i++){
+            File root = new File(Environment.getExternalStorageDirectory(),"LUWESLogger");
+            File subRoot1 = new File(root, DeviceName);
+            File subRoot2 = new File(subRoot1, "Record");
+            File subRoot3 = new File(subRoot2, String.valueOf(Year));
+            if(!subRoot3.exists()){
+                if(subRoot3.mkdirs()){
+                    Log.d("File Access", "WriteDataToFile: File created");
                 }
-                assert DateToConvert != null;
-                long timestamp = DateToConvert.getTime();
-                float waterLevel = Float.parseFloat(bufferData[1]);
-                float batteryPercentage = Float.parseFloat(bufferData[3]);
-                //Creating Student object for every student record and adding it to ArrayList
-                Log.d("TAG", "LoadPlotData: "+startDate.getTime()+","+endDate.getTime()+","+timestamp);
-                if(timestamp>startDate.getTime()&&timestamp<endDate.getTime()){
+                else
+                    Log.d("File Access", "WriteDataToFile: Can't create file");
+            }
+            try {
+                File gpxFile = new File(subRoot3, "DOY"+DoY+".txt");
+                BufferedReader br
+                        = new BufferedReader(new FileReader(gpxFile));
+                String currentLine = br.readLine();
+                while (currentLine != null) {
+                    String[] bufferData = currentLine.split(",");
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    Date DateToConvert = null;
+                    if (bufferData[0] != null) {
+                        try {
+                            DateToConvert = sdf.parse(bufferData[0]);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    assert DateToConvert != null;
+                    long timestamp = DateToConvert.getTime();
+                    float waterLevel = Float.parseFloat(bufferData[1]);
+                    float batteryPercentage = Float.parseFloat(bufferData[3]);
+                    //Creating Student object for every student record and adding it to ArrayList
                     plottingData bData = new plottingData(timestamp, waterLevel, batteryPercentage);
                     if (!TotalData.contains(bData))
                         TotalData.add(bData);
+                    currentLine = br.readLine();
                 }
-                currentLine = br.readLine();
+                br.close();
+            }catch (Exception e){
+                e.printStackTrace();
             }
-            br.close();
-        }catch (Exception e){
-            e.printStackTrace();
+            DoY++;
+            if (DoY>365){
+                DoY=1;
+                Year++;
+            }
         }
+
     }
 
     public void WriteDeviceList(String data){
-        ArrayList<String> prevList = new ArrayList<>();
-        prevList = LoadDeviceList();
+        ArrayList<String> prevList = LoadDeviceList();
         File root = new File(Environment.getExternalStorageDirectory(),"LUWESLogger");
         if(!root.exists()){
             if(root.mkdirs()){
@@ -252,7 +267,8 @@ public class FileAccess {
             File gpxFile = new File(root, fileName);
             FileWriter writer = new FileWriter(gpxFile,true);
             if(data!=null && !prevList.contains(data)) {
-                writer.append(data+"\n");
+                writer.append(data);
+                writer.append("\n");
                 writer.flush();
             }
         }catch (Exception e){

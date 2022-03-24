@@ -9,22 +9,7 @@
         android:id="@+id/nav_home"
         android:name="com.example.luwesmobileapps.ui.home.HomeFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" >
-        <action
-            android:id="@+id/action_nav_home_to_nav_spp"
-            app:destination="@id/nav_devicepage"
-            app:enterAnim="@android:anim/slide_in_left"
-            app:exitAnim="@android:anim/slide_out_right"
-            app:popEnterAnim="@android:anim/slide_in_left"
-            app:popExitAnim="@android:anim/slide_out_right" />
-        <action
-            android:id="@+id/action_nav_home_to_nav_ble"
-            app:destination="@id/nav_ble"
-            app:enterAnim="@android:anim/slide_in_left"
-            app:exitAnim="@android:anim/slide_out_right"
-            app:popEnterAnim="@android:anim/slide_in_left"
-            app:popExitAnim="@android:anim/slide_out_right" />
-    </fragment>
+        tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_devicepage"
@@ -33,16 +18,15 @@
         tools:layout="@layout/fragment_devicepage" />
 
     <fragment
-        android:id="@+id/nav_ble"
+        android:id="@+id/nav_graph"
         android:name="com.example.luwesmobileapps.ui.graphviewer.GraphViewerFragment"
         android:label="@string/menu_graphviewer"
-        tools:layout="@layout/fragment_graphviewer" >
-        <action
-            android:id="@+id/action_nav_ble_to_nav_spp"
-            app:destination="@id/nav_devicepage"
-            app:enterAnim="@android:anim/slide_in_left"
-            app:exitAnim="@android:anim/slide_out_right"
-            app:popEnterAnim="@android:anim/slide_in_left"
-            app:popExitAnim="@android:anim/slide_out_right" />
-    </fragment>
+        tools:layout="@layout/fragment_graphviewer" />
+
+    <fragment
+        android:id="@+id/nav_setting"
+        android:name="com.example.luwesmobileapps.ui.setting.SettingFragment"
+        android:label="@string/menu_setting"
+        tools:layout="@layout/fragment_setting"/>
+
 </navigation>

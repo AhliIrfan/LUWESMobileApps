@@ -9,24 +9,112 @@
         android:id="@+id/nav_home"
         android:name="com.example.luwesmobileapps.ui.home.HomeFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_nav_home_to_nav_setting"
+            app:destination="@id/nav_setting"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_devicepage"
+            app:destination="@id/nav_devicepage"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_data"
+            app:destination="@id/nav_data"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_devicepage"
         android:name="com.example.luwesmobileapps.ui.devicepage.DevicePageFragment"
         android:label="@string/menu_devicepage"
-        tools:layout="@layout/fragment_devicepage" />
+        tools:layout="@layout/fragment_devicepage" >
+        <action
+            android:id="@+id/action_nav_devicepage_to_nav_setting"
+            app:destination="@id/nav_setting"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out"  />
+        <action
+            android:id="@+id/action_nav_devicepage_to_nav_data"
+            app:destination="@id/nav_data"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out"  />
+        <action
+            android:id="@+id/action_nav_devicepage_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out"  />
+    </fragment>
 
     <fragment
-        android:id="@+id/nav_graph"
-        android:name="com.example.luwesmobileapps.ui.graphviewer.GraphViewerFragment"
-        android:label="@string/menu_graphviewer"
-        tools:layout="@layout/fragment_graphviewer" />
+        android:id="@+id/nav_data"
+        android:name="com.example.luwesmobileapps.ui.dataviewer.DataViewerFragment"
+        android:label="@string/menu_dataviewer"
+        tools:layout="@layout/fragment_dataviewer" >
+        <action
+            android:id="@+id/action_nav_data_to_nav_setting"
+            app:destination="@id/nav_setting"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+        <action
+            android:id="@+id/action_nav_data_to_nav_devicepage"
+            app:destination="@id/nav_devicepage"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out"  />
+        <action
+            android:id="@+id/action_nav_data_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_setting"
         android:name="com.example.luwesmobileapps.ui.setting.SettingFragment"
         android:label="@string/menu_setting"
-        tools:layout="@layout/fragment_setting"/>
+        tools:layout="@layout/fragment_setting">
+        <action
+            android:id="@+id/action_nav_setting_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out"  />
+        <action
+            android:id="@+id/action_nav_setting_to_nav_devicepage"
+            app:destination="@id/nav_devicepage"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out"  />
+        <action
+            android:id="@+id/action_nav_setting_to_nav_data"
+            app:destination="@id/nav_data"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+    </fragment>
 
 </navigation>

@@ -13,12 +13,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.luwesmobileapps.BuildConfig;
 import com.example.luwesmobileapps.R;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingFragment extends Fragment {
     private fragmentListener listener;
+    private TextView AppVersion;
     private SharedViewModel DeviceViewModel;
     private SwitchMaterial FilePermissionStat;
     private SwitchMaterial BTPermissionStat;
@@ -55,6 +57,7 @@ public class SettingFragment extends Fragment {
         BTPermissionStat = v.findViewById(R.id.bluetooth_permission_status);
         FilePermissionStat = v.findViewById(R.id.file_permission_status);
         LocPermissionStat = v.findViewById(R.id.location_permission_status);
+        AppVersion = v.findViewById(R.id.BuildVersion);
         DeviceViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         DeviceViewModel.getBTPermission().observe(getViewLifecycleOwner(), aBoolean -> {
             if(aBoolean){
@@ -98,6 +101,7 @@ public class SettingFragment extends Fragment {
                 listener.checkFilePermission();
             }
         });
+        AppVersion.setText(BuildConfig.VERSION_NAME);
         return v;
     }
 

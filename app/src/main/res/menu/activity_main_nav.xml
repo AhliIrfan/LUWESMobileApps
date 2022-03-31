@@ -7,18 +7,22 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_menu_home"
+            android:enabled="true"
             android:title="@string/menu_home" />
         <item
             android:id="@+id/nav_setting"
             android:icon="@drawable/ic_setting"
+            android:enabled="true"
             android:title="@string/menu_setting" />
         <item
             android:id="@+id/nav_devicepage"
             android:icon="@drawable/ic_page"
+            android:enabled="true"
             android:title="@string/menu_devicepage" />
         <item
-            android:id="@+id/nav_graph"
+            android:id="@+id/nav_data"
             android:icon="@drawable/ic_graph"
-            android:title="@string/menu_graphviewer" />
+            android:enabled="true"
+            android:title="@string/menu_dataviewer" />
     </group>
 </menu>

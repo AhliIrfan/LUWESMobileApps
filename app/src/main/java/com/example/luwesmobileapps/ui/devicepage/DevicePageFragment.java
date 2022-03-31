@@ -1,6 +1,7 @@
 package com.example.luwesmobileapps.ui.devicepage;
 
 
+import android.animation.LayoutTransition;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -10,8 +11,11 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.renderscript.ScriptGroup;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.view.LayoutInflater;
@@ -20,20 +24,20 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.example.luwesmobileapps.R;
+import com.example.luwesmobileapps.data_layer.DeviceData;
+import com.example.luwesmobileapps.data_layer.SharedData;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.example.luwesmobileapps.filter.InputFilterIP;
 import com.example.luwesmobileapps.filter.InputFilterMinMax;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,18 +46,17 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class DevicePageFragment extends Fragment {
+    private RelativeLayout MainLayout;
     private SharedViewModel DeviceViewModel;
     private fragmentListener listener;
     //Title Expandable View Button//
     private MaterialButton DeviceInfo;
     private MaterialButton RecordHistory;
-//    private Button RealTime;
     private MaterialButton Setting;
     private MaterialButton Download;
     //Card Container View//
     private CardView DeviceInfoCard;
     private CardView RecordHistoryCard;
-//    private CardView RealTimeCard;
     private CardView SettingCard;
     private CardView DownloadCard;
     //Device Info Group//
@@ -66,7 +69,6 @@ public class DevicePageFragment extends Fragment {
     private LinearLayout RecordHistoryLayout;
     private TextView FirstRecordedDate;
     private TextView LastRecordedDate;
-//    //Real Time Group//
     //Setting Group//
     private LinearLayout SettingLayout;
     private LinearLayout SettingInputLayoutText;
@@ -107,6 +109,7 @@ public class DevicePageFragment extends Fragment {
         void BTStartDownload(int downloadLength, int startDoY, int startYear);
         void BLESend(String string);
         void BLEStartDownload(int downloadLength, int startDoY, int startYear);
+        void saveDeviceList();
     }
 
     @Override
@@ -130,16 +133,16 @@ public class DevicePageFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_devicepage, container, false);
+        MainLayout = v.findViewById(R.id.MainLayout);
+        MainLayout.setLayoutTransition(new LayoutTransition());
         //Title Expandable View Button//
         DeviceInfo = v.findViewById(R.id.DeviceInfoTitle);
         RecordHistory = v.findViewById(R.id.RecordHistoryTitle);
-//        RealTime = v.findViewById(R.id.RealTimeTitle);
         Setting = v.findViewById(R.id.SettingParameterTitle);
         Download = v.findViewById(R.id.DataLogDownloadTitle);
         //Card Container View//
         DeviceInfoCard = v.findViewById(R.id.DeviceInfoCard);
         RecordHistoryCard = v.findViewById(R.id.RecordHistoryCard);
-//        RealTimeCard = v.findViewById(R.id.RealTimeCard);
         SettingCard = v.findViewById(R.id.SettingParameterCard);
         DownloadCard = v.findViewById(R.id.DataLogDownloadCard);
         //Device Info Group//
@@ -190,7 +193,7 @@ public class DevicePageFragment extends Fragment {
     //Title Card Opener//
         DeviceInfo.setOnClickListener(view -> {
             if(DeviceInfoLayout.getVisibility()==View.VISIBLE){
-                TransitionManager.beginDelayedTransition(DeviceInfoCard, new AutoTransition());
+                TransitionManager.beginDelayedTransition(MainLayout, new AutoTransition());
                 DeviceInfoLayout.setVisibility(View.GONE);
             }
             else{
@@ -200,7 +203,7 @@ public class DevicePageFragment extends Fragment {
         });
         RecordHistory.setOnClickListener(view -> {
             if(RecordHistoryLayout.getVisibility()==View.VISIBLE){
-                TransitionManager.beginDelayedTransition(RecordHistoryCard, new AutoTransition());
+                TransitionManager.beginDelayedTransition(MainLayout, new AutoTransition());
                 RecordHistoryLayout.setVisibility(View.GONE);
             }
             else{
@@ -208,33 +211,25 @@ public class DevicePageFragment extends Fragment {
                 RecordHistoryLayout.setVisibility(View.VISIBLE);
             }
         });
-//        RealTime.setOnClickListener(view -> {
-//            if(RealTimeLayout.getVisibility()==View.VISIBLE){
-//                TransitionManager.beginDelayedTransition(RealTimeCard, new AutoTransition());
-//                RealTimeLayout.setVisibility(View.GONE);
-//            }
-//            else{
-//                TransitionManager.beginDelayedTransition(RealTimeCard, new AutoTransition());
-//                RealTimeLayout.setVisibility(View.VISIBLE);
-//            }
-//        });
         Setting.setOnClickListener(view -> {
             if(SettingLayout.getVisibility()==View.VISIBLE){
-                TransitionManager.beginDelayedTransition(SettingCard, new AutoTransition());
+                TransitionManager.beginDelayedTransition(MainLayout, new AutoTransition());
                 SettingLayout.setVisibility(View.GONE);
             }
             else{
                 TransitionManager.beginDelayedTransition(SettingCard, new AutoTransition());
                 SettingLayout.setVisibility(View.VISIBLE);
-                if(DeviceViewModel.getConnectStatus().getValue()==1)
-                    listener.BTSend("LWST,7000000#\r\n");
-                else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                    listener.BLESend("LWST,7000000#\r\n");
+                if(!DeviceViewModel.getRealTimeStatus().getValue()&&DeviceViewModel.getRealTimeStatus().getValue()!=null) {
+                    if (DeviceViewModel.getConnectStatus().getValue() == 1)
+                        listener.BTSend("LWST,7000000#\r\n");
+                    else if (DeviceViewModel.getConnectStatus().getValue() == 2)
+                        listener.BLESend("LWST,7000000#\r\n");
+                }
             }
         });
         Download.setOnClickListener(view -> {
             if(DownloadLayout.getVisibility()==View.VISIBLE){
-                TransitionManager.beginDelayedTransition(DownloadCard, new AutoTransition());
+                TransitionManager.beginDelayedTransition(MainLayout, new AutoTransition());
                 DownloadLayout.setVisibility(View.GONE);
             }
             else{
@@ -252,6 +247,8 @@ public class DevicePageFragment extends Fragment {
                     SettingInputLayoutText2.setVisibility(View.GONE);
                     SettingInputLayoutInterval.setVisibility(View.GONE);
                     SettingInputTitle.setText("Site Name");
+                    SettingInput.setInputType(InputType.TYPE_CLASS_TEXT);
+                    SettingInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
                     SetSetting.setEnabled(true);
                     break;
                 case 1:
@@ -261,6 +258,9 @@ public class DevicePageFragment extends Fragment {
                     SettingInputLayoutInterval.setVisibility(View.GONE);
                     SettingInputTitle.setText("IP Address");
                     SettingInputTitle2.setText("Port");
+                    SettingInput2.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    SettingInput.setFilters(new InputFilter[]{new InputFilterIP()});
+                    SettingInput2.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
                     SetSetting.setEnabled(true);
                     break;
                 case 2:
@@ -268,7 +268,9 @@ public class DevicePageFragment extends Fragment {
                     SettingInputLayoutText.setVisibility(View.VISIBLE);
                     SettingInputLayoutText2.setVisibility(View.GONE);
                     SettingInputLayoutInterval.setVisibility(View.GONE);
-                    SettingInputTitle.setText("Offset");
+                    SettingInputTitle.setText("Offset (mm)");
+                    SettingInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    SettingInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
                     SetSetting.setEnabled(true);
                     break;
                 case 3:
@@ -280,8 +282,6 @@ public class DevicePageFragment extends Fragment {
                     break;
             }
         });
-
-        IPAddress.setFilters(new InputFilter[]{new InputFilterIP()});
 
         IntervalOptInput.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
@@ -313,7 +313,7 @@ public class DevicePageFragment extends Fragment {
                         listener.BLESend(("LWST,7780000#" + SettingInput.getText().toString().trim()));
                     DeviceViewModel.setSettingStatus(true);
                 } else {
-                  Toast.makeText(getContext(),"Site Name must be 5-20 character",Toast.LENGTH_SHORT).show();
+                  Snackbar.make(getContext(),getView(),"Site Name must be 5-20 character",Snackbar.LENGTH_SHORT).show();
                 }
             } else if ("IP Address and Port".equals(text)) {
                 if (SettingInput.getText().toString().trim().length() != 0 && SettingInput2.getText().toString().trim().length() != 0) {
@@ -323,9 +323,9 @@ public class DevicePageFragment extends Fragment {
                         listener.BLESend(("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()));
                     DeviceViewModel.setSettingStatus(true);
                  }else if (IPAddress.getText().toString().trim().length() < 1) {
-                    Toast.makeText(getContext(),"Please fill the IP address field",Toast.LENGTH_SHORT).show();
+                    Snackbar.make(getContext(),getView(),"Please fill the IP address field",Snackbar.LENGTH_SHORT).show();
                 } else if (Port.getText().toString().trim().length() < 1) {
-                    Toast.makeText(getContext(),"Please fill the port field",Toast.LENGTH_SHORT).show();
+                    Snackbar.make(getContext(),getView(),"Please fill the port field",Snackbar.LENGTH_SHORT).show();
                 }
             } else if ("Sensor Offset and Zero Values".equals(text)) {
                 if(SettingInput.getText().toString().trim().length() != 0){
@@ -335,7 +335,7 @@ public class DevicePageFragment extends Fragment {
                         listener.BLESend(("LWST,7100000#" + SettingInput.getText().toString().trim()));
                     DeviceViewModel.setSettingStatus(true);
                 } else{
-                    Toast.makeText(getContext(),"Please fill the offset value field",Toast.LENGTH_SHORT).show();
+                    Snackbar.make(getContext(),getView(),"Please fill the offset value field",Snackbar.LENGTH_SHORT).show();
                 }
             } else if ("Record Interval".equals(text)) {
                 int interval =0;
@@ -351,28 +351,10 @@ public class DevicePageFragment extends Fragment {
                         listener.BLESend(("LWST,7220000#" + interval));
                     DeviceViewModel.setSettingStatus(true);
                 } else{
-                    Toast.makeText(getContext(),"Please fill the record interval field",Toast.LENGTH_SHORT).show();
+                    Snackbar.make(getContext(),getView(),"Please fill the record interval field",Snackbar.LENGTH_SHORT).show();
                 }
             }
         });
-
-//        //Real Time Input Handler//
-//        Listen.setOnClickListener(view -> {
-//            if((Listen.getText().toString()).equalsIgnoreCase("Listen")){
-//                if(DeviceViewModel.getConnectStatus().getValue()==1)
-//                    listener.BTSend("LWRT,\r\n");
-//                else if(DeviceViewModel.getConnectStatus().getValue()==2)
-//                    listener.BLESend("LWRT,\r\n");
-//                DeviceViewModel.setRealTimeStatus(true);
-//            }
-//            else if((Listen.getText().toString()).equalsIgnoreCase("Stop")){
-//                if(DeviceViewModel.getConnectStatus().getValue()==1)
-//                    listener.BTSend("LWST,7000000#\r\n");
-//                else if(DeviceViewModel.getConnectStatus().getValue()==2)
-//                    listener.BLESend("LWST,7000000#\r\n");
-//            }
-//        });
-
         TimeSync.setOnClickListener(view -> {
             String TimeSynchronize = new SimpleDateFormat("yy/MM/dd,HH:mm:ss").format(new Date());
             String TimeZone = null;
@@ -397,8 +379,6 @@ public class DevicePageFragment extends Fragment {
             }
             DeviceViewModel.setSyncStatus(false);
         });
-
-
 
         //Download Input Handler//
         StartDate.setOnClickListener(view -> {
@@ -533,11 +513,11 @@ public class DevicePageFragment extends Fragment {
             int DayofTheYear = 0;
             int DownloadLength =0;
             if(StartDate.getText().toString().isEmpty())
-                Toast.makeText(getContext(),"Please fill the start date",Toast.LENGTH_SHORT).show();
+                Snackbar.make(getContext(),getView(),"Please fill the start date",Snackbar.LENGTH_SHORT).show();
             else if(EndDate.getText().toString().isEmpty())
-                Toast.makeText(getContext(),"Please fill the end date",Toast.LENGTH_SHORT).show();
+                Snackbar.make(getContext(),getView(),"Please fill the end date",Snackbar.LENGTH_SHORT).show();
             else if(FirstRecordedDate==null||LastRecordedDate==null)
-                Toast.makeText(getContext(), "There is currently no data to be downloaded", Toast.LENGTH_SHORT).show();
+                Snackbar.make(getContext(),getView(), "There is currently no data to be downloaded", Snackbar.LENGTH_SHORT).show();
             else {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                 Date endDateValue = null;
@@ -566,7 +546,7 @@ public class DevicePageFragment extends Fragment {
                 DayofTheYear = (int) TimeUnit.DAYS.convert(diff2, TimeUnit.MILLISECONDS) + 1;
 
                 if (DownloadLength <= 0) {
-                    Toast.makeText(getContext(), "Start date must be older than end date", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(getContext(),getView(), "Start date must be older than end date", Snackbar.LENGTH_SHORT).show();
                 }
                 else {
                     if(DeviceViewModel.getConnectStatus().getValue()==1){
@@ -618,15 +598,18 @@ public class DevicePageFragment extends Fragment {
         });
         DeviceViewModel.getSettingStatus().observe(getViewLifecycleOwner(), aBoolean -> {
             if(!aBoolean) {
-                Toast.makeText(getContext(), "Setting Success", Toast.LENGTH_SHORT).show();
+                Snackbar.make(getContext(),getView(), "Setting Success", Snackbar.LENGTH_SHORT).show();
+                DeviceViewModel.setSettingStatus(true);
                 SetSetting.setEnabled(true);
             }else{
                 SetSetting.setEnabled(false);
             }
         });
         DeviceViewModel.getSyncStatus().observe(getViewLifecycleOwner(), aBoolean -> {
-            if(aBoolean)
-                Toast.makeText(getContext(), "Time Synchronization Success", Toast.LENGTH_SHORT).show();
+            if(aBoolean){
+                Snackbar.make(getContext(),getView(), "Time Synchronization Success", Snackbar.LENGTH_SHORT).show();
+                DeviceViewModel.setSyncStatus(false);
+            }
         });
         DeviceViewModel.getFilePermission().observe(getViewLifecycleOwner(), aBoolean -> {
             if(aBoolean){
@@ -638,13 +621,25 @@ public class DevicePageFragment extends Fragment {
         DeviceViewModel.getDownloadStatus().observe(getViewLifecycleOwner(), aBoolean -> {
             if(aBoolean){
                 StartDownload.setEnabled(false);
+                SetSetting.setEnabled(false);
             }else{
                 StartDownload.setEnabled(true);
+                SetSetting.setEnabled(true);
             }
         });
         DeviceViewModel.getConnectStatus().observe(getViewLifecycleOwner(), integer -> {
             if(integer==0){
                 getActivity().onBackPressed();
+            }
+        });
+        DeviceViewModel.getRealTimeStatus().observe(getViewLifecycleOwner(), aBoolean -> {
+            if(aBoolean) {
+                SetSetting.setEnabled(false);
+                StartDownload.setEnabled(false);
+            }
+            else {
+                SetSetting.setEnabled(true);
+                StartDownload.setEnabled(true);
             }
         });
 

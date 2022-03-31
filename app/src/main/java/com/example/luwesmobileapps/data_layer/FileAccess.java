@@ -33,7 +33,7 @@ public class FileAccess {
                 Log.d("File Access", "WriteDataToFile: Can't create file");
         }
         try{
-            File gpxFile = new File(subRoot3, "DOY"+DoY+".txt");
+            File gpxFile = new File(subRoot3, "DOY"+DoY+".csv");
             FileWriter writer = new FileWriter(gpxFile,true);
             if(data!=null) {
                 writer.append(data);
@@ -141,7 +141,7 @@ public class FileAccess {
                 Log.d("File Access", "WriteDataToFile: Can't create file");
         }
         try{
-            File gpxFile = new File(subRoot3, "DOY"+DoY+".txt");
+            File gpxFile = new File(subRoot3, "DOY"+DoY+".csv");
             BufferedReader br
                     = new BufferedReader(new FileReader(gpxFile));
             String currentLine = br.readLine();
@@ -214,13 +214,14 @@ public class FileAccess {
                     Log.d("File Access", "WriteDataToFile: Can't create file");
             }
             try {
-                File gpxFile = new File(subRoot3, "DOY"+DoY+".txt");
+                File gpxFile = new File(subRoot3, "DOY"+DoY+".csv");
                 BufferedReader br
                         = new BufferedReader(new FileReader(gpxFile));
                 String currentLine = br.readLine();
                 while (currentLine != null) {
                     String[] bufferData = currentLine.split(",");
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     Date DateToConvert = null;
                     if (bufferData[0] != null) {
                         try {

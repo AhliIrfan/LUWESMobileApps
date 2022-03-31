@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.home.HomeFragment"
-    android:padding="@dimen/border_margin">
+    android:padding="@dimen/border_margin"
+    tools:context=".ui.home.HomeFragment">
 
-    <TextView
-        android:id="@+id/permission_title"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/DeviceContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Home Fragment"
-        android:textSize="@dimen/text_title"
-        android:textStyle="bold" />
+        android:layout_height="match_parent"
+        tools:listitem="@layout/home_device_listview" />
 
-</RelativeLayout>
+
+</ScrollView>

@@ -10,6 +10,7 @@ import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -21,15 +22,20 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.luwesmobileapps.MainActivity;
 import com.example.luwesmobileapps.R;
+import com.example.luwesmobileapps.data_layer.DeviceData;
 import com.example.luwesmobileapps.data_layer.FileAccess;
 import com.example.luwesmobileapps.data_layer.SharedData;
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -43,7 +49,7 @@ public class BTService extends Service {
     private Intent notificationIntent;
     private PendingIntent pendingIntent;
     private BluetoothDevice myDevice;
-    private SharedData DeviceData;
+    private SharedData deviceData;
     private boolean isRunning;
     public NotificationManagerCompat myNotificationManager;
 
@@ -64,8 +70,8 @@ public class BTService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        DeviceData = new SharedData();
-        DeviceData.postDownloadStatus(false);
+        deviceData = new SharedData();
+        deviceData.postDownloadStatus(false);
     }
 
     @SuppressLint("MissingPermission")
@@ -82,7 +88,7 @@ public class BTService extends Service {
             Notification notification = new NotificationCompat.Builder(this, Channel_1_ID)
                     .setContentTitle("Device Connection")
                     .setContentText("Trying to connect with " + myDevice.getName())
-                    .setSmallIcon(R.drawable.ic_bluetooth)
+                    .setSmallIcon(R.drawable.ic_logo_luwes)
                     .setContentIntent(pendingIntent)
                     .build();
             startForeground(1, notification);
@@ -92,14 +98,14 @@ public class BTService extends Service {
                 Notification notification2 = new NotificationCompat.Builder(this, Channel_1_ID)
                         .setContentTitle("Device Connection")
                         .setContentText("Connected with " + myDevice.getName())
-                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setSmallIcon(R.drawable.ic_logo_luwes)
                         .setContentIntent(pendingIntent)
                         .setOngoing(false)
                         .build();
                 myNotificationManager = NotificationManagerCompat.from(this);
                 myNotificationManager.notify(1, notification2);
                 setRunning(true);
-                DeviceData.postConnectStatus(1);
+                deviceData.postConnectStatus(1);
             } else if (!BTConnect.isConnected())
                 stopSelf();
         } else if (isRunning()) {
@@ -114,7 +120,7 @@ public class BTService extends Service {
 
                 downloadStart= new Date().getTime();
                 downloadRunNotification(downloadCounter,downloadLength);
-                myFileAccess.WriteDeviceList(DeviceData.getSiteName().getValue());
+                myFileAccess.WriteDeviceList(deviceData.getSiteName().getValue());
             }catch (Exception e){
                 Log.d("Sent Data BT", input);
                 BTStream.write(input.getBytes());
@@ -128,8 +134,12 @@ public class BTService extends Service {
         super.onDestroy();
         if(myNotificationManager!=null)
             myNotificationManager.cancelAll();
-        DeviceData.postConnectStatus(0);
+        deviceData.postRealTimeStatus(false);
+        deviceData.postDownloadStatus(false);
+        deviceData.postConnectStatus(0);
         BTConnect.disconnect();
+        if(this.myDevice!=null)
+            unpairDevice(myDevice);
     }
 
     @Nullable
@@ -167,7 +177,6 @@ public class BTService extends Service {
             }
             mmSocket = tmp;
             // Cancel discovery because it otherwise slows down the connection.
-            bluetoothAdapter.cancelDiscovery();
             try {
                 // Connect to the remote device through the socket. This call blocks
                 // until it succeeds or throws an exception.
@@ -276,33 +285,34 @@ public class BTService extends Service {
                     case LWRT:
                         String RealTimeString = (String) message.obj;
                         String[] splitString1 = RealTimeString.split(",");
-                        DeviceData.postRecordStatus(splitString1[1]+"/"+splitString1[2]);
-                        DeviceData.postDeviceDateTime(splitString1[3]);
-                        DeviceData.postWaterLevel(splitString1[4]);
-                        DeviceData.postDeviceBattery(splitString1[5]);
+                        deviceData.postRecordStatus(splitString1[1]+"/"+splitString1[2]);
+                        deviceData.postDeviceDateTime(splitString1[3]);
+                        deviceData.postWaterLevel(splitString1[4]);
+                        deviceData.postDeviceBattery(splitString1[5]);
                         if (Integer.parseInt(splitString1[6].substring(0, 1)) > 1) {
-                            DeviceData.postInternetConnection("Connected");
+                            deviceData.postInternetConnection("Connected");
                         } else
-                            DeviceData.postInternetConnection("Not connected");
+                            deviceData.postInternetConnection("Not connected");
+                        deviceData.postDeviceDataChanged(true);
                         return true;
                     case LWST:
                         String SettingString = (String) message.obj;
-                        DeviceData.postRealTimeStatus(false);
+                        deviceData.postRealTimeStatus(false);
                         if(SettingString.contains("SET OK")){
                             write("LWST,7000000#\r\n".getBytes());
-                            DeviceData.postSettingStatus(false);
+                            deviceData.postSettingStatus(false);
                         }
                         else if(SettingString.contains("SYNC OK")){
-                            DeviceData.postSyncStatus(true);
+                            deviceData.postSyncStatus(true);
                         }
                         else{
                             String[] splitString2 = SettingString.split(",");
-                            DeviceData.postSiteName(splitString2[1]);
-                            DeviceData.postIPAddress(splitString2[2]);
-                            DeviceData.postPort(splitString2[3]);
-                            DeviceData.postSensorOffset(splitString2[4]);
-                            DeviceData.postSensorZeroValues(splitString2[5]);
-                            DeviceData.postRecordInterval(splitString2[6]);
+                            deviceData.postSiteName(splitString2[1]);
+                            deviceData.postIPAddress(splitString2[2]);
+                            deviceData.postPort(splitString2[3]);
+                            deviceData.postSensorOffset(splitString2[4]);
+                            deviceData.postSensorZeroValues(splitString2[5]);
+                            deviceData.postRecordInterval(splitString2[6]);
 
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                                 pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
@@ -311,30 +321,48 @@ public class BTService extends Service {
                             }
                             Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
                                     .setContentTitle("Device Connection")
-                                    .setContentText("Connected with " + DeviceData.getSiteName().getValue())
-                                    .setSmallIcon(R.mipmap.ic_launcher)
+                                    .setContentText("Connected with " + deviceData.getSiteName().getValue())
+                                    .setSmallIcon(R.drawable.ic_logo_luwes)
                                     .setContentIntent(pendingIntent)
                                     .setOnlyAlertOnce(true)
                                     .setOngoing(false)
                                     .build();
                             myNotificationManager = NotificationManagerCompat.from(getBaseContext());
                             myNotificationManager.notify(1, notification2);
+                            deviceData.postDeviceDataChanged(true);
                         }
                         return true;
                     case LWDI:
                         String DeviceInfoString = (String) message.obj;
                         String[] splitString3 = DeviceInfoString.split(",");
-                        DeviceData.postSiteName(myDevice.getName());
-                        DeviceData.postDeviceModel(splitString3[1]);
-                        DeviceData.postFirmwareVersion(splitString3[2]);
-                        if((splitString3[4].length()<5)){
-                            DeviceData.postMACAddress("Not Registered");
+                        deviceData.postSiteName(myDevice.getName());
+                        deviceData.postDeviceModel(splitString3[1]);
+                        deviceData.postFirmwareVersion(splitString3[2]);
+//                        if((splitString3[4].length()<5)){
+//                            DeviceData.postMACAddress("Not Registered");
+//                        }
+//                        else{
+//                            DeviceData.postMACAddress(splitString3[4].substring(0,15));
+//                        }
+                        DeviceData newDevice = new DeviceData(myDevice.getAddress());
+                        if(!deviceData.deviceList.contains(newDevice)) {
+                            newDevice.setDeviceName(myDevice.getName());
+                            newDevice.setDeviceModel(splitString3[1]);
+                            newDevice.setDeviceConnection(1);
+                            newDevice.setLastConnection(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+                            deviceData.deviceList.add(newDevice);
+                            SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                            SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+                            Gson gson = new Gson();
+
+                            String jsonString = gson.toJson(SharedData.deviceList);
+
+                            prefsEditor.putString("deviceList", jsonString);
+                            prefsEditor.commit();
                         }
-                        else{
-                            DeviceData.postMACAddress(splitString3[4].substring(0,15));
-                        }
+                        deviceData.postMACAddress(myDevice.getAddress());
                         if(splitString3[5].length()<3){
-                            DeviceData.postFirstRecord("No Records");
+                            deviceData.postFirstRecord("No Records");
                         }else{
                             SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/DDD");
                             Date FirstRecordDate = null;
@@ -344,11 +372,11 @@ public class BTService extends Service {
                                 e.printStackTrace();
                             }
                             if (FirstRecordDate != null) {
-                                DeviceData.postFirstRecord(new SimpleDateFormat("dd/MM/yyyy").format(FirstRecordDate));
+                                deviceData.postFirstRecord(new SimpleDateFormat("dd/MM/yyyy").format(FirstRecordDate));
                             }
                         }
                         if(splitString3[6].length()<3){
-                            DeviceData.postLastRecord("No Records");
+                            deviceData.postLastRecord("No Records");
                         }else{
                             String[] splitString4 = splitString3[6].split("/r");
                             SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/DDD");
@@ -359,7 +387,7 @@ public class BTService extends Service {
                                 e.printStackTrace();
                             }
                             if (LastRecordDate != null) {
-                                DeviceData.postLastRecord(new SimpleDateFormat("dd/MM/yyyy").format(LastRecordDate));
+                                deviceData.postLastRecord(new SimpleDateFormat("dd/MM/yyyy").format(LastRecordDate));
                             }
                         }
 
@@ -371,10 +399,10 @@ public class BTService extends Service {
                             String[] splitString6;
                             splitString6 = splitString5[1].split("\r");
                             if(splitString6[0].contains("000")){
-                                myFileAccess.BatchSort(DeviceData.getSiteName().getValue(),startYear,startDoY,downloadLength);
+                                myFileAccess.BatchSort(deviceData.getSiteName().getValue(),startYear,startDoY,downloadLength);
                                 downloadEndNotification();
                                 downloadCounter=0;
-                                DeviceData.postDownloadStatus(false);
+                                deviceData.postDownloadStatus(false);
                             }
                         }
                         else if(splitString5.length==4) {
@@ -408,7 +436,7 @@ public class BTService extends Service {
                                 long diff = dateData.getTime() - startFirstFayOfTheYear.getTime();
                                 int DoY = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
 
-                                myFileAccess.WriteDataToFile(dataToSave, DeviceData.getSiteName().getValue(), year, String.valueOf(DoY));
+                                myFileAccess.WriteDataToFile(dataToSave, deviceData.getSiteName().getValue(), year, String.valueOf(DoY));
                                 downloadRunNotification(downloadCounter, downloadLength);
                             }
                         }
@@ -452,7 +480,7 @@ public class BTService extends Service {
     public void downloadRunNotification(int progress,int max){
         int percentage = (int) ((Float.intBitsToFloat(downloadCounter)/Float.intBitsToFloat(downloadLength))*100);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Channel_1_ID)
-                .setSmallIcon(R.drawable.ic_devices)
+                .setSmallIcon(R.drawable.ic_logo_luwes)
                 .setContentTitle("Download")
                 .setContentText("Download progress "+percentage+"%")
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
@@ -483,7 +511,7 @@ public class BTService extends Service {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         myNotificationManager.cancel(2);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Channel_1_ID)
-                .setSmallIcon(R.drawable.ic_devices)
+                .setSmallIcon(R.drawable.ic_logo_luwes)
                 .setContentTitle("Download")
                 .setContentText("Download complete")
                 .setStyle(new NotificationCompat.BigTextStyle()
@@ -494,5 +522,14 @@ public class BTService extends Service {
                 .setShowWhen(false)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
         myNotificationManager.notify(3, builder.build());
+    }
+    private void unpairDevice(BluetoothDevice device) {
+        try {
+            Method m = device.getClass()
+                    .getMethod("removeBond", (Class[]) null);
+            m.invoke(device, (Object[]) null);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
     }
 }

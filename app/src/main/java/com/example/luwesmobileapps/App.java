@@ -63,7 +63,7 @@ public class App extends Application {
                 Notification notification2 = new NotificationCompat.Builder(getApplicationContext(),Channel_1_ID)
                         .setContentTitle("Device Connection")
                         .setContentText("Last connection disconnected")
-                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setSmallIcon(R.drawable.ic_logo_luwes)
                         .build();
                 myNotificationManager = NotificationManagerCompat.from(getApplicationContext());
                 myNotificationManager.cancelAll();
@@ -77,7 +77,7 @@ public class App extends Application {
                     Notification notification2 = new NotificationCompat.Builder(getApplicationContext(), Channel_1_ID)
                             .setContentTitle("Device Connection")
                             .setContentText("Bluetooth Turned Off")
-                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setSmallIcon(R.drawable.ic_logo_luwes)
                             .build();
                     myNotificationManager = NotificationManagerCompat.from(getApplicationContext());
                     myNotificationManager.cancelAll();

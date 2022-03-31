@@ -6,21 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+<!--    <com.google.android.material.appbar.AppBarLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content">-->
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:menu="@menu/activity_main_appbar"
-            style="@style/Widget.MaterialComponents.Toolbar.Primary"/>
+<!--        <com.google.android.material.appbar.MaterialToolbar-->
+<!--            android:id="@+id/toolbar"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="?attr/actionBarSize"-->
+<!--            app:menu="@menu/activity_main_appbar"-->
+<!--            style="@style/Widget.MaterialComponents.Toolbar.Primary"/>-->
 
-    </com.google.android.material.appbar.AppBarLayout>
+<!--    </com.google.android.material.appbar.AppBarLayout>-->
 
 
-    <include layout="@layout/content_main" />
+    <include
+        android:id="@+id/include"
+        layout="@layout/content_main"
+        />
 
     <RelativeLayout
         android:id="@+id/connectmenu"
@@ -48,7 +51,8 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_gravity="end"
-            app:backgroundTint="@color/colorSecondaryVariant"
+            app:backgroundTint="@color/colorPrimary"
+            app:tint="@color/cardview_light_background"
             app:elevation="2dp"
             app:fabSize="mini"
             app:srcCompat="@drawable/ic_bluetoothle" />
@@ -72,7 +76,8 @@
             android:layout_marginVertical="@dimen/inner_margin"
             android:layout_alignParentRight="true"
             android:layout_gravity="end"
-            app:backgroundTint="@color/colorSecondaryVariant"
+            app:backgroundTint="@color/colorPrimary"
+            app:tint="@color/cardview_light_background"
             app:elevation="2dp"
             app:fabSize="mini"
             app:srcCompat="@drawable/ic_bluetooth" />
@@ -94,7 +99,8 @@
             android:layout_below="@id/action_bluetoothscan"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="@dimen/inner_margin"
-            app:backgroundTint="@color/colorSecondaryVariant"
+            app:backgroundTint="@color/colorPrimary"
+            app:tint="@color/cardview_light_background"
             app:elevation="2dp"
             app:fabSize="mini"
             app:srcCompat="@drawable/ic_disconnect" />
@@ -105,9 +111,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
-        android:layout_gravity="bottom|right
-"
+        android:layout_gravity="end|bottom"
+        app:backgroundTint="@color/colorPrimary"
         app:elevation="2dp"
-        app:srcCompat="@drawable/ic_search" />
+        app:srcCompat="@drawable/ic_search"
+        app:tint="@color/cardview_light_background"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

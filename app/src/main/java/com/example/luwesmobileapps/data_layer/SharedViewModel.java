@@ -24,14 +24,20 @@ public class SharedViewModel extends ViewModel {
     private MutableLiveData<String> RecordInterval;
     private MutableLiveData<String> RecordStatus;
     private MutableLiveData<String> InternetConnectionStatus;
+    private MutableLiveData<String> LastLevel;
+    private MutableLiveData<String> LastBattery;
+    private MutableLiveData<String> LastConnection;
     //Device Logic Data//
     private MutableLiveData<Boolean> SettingStatus;
     private MutableLiveData<Boolean> SyncStatus;
     private MutableLiveData<Boolean> RealTimeStatus;
     private MutableLiveData<Boolean> DownloadStatus;
+    private MutableLiveData<Boolean> DeviceDataChanged;
     private MutableLiveData<Boolean> BTPermission = new MutableLiveData<>();
     private MutableLiveData<Boolean> LocPermission = new MutableLiveData<>();
     private MutableLiveData<Boolean> FilePermission = new MutableLiveData<>();
+    private MutableLiveData<Boolean> NightMode = new MutableLiveData<>();
+    private MutableLiveData<Boolean> GenerateData = new MutableLiveData<>();
     private MutableLiveData<Integer> ConnectStatus;
 
     public SharedViewModel() {
@@ -59,6 +65,7 @@ public class SharedViewModel extends ViewModel {
         RealTimeStatus = DeviceData.getRealTimeStatus();
         ConnectStatus = DeviceData.getConnectStatus();
         DownloadStatus = DeviceData.getDownloadStatus();
+        DeviceDataChanged = DeviceData.getDeviceDataChanged();
     }
 
     public LiveData<String> getSiteName() {
@@ -153,9 +160,22 @@ public class SharedViewModel extends ViewModel {
         return DownloadStatus;
     }
 
+    public LiveData<Boolean> getGenerateData() {
+        return GenerateData;
+    }
+
+    public LiveData<Boolean> getDeviceDataChanged() {
+        return DeviceDataChanged;
+    }
+
+    public LiveData<Boolean> getNightMode() {
+        return NightMode;
+    }
+
     public LiveData<Integer> getConnectStatus() {
         return ConnectStatus;
     }
+
 
     public void setSiteName(MutableLiveData<String> siteName) {
         SiteName = siteName;
@@ -221,6 +241,10 @@ public class SharedViewModel extends ViewModel {
         InternetConnectionStatus = internetConnectionStatus;
     }
 
+    public void setLastConnection(String lastConnection) {
+        LastConnection.setValue(lastConnection);
+    }
+
     public void setSettingStatus(boolean settingStatus) {
         SettingStatus.setValue(settingStatus);
     }
@@ -245,8 +269,24 @@ public class SharedViewModel extends ViewModel {
         FilePermission.setValue(FilePermissionSet);
     }
 
+    public void setNightMode(boolean nightMode) {
+        NightMode.setValue(nightMode);
+    }
+
     public void setDownloadStatus(boolean DownloadStatusSet) {
         DownloadStatus.setValue(DownloadStatusSet);
+    }
+
+    public void postGenerateData(boolean generateData) {
+        GenerateData.postValue(generateData);
+    }
+
+    public void setGenerateData(boolean generateData) {
+        GenerateData.setValue(generateData);
+    }
+
+    public void setDeviceDataChanged(boolean DeviceDataChangedSet) {
+        DeviceDataChanged.setValue(DeviceDataChangedSet);
     }
 
     public void ClearAll(){

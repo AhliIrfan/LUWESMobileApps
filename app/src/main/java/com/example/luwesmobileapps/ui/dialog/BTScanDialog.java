@@ -1,13 +1,17 @@
 package com.example.luwesmobileapps.ui.dialog;
 
+import static com.example.luwesmobileapps.MainActivity.bluetoothAdapter;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -18,7 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,6 +29,8 @@ import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.example.luwesmobileapps.service.BTService;
 import com.example.luwesmobileapps.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import java.lang.reflect.Method;
 
 
 public class BTScanDialog extends AppCompatDialogFragment {
@@ -35,8 +40,9 @@ public class BTScanDialog extends AppCompatDialogFragment {
     private Button dismiss;
     private Button scan;
     private ProgressBar progressBar;
-    private BTViewAdaper adapter;
+    private BTViewAdapter adapter;
     private SharedViewModel DeviceViewModel;
+    @SuppressLint("MissingPermission")
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
@@ -49,7 +55,7 @@ public class BTScanDialog extends AppCompatDialogFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
 
-        adapter = new BTViewAdaper();
+        adapter = new BTViewAdapter();
         recyclerView.setAdapter(adapter);
 
         ScanTitle = view.findViewById(R.id.scanTitle);
@@ -76,13 +82,17 @@ public class BTScanDialog extends AppCompatDialogFragment {
             dismiss();
         });
 
-        scan.setOnClickListener(view12 -> listener.BTStartScan());
+        scan.setOnClickListener(view12 -> {
+            adapter.clearDeviceList();
+            listener.BTStartScan();
+            Log.d("TAG", "onCreateDialog: scanpressed");
+        });
 
         adapter.setOnItemClickListener(device -> {
             listener.BTStopScan();
             Intent BTServiceIntent = new Intent(getActivity(), BTService.class);
-            BTServiceIntent.putExtra("Device Input",device);
-            ContextCompat.startForegroundService(getActivity(),BTServiceIntent);
+            BTServiceIntent.putExtra("Device Input", device);
+            ContextCompat.startForegroundService(getActivity(), BTServiceIntent);
             dismiss();
         });
         return builder.create();

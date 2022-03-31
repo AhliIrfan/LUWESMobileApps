@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.dataviewer.DataViewerFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.tabs.TabLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/Tab">
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/CachedData"
+                android:text="Cached Data"/>
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/LiveData"
+                android:text="Live Data"/>
+        </com.google.android.material.tabs.TabLayout>
+
+
+        <TextView
+            android:id="@+id/ChartTitle"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/Tab"
+            android:text="Water Level"
+            android:textAllCaps="false"
+            android:textSize="@dimen/text_subtitle"
+            android:visibility="gone"/>
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChart"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:layout_below="@id/ChartTitle"
+            android:visibility="visible"/>
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChart2"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:layout_below="@id/ChartTitle"
+            android:visibility="invisible" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lineChart" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/DetailsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lineChart"
+            android:layout_margin="@dimen/border_margin"
+            app:strokeWidth="@dimen/stroke_width"
+            app:strokeColor="@color/colorPrimary">
+
+            <RelativeLayout
+                android:id="@+id/CachedDataGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                android:layout_marginHorizontal="@dimen/fab_margin"
+                android:layout_marginTop="@dimen/dialog_margin">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/selectDevice"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/dialog_margin"
+                    android:hint="Select device"
+                    app:startIconDrawable="@drawable/ic_devices">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/selectDeviceContent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:id="@+id/timeSpan"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/selectDevice"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/startDate"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:focusableInTouchMode="false"
+                        android:hint="Start date"
+                        app:startIconDrawable="@drawable/ic_calendar">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusableInTouchMode="false" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_marginHorizontal="@dimen/inner_margin"
+                        android:layout_weight="0" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/endDate"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/startDate"
+                        android:layout_weight="1"
+                        android:focusableInTouchMode="false"
+                        android:hint="End date"
+                        app:startIconDrawable="@drawable/ic_calendar">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusableInTouchMode="false" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Generate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/timeSpan"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginStart="@dimen/fab_margin"
+                    android:layout_marginTop="@dimen/fab_margin"
+                    android:layout_marginEnd="@dimen/fab_margin"
+                    android:layout_marginBottom="@dimen/fab_margin"
+                    android:text="Generate" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/LiveDataGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:layout_margin="@dimen/fab_margin">
+
+                <LinearLayout
+                    android:id="@+id/RealTimeGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/DateTimeTitle"
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Date/Time"
+                            android:textSize="@dimen/text_content" />
+
+                        <TextView
+                            android:id="@+id/DateTime"
+                            style="@style/Widget.AppCompat.EditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/start_margin"
+                            android:singleLine="true"
+                            android:textAlignment="textEnd"
+                            android:textSize="@dimen/text_content" />
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/BatteryTitle"
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Device Battery"
+                            android:textSize="@dimen/text_content" />
+
+                        <TextView
+                            android:id="@+id/Battery"
+                            style="@style/Widget.AppCompat.EditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/start_margin"
+                            android:singleLine="true"
+                            android:textAlignment="textEnd"
+                            android:textSize="@dimen/text_content" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/RecordTitle"
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Record Status"
+                            android:textSize="@dimen/text_content" />
+
+                        <TextView
+                            android:id="@+id/Record"
+                            style="@style/Widget.AppCompat.EditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/start_margin"
+                            android:singleLine="true"
+                            android:textAlignment="textEnd"
+                            android:textSize="@dimen/text_content" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/InternetConnectionTitle"
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Internet Connection"
+                            android:textSize="@dimen/text_content" />
+
+                        <TextView
+                            android:id="@+id/InternetConnection"
+                            style="@style/Widget.AppCompat.EditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/start_margin"
+                            android:singleLine="true"
+                            android:textAlignment="textEnd"
+                            android:textSize="@dimen/text_content" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/realtimebutton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="@dimen/dialog_margin"
+                        android:text="Listen" />
+                </LinearLayout>
+            </RelativeLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+
+
+
+
+    </RelativeLayout>
+</ScrollView>

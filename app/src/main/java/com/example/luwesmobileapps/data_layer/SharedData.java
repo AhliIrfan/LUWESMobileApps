@@ -1,8 +1,8 @@
 package com.example.luwesmobileapps.data_layer;
 
-import android.util.Log;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import java.util.ArrayList;
 
 public class SharedData {
     //Device Data//
@@ -27,7 +27,10 @@ public class SharedData {
     private static MutableLiveData<Boolean> SyncStatus= new MutableLiveData<>();
     private static MutableLiveData<Boolean> RealTimeStatus= new MutableLiveData<>();
     private static MutableLiveData<Boolean> DownloadStatus= new MutableLiveData<>();
+    private static MutableLiveData<Boolean> DeviceDataChanged= new MutableLiveData<>();
     private static MutableLiveData<Integer> ConnectStatus= new MutableLiveData<>();
+
+    public static ArrayList<DeviceData> deviceList = new ArrayList<>();
 
     public void postSiteName(String string){
         SiteName.postValue(string);
@@ -88,6 +91,9 @@ public class SharedData {
     }
     public void postDownloadStatus(boolean input){
         DownloadStatus.postValue(input);
+    }
+    public void postDeviceDataChanged(boolean input){
+        DeviceDataChanged.postValue(input);
     }
     public void postConnectStatus(int input){
         ConnectStatus.postValue(input);
@@ -173,7 +179,12 @@ public class SharedData {
         return DownloadStatus;
     }
 
+    public static MutableLiveData<Boolean> getDeviceDataChanged() {
+        return DeviceDataChanged;
+    }
+
     public static MutableLiveData<Integer> getConnectStatus() {
         return ConnectStatus;
     }
+
 }

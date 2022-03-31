@@ -14,56 +14,59 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import android.os.Handler;
 import android.os.ParcelUuid;
+import android.preference.PreferenceManager;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.example.luwesmobileapps.data_layer.SharedData;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.example.luwesmobileapps.service.BLEService;
 import com.example.luwesmobileapps.service.BTService;
 import com.example.luwesmobileapps.ui.devicepage.DevicePageFragment;
 import com.example.luwesmobileapps.ui.dialog.BLEScanDialog;
 import com.example.luwesmobileapps.ui.dialog.BTScanDialog;
-import com.example.luwesmobileapps.ui.graphviewer.GraphViewerFragment;
+import com.example.luwesmobileapps.ui.dataviewer.DataViewerFragment;
+import com.example.luwesmobileapps.ui.home.HomeFragment;
 import com.example.luwesmobileapps.ui.setting.SettingFragment;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
 
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements DevicePageFragment.fragmentListener, BTScanDialog.fragmentListener,
-        SettingFragment.fragmentListener, BLEScanDialog.fragmentListener, GraphViewerFragment.fragmentListener {
+        SettingFragment.fragmentListener, BLEScanDialog.fragmentListener, DataViewerFragment.fragmentListener, HomeFragment.fragmentListener {
 
     private AppBarConfiguration mAppBarConfiguration;
     private SharedViewModel DeviceViewModel;
@@ -94,22 +97,44 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         MainActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        BottomNavigationView BotNav = findViewById(R.id.bottom_navigation);
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
         RelativeLayout ScanAction = findViewById(R.id.connectmenu);
         fab = findViewById(R.id.fab);
         FloatingActionButton BTScan = findViewById(R.id.action_bluetoothscan);
         FloatingActionButton BLEScan = findViewById(R.id.action_blescan);
         FloatingActionButton Disconnect = findViewById(R.id.action_disconnect);
+        IntentFilter filter2 = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
         IntentFilter filter3 = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         IntentFilter filter4 = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         IntentFilter filter5 = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+//        registerReceiver(BTReceiver,filter2);
         registerReceiver(BTReceiver,filter3);
         registerReceiver(BTReceiver,filter4);
         registerReceiver(BTReceiver,filter5);
-
-
         DeviceViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
+
+        int nightModeFlags =
+                this.getResources().getConfiguration().uiMode &
+                        Configuration.UI_MODE_NIGHT_MASK;
+        switch (nightModeFlags) {
+            case Configuration.UI_MODE_NIGHT_YES:
+                DeviceViewModel.setNightMode(true);
+                fab.setImageTintList(getResources().getColorStateList(R.color.colorDarkGray));
+                BTScan.setImageTintList(getResources().getColorStateList(R.color.colorDarkGray));
+                BLEScan.setImageTintList(getResources().getColorStateList(R.color.colorDarkGray));
+                Disconnect.setImageTintList(getResources().getColorStateList(R.color.colorDarkGray));
+                break;
+
+            case Configuration.UI_MODE_NIGHT_NO:
+
+            case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                DeviceViewModel.setNightMode(false);
+                Log.d("Main", "onCreate: Day");
+                break;
+        }
+
         if (Build.VERSION.SDK_INT >= 30) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
                 DeviceViewModel.setBTPermission(true);
@@ -199,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
             ScanAction.setVisibility(View.INVISIBLE);
         });
         Disconnect.setOnClickListener(view -> {
+            saveDeviceList();
             DeviceViewModel.ClearAll();
             Intent ServiceBT = new Intent(MainActivity, BTService.class);
             stopService(ServiceBT);
@@ -208,38 +234,50 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
             TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
             ScanAction.setVisibility(View.INVISIBLE);
         });
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+//        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+//        NavigationView navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        Menu nav_menu = navigationView.getMenu();
+        Menu nav_menu = BotNav.getMenu();
         nav_menu.findItem(R.id.nav_devicepage).setEnabled(false);
 
+        BadgeDrawable ConnectBadge = BotNav.getOrCreateBadge(R.id.nav_devicepage);
+        ConnectBadge.setBackgroundColor(ContextCompat.getColor(this,R.color.colorSecondary));
+        ConnectBadge.setVisible(false);
+
+        BadgeDrawable RealtimeBadge = BotNav.getOrCreateBadge(R.id.nav_data);
+        RealtimeBadge.setBackgroundColor(ContextCompat.getColor(this,R.color.colorSecondary));
+        RealtimeBadge.setVisible(false);
+
         DeviceViewModel.getConnectStatus().observe(this, integer -> {
-            Menu nav_menu1 = navigationView.getMenu();
+            Menu nav_menu1 = BotNav.getMenu();
             if(integer==0){
                 nav_menu1.findItem(R.id.nav_devicepage).setEnabled(false);
+                ConnectBadge.setVisible(false);
             }
             else{
                 nav_menu1.findItem(R.id.nav_devicepage).setEnabled(true);
+                ConnectBadge.setVisible(true);
             }
         });
-
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_setting, R.id.nav_devicepage, R.id.nav_graph)
-                .setOpenableLayout(drawer)
-                .build();
+        DeviceViewModel.getRealTimeStatus().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if(aBoolean)
+                    RealtimeBadge.setVisible(true);
+                else
+                    RealtimeBadge.setVisible(false);
+            }
+        });
+//
+//        mAppBarConfiguration = new AppBarConfiguration.Builder(
+//                R.id.nav_home, R.id.nav_setting, R.id.nav_devicepage, R.id.nav_graph)
+//                .setOpenableLayout(drawer)
+//                .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
+//        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavigationUI.setupWithNavController(BotNav, navController);
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_main_appbar, menu);
-        return true;
     }
 
     @Override
@@ -296,8 +334,15 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
                     btScanDialog.ScanButton(4,true);
                 Log.d("Device Discovery","Stop Discovering");
             }
+//            if(BluetoothDevice.ACTION_PAIRING_REQUEST.equals(intent.getAction())){
+//                Log.d("TAG", "onReceive: Req Pairing");
+//                BluetoothDevice myDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//                myDevice.setPin("2912".getBytes());
+//            }
         }
     }
+
+
 
     @Override
     protected void onDestroy() {
@@ -479,5 +524,17 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
             setting = new ScanSettings.Builder().setMatchMode(ScanSettings.CALLBACK_TYPE_FIRST_MATCH).build();
         }
         return setting;
+    }
+
+    @Override
+    public void saveDeviceList(){
+        SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+        Gson gson = new Gson();
+
+        String jsonString = gson.toJson(SharedData.deviceList);
+
+        prefsEditor.putString("deviceList", jsonString);
+        prefsEditor.commit();
     }
 }

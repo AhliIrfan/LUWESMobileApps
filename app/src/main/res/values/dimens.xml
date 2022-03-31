@@ -13,5 +13,6 @@
     <dimen name="text_content">16sp</dimen>
     <dimen name="text_content2">14sp</dimen>
     <dimen name="start_margin">3dp</dimen>
+    <dimen name="stroke_width">1dp</dimen>
     <dimen name="title_size">145sp</dimen>
 </resources>

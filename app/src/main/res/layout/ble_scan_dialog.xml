@@ -15,14 +15,14 @@
             android:orientation="vertical"
             android:id="@+id/scanTitle">
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Nearby BLE Device"
-                android:textSize="@dimen/text_subtitle"
-                android:textStyle="bold"
-                android:layout_margin="@dimen/dialog_margin"
-                android:paddingHorizontal="@dimen/fab_margin"
-                android:paddingTop="@dimen/inner_margin"/>
+                android:textSize="@dimen/text_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="@dimen/fab_margin"
+                android:layout_marginBottom="@dimen/dialog_margin"
+                android:textStyle="bold"/>
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
@@ -35,7 +35,7 @@
         </LinearLayout>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/deviceList"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="@dimen/dialog_margin"
             android:paddingTop="5dp"
@@ -52,12 +52,13 @@
                 android:layout_height="wrap_content"
                 android:text="Dismiss"
                 android:id="@+id/dismissbutton"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"/>
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dialog_margin"
                 android:text="Scan"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
                 android:id="@+id/scanbutton"/>
         </LinearLayout>
 

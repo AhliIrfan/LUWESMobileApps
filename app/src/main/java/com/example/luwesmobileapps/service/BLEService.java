@@ -388,12 +388,13 @@ public class BLEService extends Service {
                     DeviceData.postSiteName(mmDevice.getName());
                     DeviceData.postDeviceModel(splitString3[1]);
                     DeviceData.postFirmwareVersion(splitString3[2]);
-                    if((splitString3[4].length()<5)){
-                        DeviceData.postMACAddress("Not Registered");
-                    }
-                    else{
-                        DeviceData.postMACAddress(splitString3[4].substring(0,15));
-                    }
+//                    if((splitString3[4].length()<5)){
+//                        DeviceData.postMACAddress("Not Registered");
+//                    }
+//                    else{
+//                        DeviceData.postMACAddress(splitString3[4].substring(0,15));
+//                    }
+                    DeviceData.postMACAddress(mmDevice.getAddress());
                     if(splitString3[5].length()<3){
                         DeviceData.postFirstRecord("No Records");
                     }else{

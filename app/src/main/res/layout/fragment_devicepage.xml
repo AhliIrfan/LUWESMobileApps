@@ -5,16 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <RelativeLayout
+        android:id="@+id/MainLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/border_margin"
-        android:paddingTop="@dimen/border_margin"
-        android:paddingRight="@dimen/border_margin"
+        android:layout_height="match_parent"
+        android:padding="@dimen/border_margin"
         tools:context=".ui.devicepage.DevicePageFragment">
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/DeviceInfoCard"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginVertical="@dimen/inner_margin"
+            android:animateLayoutChanges="true"
+            app:strokeWidth="@dimen/stroke_width"
+            app:strokeColor="@color/colorPrimary">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -27,17 +31,17 @@
                     android:text="Device Info"
                     android:textSize="@dimen/text_subtitle"
                     android:textStyle="normal"
-                    android:textAllCaps="false"
                     app:icon="@drawable/ic_info"/>
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/DeviceInfoGroup"
                     android:orientation="vertical"
-                    android:layout_margin="@dimen/inner_margin">
+                    android:layout_marginHorizontal="@dimen/fab_margin"
+                    android:layout_marginBottom="@dimen/inner_margin">
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -56,7 +60,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
@@ -77,7 +80,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
@@ -98,7 +100,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
@@ -118,7 +119,6 @@
                             android:layout_marginStart="@dimen/start_margin"
                             android:singleLine="true"
                             android:textAlignment="textEnd"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"
                             android:textSize="@dimen/text_content"/>
                     </LinearLayout>
@@ -129,7 +129,10 @@
             android:id="@+id/RecordHistoryCard"
             android:layout_below="@id/DeviceInfoCard"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginVertical="@dimen/inner_margin"
+            app:strokeWidth="@dimen/stroke_width"
+            app:strokeColor="@color/colorPrimary">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -139,22 +142,21 @@
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
                     android:text="Record History"
                     android:textSize="@dimen/text_subtitle"
                     android:textStyle="normal"
-                    android:textAllCaps="false"
                     app:icon="@drawable/ic_history"/>
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/RecordHistoryGroup"
                     android:orientation="vertical"
-                    android:layout_margin="@dimen/inner_margin"
+                    android:layout_marginHorizontal="@dimen/fab_margin"
+                    android:layout_marginBottom="@dimen/inner_margin"
                     android:visibility="gone">
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -173,7 +175,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
@@ -194,7 +195,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                 </LinearLayout>
@@ -206,7 +206,10 @@
             android:id="@+id/SettingParameterCard"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/RecordHistoryCard">
+            android:layout_below="@id/RecordHistoryCard"
+            android:layout_marginVertical="@dimen/inner_margin"
+            app:strokeWidth="@dimen/stroke_width"
+            app:strokeColor="@color/colorPrimary">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -216,24 +219,23 @@
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/inner_margin"
                     android:text="Setting Parameter"
                     android:textSize="@dimen/text_subtitle"
                     android:textStyle="normal"
-                    android:textAllCaps="false"
                     app:icon="@drawable/ic_setting"/>
 
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:id="@+id/SettingParameterGroup"
                     android:orientation="vertical"
-                    android:layout_margin="@dimen/inner_margin"
+                    android:layout_marginHorizontal="@dimen/fab_margin"
+                    android:layout_marginBottom="@dimen/inner_margin"
                     android:visibility="gone">
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -260,7 +262,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
@@ -281,7 +282,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
 
                     </LinearLayout>
@@ -303,7 +303,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
@@ -314,7 +313,7 @@
                             android:id="@+id/SensorOffsetTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
-                            android:text="Sensor Offset"
+                            android:text="Offset (mm)"
                             android:textSize="@dimen/text_content"/>
                         <TextView
                             android:id="@+id/SensorOffset"
@@ -324,7 +323,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
@@ -335,7 +333,7 @@
                             android:id="@+id/ZeroValueTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
-                            android:text="Sensor Zero Value"
+                            android:text="Zero Value (mm)"
                             android:textSize="@dimen/text_content"/>
                         <TextView
                             android:id="@+id/ZeroValue"
@@ -345,7 +343,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                     </LinearLayout>
                     <LinearLayout
@@ -366,7 +363,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             style="@style/Widget.AppCompat.EditText"/>
                         <TextView
                             android:id="@+id/spinner3"
@@ -420,7 +416,6 @@
                             android:layout_marginStart="@dimen/start_margin"
                             android:singleLine="true"
                             android:textAlignment="textEnd"
-                            android:textColor="@color/colorDarkGray"
                             android:textSize="@dimen/text_content"/>
                     </LinearLayout>
 
@@ -443,7 +438,6 @@
                             android:layout_marginStart="@dimen/start_margin"
                             android:singleLine="true"
                             android:textAlignment="textEnd"
-                            android:textColor="@color/colorDarkGray"
                             android:textSize="@dimen/text_content"/>
                     </LinearLayout>
                     <LinearLayout
@@ -466,7 +460,6 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             android:inputType="number"/>
                         <Spinner
                             android:id="@+id/spinner4"
@@ -481,7 +474,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="@dimen/inner_margin"
+                        android:layout_marginTop="@dimen/dialog_margin"
                         android:layout_gravity="end">
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/timesyncbutton"
@@ -505,7 +498,11 @@
             android:id="@+id/DataLogDownloadCard"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/SettingParameterCard">
+            android:layout_below="@id/SettingParameterCard"
+            android:layout_marginVertical="@dimen/inner_margin"
+            android:animateLayoutChanges="true"
+            app:strokeWidth="@dimen/stroke_width"
+            app:strokeColor="@color/colorPrimary">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -515,22 +512,21 @@
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/inner_margin"
                     android:text="Data Log Download"
                     android:textSize="@dimen/text_subtitle"
                     android:textStyle="normal"
-                    android:textAllCaps="false"
                     app:icon="@drawable/ic_download"/>
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/DataLogDownloadGroup"
+                    android:layout_marginHorizontal="@dimen/fab_margin"
+                    android:layout_marginBottom="@dimen/inner_margin"
                     android:orientation="vertical"
-                    android:layout_margin="@dimen/inner_margin"
                     android:visibility="gone">
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -549,7 +545,6 @@
                             android:textAlignment="textEnd"
                             android:focusableInTouchMode="false"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             android:hint="Input start date here"/>
                     </LinearLayout>
                     <LinearLayout
@@ -571,7 +566,6 @@
                             android:textAlignment="textEnd"
                             android:focusableInTouchMode="false"
                             android:textSize="@dimen/text_content"
-                            android:textColor="@color/colorDarkGray"
                             android:hint="Input end date here"/>
                     </LinearLayout>
                     <com.google.android.material.button.MaterialButton
@@ -579,7 +573,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:layout_marginTop="@dimen/inner_margin"
+                        android:layout_marginTop="@dimen/dialog_margin"
                         android:text="Download"/>
                 </LinearLayout>
             </LinearLayout>

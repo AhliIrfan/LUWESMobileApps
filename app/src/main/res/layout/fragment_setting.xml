@@ -7,156 +7,217 @@
     tools:context=".ui.setting.SettingFragment"
     android:padding="@dimen/border_margin">
 
-    <RelativeLayout
-        android:id="@+id/permission_card"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/app_info_card"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/inner_margin"
+        app:strokeWidth="@dimen/stroke_width"
+        app:strokeColor="@color/colorPrimary">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dialog_margin">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/app_info_title"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="App Info"
+                android:textSize="@dimen/text_subtitle"
+                app:icon="@drawable/ic_info" />
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/app_info_title"
+                />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/app_info_title"
+                android:layout_marginHorizontal="@dimen/dialog_margin"
+                android:layout_marginBottom="@dimen/dialog_margin">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/inner_margin"
+                    android:text="Build Version"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_subtitle" />
+
+                <TextView
+                    android:id="@+id/BuildVersion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/inner_margin"
+                    android:layout_alignParentRight="true"
+                    android:textSize="@dimen/text_subtitle"
+                    android:text="V.2.0.0"/>
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/permission_card"
+        android:layout_below="@id/app_info_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/inner_margin"
+        app:strokeWidth="@dimen/stroke_width"
+        app:strokeColor="@color/colorPrimary">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dialog_margin">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/permission_title"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:text="Permission"
                 android:textSize="@dimen/text_subtitle"
-                android:textAllCaps="false"
-                app:icon="@drawable/ic_info" />
+                app:icon="@android:drawable/stat_sys_warning" />
 
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/permission_title"
                 />
-
-            <LinearLayout
-                android:id="@+id/file_permission_group"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/permission_title"
-                android:orientation="vertical"
-                android:layout_marginTop="@dimen/inner_margin">
+                android:layout_marginHorizontal="@dimen/dialog_margin"
+                android:layout_marginBottom="@dimen/dialog_margin">
                 <LinearLayout
+                    android:id="@+id/file_permission_group"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
+                        <TextView
+                            android:id="@+id/file_permission_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="File Permission"
+                            android:textStyle="bold"
+                            android:layout_gravity="center_vertical"
+                            android:textSize="@dimen/text_subtitle" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"/>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/file_permission_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:useMaterialThemeColors="true"/>
+
+                    </LinearLayout>
                     <TextView
-                        android:id="@+id/file_permission_title"
+                        android:id="@+id/file_permission_context"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="File Permission"
-                        android:textStyle="bold"
-                        android:layout_gravity="center_vertical"
-                        android:textSize="@dimen/text_subtitle" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"/>
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/file_permission_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:useMaterialThemeColors="true"/>
-
+                        android:layout_marginEnd="@dimen/inner_margin"
+                        android:text="@string/file_permission"
+                        android:textSize="@dimen/text_content2" />
                 </LinearLayout>
-                <TextView
-                    android:id="@+id/file_permission_context"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/inner_margin"
-                    android:text="@string/file_permission"
-                    android:textSize="@dimen/text_content2" />
-            </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/bluetooth_permission_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_below="@id/file_permission_group"
-                android:layout_marginTop="@dimen/inner_margin">
                 <LinearLayout
+                    android:id="@+id/bluetooth_permission_group"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:layout_below="@id/file_permission_group"
+                    android:layout_marginTop="@dimen/inner_margin">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
+                        <TextView
+                            android:id="@+id/bluetooth_permission_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Bluetooth Permission"
+                            android:textStyle="bold"
+                            android:layout_gravity="center_vertical"
+                            android:textSize="@dimen/text_subtitle" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"/>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/bluetooth_permission_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:useMaterialThemeColors="true"/>
+                    </LinearLayout>
                     <TextView
-                        android:id="@+id/bluetooth_permission_title"
+                        android:id="@+id/bluetooth_permission_context"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Bluetooth Permission"
-                        android:textStyle="bold"
-                        android:layout_gravity="center_vertical"
-                        android:textSize="@dimen/text_subtitle" />
+                        android:layout_marginEnd="@dimen/inner_margin"
+                        android:text="@string/bluetooth_permission"
+                        android:textSize="@dimen/text_content2" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"/>
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/bluetooth_permission_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:useMaterialThemeColors="true"/>
                 </LinearLayout>
-                <TextView
-                    android:id="@+id/bluetooth_permission_context"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/inner_margin"
-                    android:text="@string/bluetooth_permission"
-                    android:textSize="@dimen/text_content2" />
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/location_permission_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_below="@id/bluetooth_permission_group"
-                android:layout_marginTop="@dimen/inner_margin">
                 <LinearLayout
+                    android:id="@+id/location_permission_group"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:layout_below="@id/bluetooth_permission_group"
+                    android:layout_marginTop="@dimen/inner_margin">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
+                        <TextView
+                            android:id="@+id/location_permission_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Location Permission"
+                            android:textStyle="bold"
+                            android:layout_gravity="center_vertical"
+                            android:textSize="@dimen/text_subtitle" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"/>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/location_permission_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:useMaterialThemeColors="true"/>
+                    </LinearLayout>
                     <TextView
-                        android:id="@+id/location_permission_title"
+                        android:id="@+id/location_permission_context"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Location Permission"
-                        android:textStyle="bold"
-                        android:layout_gravity="center_vertical"
-                        android:textSize="@dimen/text_subtitle" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"/>
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/location_permission_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:useMaterialThemeColors="true"/>
+                        android:layout_marginEnd="@dimen/inner_margin"
+                        android:text="@string/location_permission"
+                        android:textSize="@dimen/text_content2" />
                 </LinearLayout>
-                <TextView
-                    android:id="@+id/location_permission_context"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/inner_margin"
-                    android:text="@string/location_permission"
-                    android:textSize="@dimen/text_content2" />
 
-            </LinearLayout>
+            </RelativeLayout>
+
         </RelativeLayout>
-    </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
 </RelativeLayout>

@@ -15,7 +15,7 @@ import com.example.luwesmobileapps.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BLEViewAdaper extends RecyclerView.Adapter<BLEViewAdaper.BTViewHolder> {
+public class BTViewAdapter extends RecyclerView.Adapter<BTViewAdapter.BTViewHolder> {
     private List<BluetoothDevice> myDeviceList = new ArrayList<>();
     private OnItemClickListener listener;
 
@@ -23,7 +23,7 @@ public class BLEViewAdaper extends RecyclerView.Adapter<BLEViewAdaper.BTViewHold
     @Override
     public BTViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.ble_device_listview,parent,false);
+                .inflate(R.layout.bt_device_listview,parent,false);
         return new BTViewHolder(itemView);
     }
 
@@ -31,8 +31,8 @@ public class BLEViewAdaper extends RecyclerView.Adapter<BLEViewAdaper.BTViewHold
     @Override
     public void onBindViewHolder(@NonNull BTViewHolder holder, int position) {
         BluetoothDevice selectedDevice = myDeviceList.get(position);
-        holder.BLEName.setText(selectedDevice.getName());
-        holder.BLEUUID.setText(String.valueOf(selectedDevice.getUuids()));
+        holder.BTAddress.setText(selectedDevice.getAddress());
+        holder.BTName.setText(selectedDevice.getName());
 
     }
 
@@ -41,19 +41,24 @@ public class BLEViewAdaper extends RecyclerView.Adapter<BLEViewAdaper.BTViewHold
         return myDeviceList.size();
     }
 
-    public void setThisDevice(List<BluetoothDevice> thisDevice) {
-        this.myDeviceList = thisDevice;
+    public void addDeviceList(List<BluetoothDevice> thisDevice) {
+        this.myDeviceList=thisDevice;
+        notifyDataSetChanged();
+    }
+
+    public void addDevice(BluetoothDevice thisDevice) {
+        this.myDeviceList.add(thisDevice);
         notifyDataSetChanged();
     }
 
     class BTViewHolder extends RecyclerView.ViewHolder{
-        private TextView BLEName;
-        private TextView BLEUUID;
+        private TextView BTName;
+        private TextView BTAddress;
 
         public BTViewHolder(@NonNull View itemView) {
             super(itemView);
-            BLEName = itemView.findViewById(R.id.serviceName);
-            BLEUUID = itemView.findViewById(R.id.serviceUUID);
+            BTName = itemView.findViewById(R.id.deviceName);
+            BTAddress = itemView.findViewById(R.id.deviceAddress);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -62,17 +67,13 @@ public class BLEViewAdaper extends RecyclerView.Adapter<BLEViewAdaper.BTViewHold
                 }
             });
         }
-    }
 
-    public void addDevice(BluetoothDevice thisDevice) {
-        this.myDeviceList.add(thisDevice);
-        notifyDataSetChanged();
     }
     public interface OnItemClickListener {
         void onItemClick(BluetoothDevice device);
     }
 
-    public void setOnItemClickListener(BLEViewAdaper.OnItemClickListener listener) {
+    public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
 

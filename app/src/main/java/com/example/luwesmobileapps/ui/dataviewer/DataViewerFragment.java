@@ -1,13 +1,11 @@
-package com.example.luwesmobileapps.ui.graphviewer;
+package com.example.luwesmobileapps.ui.dataviewer;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +15,9 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -29,8 +25,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.luwesmobileapps.R;
 import com.example.luwesmobileapps.data_layer.FileAccess;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
-import com.example.luwesmobileapps.ui.devicepage.DevicePageFragment;
-import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
@@ -39,12 +33,13 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IFillFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.ParseException;
@@ -54,13 +49,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class GraphViewerFragment extends Fragment {
+public class DataViewerFragment extends Fragment {
 
     private SharedViewModel DeviceViewModel;
-    private MaterialButtonToggleGroup ButtonGroup;
+    private TabLayout Tabs;
     private fragmentListener listener;
     private RelativeLayout CachedDataGroup;
-    private RelativeLayout DetailsGroup;
+    private MaterialCardView DetailsGroup;
 
     //Live Data Group
     private RelativeLayout LiveDataGroup;
@@ -70,13 +65,15 @@ public class GraphViewerFragment extends Fragment {
     private TextView InternetConnectionStatus;
     private MaterialButton Listen;
 
-    private LineChart charts;
+    private LineChart CachedCharts;
+    private LineChart LiveCharts;
     private FileAccess myFileAccess = new FileAccess();
     private AutoCompleteTextView DeviceListOpt;
     private TextInputLayout StartDate;
     private TextInputLayout EndDate;
     private MaterialButton Generate;
     private ArrayList<FileAccess.plottingData> data = new ArrayList<>();
+    private String prevTimeStamp;
 
     public interface fragmentListener{
         void BTSend(String string);
@@ -103,11 +100,10 @@ public class GraphViewerFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         DeviceViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_graphviewer, container, false);
-        ButtonGroup = root.findViewById(R.id.ButtonGroup);
+        View root = inflater.inflate(R.layout.fragment_dataviewer, container, false);
+        Tabs = root.findViewById(R.id.Tab);
         //Cached Data Group
         CachedDataGroup = root.findViewById(R.id.CachedDataGroup);
-        Button CachedDataButton = root.findViewById(R.id.CachedData);
         DetailsGroup = root.findViewById(R.id.DetailsContainer);
         DeviceListOpt = root.findViewById(R.id.selectDeviceContent);
         StartDate = root.findViewById(R.id.startDate);
@@ -121,23 +117,40 @@ public class GraphViewerFragment extends Fragment {
         RecordStatus = root.findViewById(R.id.Record);
         InternetConnectionStatus = root.findViewById(R.id.InternetConnection);
         Listen = root.findViewById(R.id.realtimebutton);
+        BadgeDrawable LiveBadge = Tabs.getTabAt(1).getOrCreateBadge();
+        LiveBadge.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.colorSecondary));
+        LiveBadge.setVisible(false);
 
         Listen.setEnabled(false);
+        Tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int checkedId = Tabs.getSelectedTabPosition();
+                switch (checkedId) {
+                    case 0:
+                        TransitionManager.beginDelayedTransition(DetailsGroup, new AutoTransition());
+                        CachedDataGroup.setVisibility(View.VISIBLE);
+                        LiveDataGroup.setVisibility(View.GONE);
+                        CachedCharts.setVisibility(View.VISIBLE);
+                        LiveCharts.setVisibility(View.INVISIBLE);
+                        break;
+                    case 1:
+                        TransitionManager.beginDelayedTransition(DetailsGroup, new AutoTransition());
+                        CachedDataGroup.setVisibility(View.GONE);
+                        LiveDataGroup.setVisibility(View.VISIBLE);
+                        LiveCharts.setVisibility(View.VISIBLE);
+                        CachedCharts.setVisibility(View.INVISIBLE);
+                        break;
+                }
+            }
 
-        ButtonGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            switch (checkedId){
-                case R.id.CachedData:
-                    TransitionManager.beginDelayedTransition(DetailsGroup,new AutoTransition());
-                    CachedDataGroup.setVisibility(View.VISIBLE);
-                    LiveDataGroup.setVisibility(View.GONE);
-                    charts.clear();
-                    break;
-                case R.id.LiveData:
-                    TransitionManager.beginDelayedTransition(DetailsGroup, new AutoTransition());
-                    CachedDataGroup.setVisibility(View.GONE);
-                    LiveDataGroup.setVisibility(View.VISIBLE);
-                    charts.clear();
-                    break;
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
             }
         });
 
@@ -167,43 +180,46 @@ public class GraphViewerFragment extends Fragment {
 
         });
 
-        Generate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                Date startDate = null;
-                try {
-                    startDate = sdf.parse(StartDate.getEditText().getText().toString()+" 00:00:00");
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                Date endDate = null;
-                try {
-                    endDate = sdf.parse(EndDate.getEditText().getText().toString()+" 23:59:00");
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                if((startDate!=null)&&(endDate!=null)&&(!DeviceListOpt.getText().toString().isEmpty())){
-                    data.clear();
-                    myFileAccess.LoadPlotData(DeviceListOpt.getText().toString(),data,startDate,endDate);
-                    if(!data.isEmpty())
-                        setupChart(data,charts);
-                    else
-                        Toast.makeText(getContext(),"No records for selected time span",Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getContext(),"Please input required parameter first",Toast.LENGTH_SHORT).show();
-                }
+        Generate.setOnClickListener(view -> {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            Date startDate = null;
+            try {
+                startDate = sdf.parse(StartDate.getEditText().getText().toString()+" 00:00:00");
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Date endDate = null;
+            try {
+                endDate = sdf.parse(EndDate.getEditText().getText().toString()+" 23:59:00");
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if((startDate!=null)&&(endDate!=null)&&(!DeviceListOpt.getText().toString().isEmpty())){
+                data.clear();
+                Thread LoadThread = new LoadData(DeviceListOpt.getText().toString(),data,startDate,endDate);
+                LoadThread.start();
+                Generate.setEnabled(false);
+//                myFileAccess.LoadPlotData(DeviceListOpt.getText().toString(),data,startDate,endDate);
+//                if(!data.isEmpty()) {
+//                    postData(data, CachedCharts);
+//                    CachedCharts.animateX(2000);
+//                    CachedCharts.invalidate();
+//                }else
+//                    Snackbar.make(getContext(),getView(),"No records for selected time span",Snackbar.LENGTH_SHORT).show();
+            }else{
+                Snackbar.make(getContext(),getView(),"Please input required parameter first",Snackbar.LENGTH_SHORT).show();
             }
         });
 
         Listen.setOnClickListener(view -> {
             if((Listen.getText().toString()).equalsIgnoreCase("Listen")){
+                LiveCharts.clear();
+                setupChartRT(LiveCharts,DeviceViewModel.getNightMode().getValue());
                 if(DeviceViewModel.getConnectStatus().getValue()==1)
                     listener.BTSend("LWRT,\r\n");
                 else if(DeviceViewModel.getConnectStatus().getValue()==2)
                     listener.BLESend("LWRT,\r\n");
                 DeviceViewModel.setRealTimeStatus(true);
-                setupChartRT(charts);
             }
             else if((Listen.getText().toString()).equalsIgnoreCase("Stop")){
                 if(DeviceViewModel.getConnectStatus().getValue()==1)
@@ -214,7 +230,10 @@ public class GraphViewerFragment extends Fragment {
         });
 
         DeviceListOpt.setAdapter(DeviceListAdapter);
-        charts = root.findViewById(R.id.lineChart);
+        CachedCharts = root.findViewById(R.id.lineChart);
+        LiveCharts = root.findViewById(R.id.lineChart2);
+        setupChart(CachedCharts,DeviceViewModel.getNightMode().getValue());
+        setupChartRT(LiveCharts,DeviceViewModel.getNightMode().getValue());
 
         //View Model Callbacks Response//
         DeviceViewModel.getDeviceDateTime().observe(getViewLifecycleOwner(), s -> DeviceDateTime.setText(s));
@@ -227,20 +246,20 @@ public class GraphViewerFragment extends Fragment {
         });
         DeviceViewModel.getRecordStatus().observe(getViewLifecycleOwner(), s -> RecordStatus.setText(s));
         DeviceViewModel.getWaterLevel().observe(getViewLifecycleOwner(), s -> {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            if(!s.equals(""))
-                addEntry(charts, Float.parseFloat(s));
+            if(!s.equals("")&&!DeviceDateTime.getText().toString().equals(prevTimeStamp)) {
+                addEntry(LiveCharts, Float.parseFloat(s));
+                prevTimeStamp=DeviceDateTime.getText().toString();
+            }
         });
         DeviceViewModel.getInternetConnectionStatus().observe(getViewLifecycleOwner(), s -> InternetConnectionStatus.setText(s));
         DeviceViewModel.getRealTimeStatus().observe(getViewLifecycleOwner(), aBoolean -> {
             if(aBoolean){
                 Listen.setText("Stop");
-                CachedDataButton.setEnabled(false);
+                LiveBadge.setVisible(true);
             }
             else{
                 Listen.setText("Listen");
-                CachedDataButton.setEnabled(true);
-                charts.clear();
+                LiveBadge.setVisible(false);
             }
         });
         DeviceViewModel.getConnectStatus().observe(getViewLifecycleOwner(), integer -> {
@@ -250,14 +269,34 @@ public class GraphViewerFragment extends Fragment {
                 Listen.setEnabled(true);
             }
         });
+        DeviceViewModel.getGenerateData().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if(aBoolean){
+                    if(!data.isEmpty()) {
+                        postData(data, CachedCharts);
+                        CachedCharts.animateX(2000);
+                        CachedCharts.invalidate();
+                        Generate.setEnabled(true);
+                    }else {
+                        Snackbar.make(getContext(), getView(), "No records for selected time span", Snackbar.LENGTH_SHORT).show();
+                        Generate.setEnabled(true);
+                    }
+                    DeviceViewModel.setGenerateData(false);
+                }
+            }
+        });
         return root;
     }
 
-    private void setupChart(ArrayList<FileAccess.plottingData> data, LineChart chart) {
-
-        postData(data,chart);
+    private void setupChart(LineChart chart, boolean NightMode) {
+        LineData data = new LineData();
+        chart.setData(data);
         chart.calculateOffsets();
-        chart.setBackgroundColor(Color.WHITE);
+        if(NightMode)
+            chart.setBackgroundColor(getContext().getResources().getColor(R.color.colorDarkGray));
+        else
+            chart.setBackgroundColor(Color.WHITE);
         // no description text
         chart.getDescription().setEnabled(false);
         // enable touch gestures
@@ -276,11 +315,19 @@ public class GraphViewerFragment extends Fragment {
         x.setEnabled(true);
         x.setDrawGridLines(true);
         x.setDrawAxisLine(true);
-        x.setTextColor(Color.DKGRAY);
+        if(NightMode)
+            x.setGridColor(Color.WHITE);
+        else
+            x.setTextColor(Color.DKGRAY);
+
+        if(NightMode)
+            x.setTextColor(Color.WHITE);
+        else
+            x.setTextColor(Color.DKGRAY);
         x.setAvoidFirstLastClipping(true);
         x.setDrawLabels(true);
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
-        x.setLabelCount(4, true);
+        x.setLabelCount(3, true);
         x.setGranularity(1f);
         x.setGranularityEnabled(true);
         x.setValueFormatter(new XValueFormatter());
@@ -288,7 +335,15 @@ public class GraphViewerFragment extends Fragment {
         YAxis y = chart.getAxisLeft();
         y.setDrawLabels(true);
         y.setLabelCount(10, true);
-        y.setTextColor(Color.DKGRAY);
+        if(NightMode)
+            y.setGridColor(Color.WHITE);
+        else
+            y.setTextColor(Color.DKGRAY);
+
+        if(NightMode)
+            y.setTextColor(Color.WHITE);
+        else
+            y.setTextColor(Color.DKGRAY);
         y.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
         y.setDrawGridLines(true);
         y.setDrawAxisLine(true);
@@ -297,10 +352,12 @@ public class GraphViewerFragment extends Fragment {
         chart.getAxisRight().setEnabled(false);
 
         Legend legend = chart.getLegend();
+        if(NightMode)
+            legend.setTextColor(Color.WHITE);
+        else
+            legend.setTextColor(Color.DKGRAY);
         legend.setEnabled(true);
         legend.setDrawInside(false);
-
-        chart.animateX(2000);
         // don't forget to refresh the drawing
         chart.invalidate();
     }
@@ -308,9 +365,38 @@ public class GraphViewerFragment extends Fragment {
     class XValueFormatter extends ValueFormatter{
         @Override
         public String getAxisLabel(float value,AxisBase axis) {
-            long convertedValue= TimeUnit.MINUTES.convert((long) value,TimeUnit.MILLISECONDS);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            Date startDate = null;
+            try {
+                startDate = sdf.parse(StartDate.getEditText().getText().toString()+" 00:00:00");
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Date endDate = null;
+            try {
+                endDate = sdf.parse(EndDate.getEditText().getText().toString()+" 23:59:00");
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            long diff = endDate.getTime()-startDate.getTime();
+            int timeSpan = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
             String timestamp;
+            if(timeSpan<=1)
                 timestamp = new SimpleDateFormat("HH:mm").format(new Date((long)value));
+            else if(timeSpan>365)
+                timestamp = new SimpleDateFormat("MMM yy HH:00").format(new Date((long)value));
+            else
+                timestamp = new SimpleDateFormat("dd MMM HH:mm").format(new Date((long)value));
+            return timestamp;
+        }
+    }
+
+    class XValueFormatterRT extends ValueFormatter{
+        @Override
+        public String getAxisLabel(float value,AxisBase axis) {
+            long convertedValue= TimeUnit.SECONDS.toMillis((long) value);
+            String timestamp;
+            timestamp = new SimpleDateFormat("mm:ss").format(new Date(convertedValue));
             return timestamp;
         }
     }
@@ -355,18 +441,21 @@ public class GraphViewerFragment extends Fragment {
             // create a data object with the data sets
             LineData dataL = new LineData(set1);
             dataL.setValueTextSize(9f);
-            dataL.setDrawValues(true);
+            dataL.setDrawValues(false);
 
             // set data
             chart.setData(dataL);
         }
     }
 
-    private void setupChartRT(LineChart chart){
+    private void setupChartRT(LineChart chart, boolean NightMode){
         LineData data = new LineData();
         chart.setData(data);
         chart.calculateOffsets();
-        chart.setBackgroundColor(Color.WHITE);
+        if(NightMode)
+            chart.setBackgroundColor(getContext().getResources().getColor(R.color.colorDarkGray));
+        else
+            chart.setBackgroundColor(Color.WHITE);
         // no description text
         chart.getDescription().setEnabled(false);
         // enable touch gestures
@@ -385,18 +474,35 @@ public class GraphViewerFragment extends Fragment {
         x.setEnabled(true);
         x.setDrawGridLines(true);
         x.setDrawAxisLine(true);
-        x.setTextColor(Color.DKGRAY);
+        if(NightMode)
+            x.setGridColor(Color.WHITE);
+        else
+            x.setTextColor(Color.DKGRAY);
+
+        if(NightMode)
+            x.setTextColor(Color.WHITE);
+        else
+            x.setTextColor(Color.DKGRAY);
         x.setAvoidFirstLastClipping(true);
         x.setDrawLabels(true);
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
-        x.setLabelCount(4, true);
+        x.setLabelCount(3, true);
         x.setGranularity(1f);
         x.setGranularityEnabled(true);
+        x.setValueFormatter(new XValueFormatterRT());
 
         YAxis y = chart.getAxisLeft();
         y.setDrawLabels(true);
         y.setLabelCount(10, true);
-        y.setTextColor(Color.DKGRAY);
+        if(NightMode)
+            y.setGridColor(Color.WHITE);
+        else
+            y.setTextColor(Color.DKGRAY);
+
+        if(NightMode)
+            y.setTextColor(Color.WHITE);
+        else
+            y.setTextColor(Color.DKGRAY);
         y.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
         y.setDrawGridLines(true);
         y.setDrawAxisLine(true);
@@ -405,6 +511,10 @@ public class GraphViewerFragment extends Fragment {
         chart.getAxisRight().setEnabled(false);
 
         Legend legend = chart.getLegend();
+        if(NightMode)
+            legend.setTextColor(Color.WHITE);
+        else
+            legend.setTextColor(Color.DKGRAY);
         legend.setEnabled(true);
         legend.setDrawInside(false);
     }
@@ -418,7 +528,7 @@ public class GraphViewerFragment extends Fragment {
                 set = createSet();
                 data.addDataSet(set);
             }
-            data.addEntry(new Entry(set.getEntryCount(), waterLevel), 0);
+            data.addEntry(new Entry(data.getEntryCount(), waterLevel),0);
             data.notifyDataChanged();
             // let the chart know it's data has changed
             chart.notifyDataSetChanged();
@@ -437,7 +547,7 @@ public class GraphViewerFragment extends Fragment {
     }
 
     private LineDataSet createSet() {
-        LineDataSet set = new LineDataSet(null, "Dynamic Data");
+        LineDataSet set = new LineDataSet(null, DeviceViewModel.getSiteName().getValue());
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setColor(ContextCompat.getColor(getContext(),R.color.colorPrimary));
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
@@ -450,6 +560,27 @@ public class GraphViewerFragment extends Fragment {
         set.setValueTextSize(9f);
         set.setDrawValues(false);
         return set;
+    }
+
+    class LoadData extends Thread{
+        private String deviceName;
+        private Date startDate;
+        private Date endDate;
+        private ArrayList<FileAccess.plottingData> plotData;
+
+        LoadData(String deviceNameInput, ArrayList<FileAccess.plottingData> plotDataInput,
+                 Date startDateInput, Date endDateInput){
+            this.deviceName = deviceNameInput;
+            this.startDate = startDateInput;
+            this.endDate = endDateInput;
+            this.plotData = plotDataInput;
+        }
+
+        @Override
+        public void run() {
+            myFileAccess.LoadPlotData(deviceName,plotData,startDate,endDate);
+            DeviceViewModel.postGenerateData(true);
+        }
     }
 
 }

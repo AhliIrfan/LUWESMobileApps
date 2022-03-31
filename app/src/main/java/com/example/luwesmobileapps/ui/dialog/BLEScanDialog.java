@@ -23,7 +23,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class BLEScanDialog extends AppCompatDialogFragment {
     private fragmentListener listener;
-    private BLEViewAdaper adapter;
+    private BLEViewAdapter adapter;
     private ProgressBar progressBar;
     private Button dismiss;
     private Button scan;
@@ -41,7 +41,7 @@ public class BLEScanDialog extends AppCompatDialogFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
 
-        adapter = new BLEViewAdaper();
+        adapter = new BLEViewAdapter();
         recyclerView.setAdapter(adapter);
 
         progressBar = view.findViewById(R.id.scanProgress);
@@ -54,10 +54,11 @@ public class BLEScanDialog extends AppCompatDialogFragment {
         });
 
         scan.setOnClickListener(view12 -> {
+            adapter.clearDeviceList();
             listener.BLEStartScan();
         });
 
-        adapter.setOnItemClickListener(new BLEViewAdaper.OnItemClickListener() {
+        adapter.setOnItemClickListener(new BLEViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BluetoothDevice device) {
                 listener.BLEStopScan();

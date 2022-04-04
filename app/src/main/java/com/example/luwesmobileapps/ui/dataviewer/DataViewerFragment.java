@@ -60,6 +60,7 @@ public class DataViewerFragment extends Fragment {
 
     private SharedViewModel DeviceViewModel;
     private TabLayout Tabs;
+    private TabLayout Tabs2;
     private fragmentListener listener;
     private RelativeLayout CachedDataGroup;
     private MaterialCardView DetailsGroup;
@@ -109,7 +110,9 @@ public class DataViewerFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         DeviceViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         View root = inflater.inflate(R.layout.fragment_dataviewer, container, false);
+        RelativeLayout MainLayout = root.findViewById(R.id.MainLayoutData);
         Tabs = root.findViewById(R.id.Tab);
+        Tabs2 = root.findViewById(R.id.Tab2);
         //Cached Data Group
         CachedDataGroup = root.findViewById(R.id.CachedDataGroup);
         LoadProgress = (CircularProgressIndicator) root.findViewById(R.id.loadProgress);
@@ -140,18 +143,20 @@ public class DataViewerFragment extends Fragment {
                 int checkedId = Tabs.getSelectedTabPosition();
                 switch (checkedId) {
                     case 0:
-                        TransitionManager.beginDelayedTransition(DetailsGroup, new AutoTransition());
+                        TransitionManager.beginDelayedTransition(MainLayout, new AutoTransition());
                         CachedDataGroup.setVisibility(View.VISIBLE);
                         LiveDataGroup.setVisibility(View.GONE);
                         CachedCharts.setVisibility(View.VISIBLE);
                         LiveCharts.setVisibility(View.INVISIBLE);
+                        Tabs2.setVisibility(View.VISIBLE);
                         break;
                     case 1:
-                        TransitionManager.beginDelayedTransition(DetailsGroup, new AutoTransition());
+                        TransitionManager.beginDelayedTransition(MainLayout, new AutoTransition());
                         CachedDataGroup.setVisibility(View.GONE);
                         LiveDataGroup.setVisibility(View.VISIBLE);
                         LiveCharts.setVisibility(View.VISIBLE);
                         CachedCharts.setVisibility(View.INVISIBLE);
+                        Tabs2.setVisibility(View.GONE);
                         break;
                 }
             }
@@ -163,6 +168,28 @@ public class DataViewerFragment extends Fragment {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
+            }
+        });
+
+        Tabs2.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if(CachedCharts.getData()!=null){
+                    CachedCharts.getData().clearValues();
+                    postData(data,CachedCharts);
+                    CachedCharts.animateX(2000);
+                    CachedCharts.invalidate();
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
             }
         });
 
@@ -418,6 +445,16 @@ public class DataViewerFragment extends Fragment {
     class YValueFormatter extends ValueFormatter{
         @Override
         public String getAxisLabel(float value, AxisBase axis) {
+            if(Tabs2.getSelectedTabPosition()==0)
+                return String.format("%.2f m",value);
+            else
+                return String.format("%.2f",value);
+        }
+    }
+
+    class YValueFormatterRT extends ValueFormatter{
+        @Override
+        public String getAxisLabel(float value, AxisBase axis) {
             return String.format("%.2f m",value);
         }
     }
@@ -426,7 +463,11 @@ public class DataViewerFragment extends Fragment {
         ArrayList<Entry> values = new ArrayList<>();
         int x = 0;
         for(FileAccess.plottingData bData:data){
-            Entry newEntry = new Entry((float) x++, bData.getWaterLevel());
+            Entry newEntry;
+            if(Tabs2.getSelectedTabPosition()==1)
+                 newEntry = new Entry((float) x++, bData.getBatteryPercentage());
+            else
+                 newEntry = new Entry((float) x++, bData.getWaterLevel());
             values.add(newEntry);
 //            Log.d("Plotter", "postData: " + values.get(values.indexOf(newEntry)).getX());
         }
@@ -513,7 +554,7 @@ public class DataViewerFragment extends Fragment {
         y.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
         y.setDrawGridLines(true);
         y.setDrawAxisLine(true);
-        y.setValueFormatter(new YValueFormatter());
+        y.setValueFormatter(new YValueFormatterRT());
 
         chart.getAxisRight().setEnabled(false);
 
@@ -601,7 +642,10 @@ public class DataViewerFragment extends Fragment {
         }
 
         public void refreshContent(Entry e, Highlight highlight) {
-            tValueY.setText(String.valueOf(e.getY()));
+            if(Tabs2.getSelectedTabPosition()==0)
+                tValueY.setText(String.valueOf(e.getY())+" m");
+            else
+                tValueY.setText(String.valueOf(e.getY())+"%");
             long timestamp = ((FileAccess.plottingData) DataViewerFragment.this.data.get((int) e.getX())).getTimestamp();
             tValueX1.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date(timestamp)));
             tValueX2.setText(new SimpleDateFormat("HH:mm:ss").format(new Date(timestamp)));

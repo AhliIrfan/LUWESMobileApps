@@ -8,7 +8,8 @@
     android:layout_height="match_parent">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/MainLayoutData">
 
         <com.google.android.material.tabs.TabLayout
             android:layout_width="match_parent"
@@ -37,6 +38,7 @@
             android:textAllCaps="false"
             android:textSize="@dimen/text_subtitle"
             android:visibility="gone"/>
+
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/loadProgress"
             android:visibility="invisible"
@@ -63,6 +65,23 @@
             android:layout_below="@id/ChartTitle"
             android:visibility="invisible" />
 
+        <com.google.android.material.tabs.TabLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lineChart"
+            android:id="@+id/Tab2">
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/WaterLevel"
+                android:icon="@drawable/ic_water"/>
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/BatteryPercentage"
+                android:icon="@drawable/ic_battery"/>
+        </com.google.android.material.tabs.TabLayout>
+
         <com.google.android.material.divider.MaterialDivider
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,7 +91,7 @@
             android:id="@+id/DetailsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/lineChart"
+            android:layout_below="@id/Tab2"
             android:layout_margin="@dimen/border_margin"
             app:strokeWidth="@dimen/stroke_width"
             app:strokeColor="@color/colorPrimary">

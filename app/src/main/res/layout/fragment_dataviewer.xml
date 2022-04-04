@@ -37,6 +37,17 @@
             android:textAllCaps="false"
             android:textSize="@dimen/text_subtitle"
             android:visibility="gone"/>
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/loadProgress"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="200dp"
+            android:indeterminate="true"
+            android:layout_below="@+id/Tab"
+            android:layout_centerHorizontal="true"
+            android:elevation="@dimen/stroke_width"
+            app:indicatorSize="100dp"/>
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/lineChart"

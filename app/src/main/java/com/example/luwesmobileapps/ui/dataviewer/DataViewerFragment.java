@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,13 +29,16 @@ import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.utils.MPPointF;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -47,6 +51,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 public class DataViewerFragment extends Fragment {
@@ -297,16 +302,17 @@ public class DataViewerFragment extends Fragment {
             chart.setBackgroundColor(getContext().getResources().getColor(R.color.colorDarkGray));
         else
             chart.setBackgroundColor(Color.WHITE);
-        // no description text
+
         chart.getDescription().setEnabled(false);
-        // enable touch gestures
         chart.setTouchEnabled(true);
-        // enable scaling and dragging
         chart.setDragEnabled(true);
-        chart.setScaleEnabled(true);
+        chart.setScaleXEnabled(true);
+        chart.setScaleYEnabled(false);
         chart.setHighlightPerDragEnabled(true);
-        // if disabled, scaling can be done on x- and y-axis separately
         chart.setPinchZoom(false);
+        CustomMarkerView mv = new CustomMarkerView(getContext(), R.layout.graph_marker);
+        mv.setChartView(chart);
+        chart.setMarker(mv);
 
         chart.setDrawGridBackground(false);
         chart.setMaxHighlightDistance(300);
@@ -362,32 +368,33 @@ public class DataViewerFragment extends Fragment {
         chart.invalidate();
     }
 
-    class XValueFormatter extends ValueFormatter{
-        @Override
-        public String getAxisLabel(float value,AxisBase axis) {
+    class XValueFormatter extends ValueFormatter {
+        XValueFormatter() {
+        }
+
+        public String getAxisLabel(float value, AxisBase axis) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             Date startDate = null;
             try {
-                startDate = sdf.parse(StartDate.getEditText().getText().toString()+" 00:00:00");
+                startDate = sdf.parse(DataViewerFragment.this.StartDate.getEditText().getText().toString() + " 00:00:00");
             } catch (ParseException e) {
                 e.printStackTrace();
             }
             Date endDate = null;
             try {
-                endDate = sdf.parse(EndDate.getEditText().getText().toString()+" 23:59:00");
-            } catch (ParseException e) {
-                e.printStackTrace();
+                endDate = sdf.parse(DataViewerFragment.this.EndDate.getEditText().getText().toString() + " 23:59:00");
+            } catch (ParseException e2) {
+                e2.printStackTrace();
             }
-            long diff = endDate.getTime()-startDate.getTime();
-            int timeSpan = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
-            String timestamp;
-            if(timeSpan<=1)
-                timestamp = new SimpleDateFormat("HH:mm").format(new Date((long)value));
-            else if(timeSpan>365)
-                timestamp = new SimpleDateFormat("MMM yy HH:00").format(new Date((long)value));
-            else
-                timestamp = new SimpleDateFormat("dd MMM HH:mm").format(new Date((long)value));
-            return timestamp;
+            int timeSpan = ((int) TimeUnit.DAYS.convert(endDate.getTime() - startDate.getTime(), TimeUnit.MILLISECONDS)) + 1;
+            long newValue = ((FileAccess.plottingData) DataViewerFragment.this.data.get((int) value)).getTimestamp();
+            if (timeSpan <= 1) {
+                return new SimpleDateFormat("HH:mm").format(new Date(newValue));
+            }
+            if (timeSpan > 28) {
+                return new SimpleDateFormat("dd/MM/yyyy HH:00").format(new Date(newValue));
+            }
+            return new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date(newValue));
         }
     }
 
@@ -408,44 +415,40 @@ public class DataViewerFragment extends Fragment {
         }
     }
 
-    private void postData(ArrayList<FileAccess.plottingData> data,LineChart chart) {
-
+    public void postData(ArrayList<FileAccess.plottingData> data2, LineChart chart) {
         ArrayList<Entry> values = new ArrayList<>();
-
-        for (FileAccess.plottingData bData : data) {
-            values.add(new Entry(bData.getTimestamp(), bData.getWaterLevel()));
+        int x = 0;
+        Iterator<FileAccess.plottingData> it = data2.iterator();
+        while (it.hasNext()) {
+            int x2 = x + 1;
+            Entry newEntry = new Entry((float) x, it.next().getWaterLevel());
+            values.add(newEntry);
+            Log.d("Plotter", "postData: " + values.get(values.indexOf(newEntry)).getX());
+            x = x2;
         }
-
-        LineDataSet set1;
-
-        if (chart.getData() != null &&
-                chart.getData().getDataSetCount() > 0) {
-            set1 = (LineDataSet) chart.getData().getDataSetByIndex(0);
-            set1.setValues(values);
-            chart.getData().notifyDataChanged();
-            chart.notifyDataSetChanged();
-        } else {
-            // create a dataset and give it a type
-            set1 = new LineDataSet(values, DeviceListOpt.getText().toString());
-
+        if (chart.getData() == null || ((LineData) chart.getData()).getDataSetCount() <= 0) {
+            LineDataSet set1 = new LineDataSet(values, this.DeviceListOpt.getText().toString());
             set1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
             set1.setCubicIntensity(0.2f);
             set1.setDrawFilled(false);
-            set1.setDrawCircles(false);
+            set1.setDrawCircles(true);
+            set1.setCircleColor(ContextCompat.getColor(getContext(), R.color.colorSecondary));
+            set1.setCircleHoleColor(ContextCompat.getColor(getContext(), R.color.colorSecondary));
+            set1.setCircleRadius(3.0f);
             set1.setLineWidth(1.8f);
-            set1.setHighLightColor(ContextCompat.getColor(getContext(),R.color.colorPrimaryVariant));
-            set1.setColor(ContextCompat.getColor(getContext(),R.color.colorPrimary));
+            set1.setHighLightColor(ContextCompat.getColor(getContext(), R.color.colorSecondary));
+            set1.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
             set1.setDrawHorizontalHighlightIndicator(true);
             set1.setFillFormatter((dataSet, dataProvider) -> chart.getAxisLeft().getAxisMinimum());
-
-            // create a data object with the data sets
             LineData dataL = new LineData(set1);
-            dataL.setValueTextSize(9f);
+            dataL.setValueTextSize(9.0f);
             dataL.setDrawValues(false);
-
-            // set data
             chart.setData(dataL);
+            return;
         }
+        ((LineDataSet) ((LineData) chart.getData()).getDataSetByIndex(0)).setValues(values);
+        ((LineData) chart.getData()).notifyDataChanged();
+        chart.notifyDataSetChanged();
     }
 
     private void setupChartRT(LineChart chart, boolean NightMode){
@@ -456,16 +459,16 @@ public class DataViewerFragment extends Fragment {
             chart.setBackgroundColor(getContext().getResources().getColor(R.color.colorDarkGray));
         else
             chart.setBackgroundColor(Color.WHITE);
-        // no description text
         chart.getDescription().setEnabled(false);
-        // enable touch gestures
         chart.setTouchEnabled(true);
-        // enable scaling and dragging
         chart.setDragEnabled(true);
-        chart.setScaleEnabled(true);
+        chart.setScaleXEnabled(true);
+        chart.setScaleYEnabled(false);
         chart.setHighlightPerDragEnabled(true);
-        // if disabled, scaling can be done on x- and y-axis separately
         chart.setPinchZoom(false);
+        CustomMarkerView mv = new CustomMarkerView(getContext(), R.layout.graph_marker);
+        mv.setChartView(chart);
+        chart.setMarker(mv);
 
         chart.setDrawGridBackground(false);
         chart.setMaxHighlightDistance(300);
@@ -583,4 +586,26 @@ public class DataViewerFragment extends Fragment {
         }
     }
 
+
+    public class CustomMarkerView extends MarkerView {
+        private TextView tValueX1 = ((TextView) findViewById(R.id.tvContentX1));
+        private TextView tValueX2 = ((TextView) findViewById(R.id.tvContentX2));
+        private TextView tValueY = ((TextView) findViewById(R.id.tvContentY));
+
+        public CustomMarkerView(Context context, int layoutResource) {
+            super(context, layoutResource);
+        }
+
+        public void refreshContent(Entry e, Highlight highlight) {
+            this.tValueY.setText(String.valueOf(e.getY()));
+            long timestamp = ((FileAccess.plottingData) DataViewerFragment.this.data.get((int) e.getX())).getTimestamp();
+            this.tValueX1.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date(timestamp)));
+            this.tValueX2.setText(new SimpleDateFormat("HH:mm:00").format(new Date(timestamp)));
+            super.refreshContent(e, highlight);
+        }
+
+        public MPPointF getOffset() {
+            return new MPPointF((float) (-(getWidth() + 5)), (float) (-(getHeight() + 5)));
+        }
+    }
 }

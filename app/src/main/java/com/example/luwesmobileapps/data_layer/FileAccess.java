@@ -225,13 +225,17 @@ public class FileAccess {
                     Date DateToConvert = null;
                     if (bufferData[0] != null) {
                         try {
-                            DateToConvert = sdf.parse(bufferData[0]);
+                            DateToConvert = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(bufferData[0]);
                         } catch (ParseException e) {
-                            e.printStackTrace();
+                            DateToConvert = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bufferData[0]);
                         }
                     }
                     assert DateToConvert != null;
                     long timestamp = DateToConvert.getTime();
+                    if(DownloadLength>28)
+                        timestamp = timestamp*360000/360000;
+                    else
+                        timestamp = timestamp*60000/60000;
                     float waterLevel = Float.parseFloat(bufferData[1]);
                     float batteryPercentage = Float.parseFloat(bufferData[3]);
                     //Creating Student object for every student record and adding it to ArrayList

@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.util.Log;
@@ -42,6 +43,7 @@ import com.github.mikephil.charting.utils.MPPointF;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputLayout;
@@ -72,6 +74,7 @@ public class DataViewerFragment extends Fragment {
 
     private LineChart CachedCharts;
     private LineChart LiveCharts;
+    private CircularProgressIndicator LoadProgress;
     private FileAccess myFileAccess = new FileAccess();
     private AutoCompleteTextView DeviceListOpt;
     private TextInputLayout StartDate;
@@ -109,6 +112,7 @@ public class DataViewerFragment extends Fragment {
         Tabs = root.findViewById(R.id.Tab);
         //Cached Data Group
         CachedDataGroup = root.findViewById(R.id.CachedDataGroup);
+        LoadProgress = (CircularProgressIndicator) root.findViewById(R.id.loadProgress);
         DetailsGroup = root.findViewById(R.id.DetailsContainer);
         DeviceListOpt = root.findViewById(R.id.selectDeviceContent);
         StartDate = root.findViewById(R.id.startDate);
@@ -123,8 +127,11 @@ public class DataViewerFragment extends Fragment {
         InternetConnectionStatus = root.findViewById(R.id.InternetConnection);
         Listen = root.findViewById(R.id.realtimebutton);
         BadgeDrawable LiveBadge = Tabs.getTabAt(1).getOrCreateBadge();
+        BadgeDrawable CachedBadge = Tabs.getTabAt(0).getOrCreateBadge();
         LiveBadge.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.colorSecondary));
         LiveBadge.setVisible(false);
+        CachedBadge.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorSecondary));
+        CachedBadge.setVisible(false);
 
         Listen.setEnabled(false);
         Tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -201,16 +208,12 @@ public class DataViewerFragment extends Fragment {
             }
             if((startDate!=null)&&(endDate!=null)&&(!DeviceListOpt.getText().toString().isEmpty())){
                 data.clear();
+                CachedCharts.getData().clearValues();
                 Thread LoadThread = new LoadData(DeviceListOpt.getText().toString(),data,startDate,endDate);
                 LoadThread.start();
                 Generate.setEnabled(false);
-//                myFileAccess.LoadPlotData(DeviceListOpt.getText().toString(),data,startDate,endDate);
-//                if(!data.isEmpty()) {
-//                    postData(data, CachedCharts);
-//                    CachedCharts.animateX(2000);
-//                    CachedCharts.invalidate();
-//                }else
-//                    Snackbar.make(getContext(),getView(),"No records for selected time span",Snackbar.LENGTH_SHORT).show();
+                LoadProgress.setVisibility(View.VISIBLE);
+                CachedBadge.setVisible(true);
             }else{
                 Snackbar.make(getContext(),getView(),"Please input required parameter first",Snackbar.LENGTH_SHORT).show();
             }
@@ -277,17 +280,21 @@ public class DataViewerFragment extends Fragment {
         DeviceViewModel.getGenerateData().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                if(aBoolean){
-                    if(!data.isEmpty()) {
-                        postData(data, CachedCharts);
-                        CachedCharts.animateX(2000);
-                        CachedCharts.invalidate();
-                        Generate.setEnabled(true);
-                    }else {
-                        Snackbar.make(getContext(), getView(), "No records for selected time span", Snackbar.LENGTH_SHORT).show();
-                        Generate.setEnabled(true);
-                    }
+                if(aBoolean){if (!data.isEmpty()) {
+                    postData(data, DataViewerFragment.this.CachedCharts);
+                    CachedCharts.animateX(2000);
+                    CachedCharts.invalidate();
+                } else {
+                    Snackbar.make(getContext(), DataViewerFragment.this.getView(), "No records for selected time span", Snackbar.LENGTH_SHORT).show();
+                }
+                    LoadProgress.setVisibility(View.INVISIBLE);
                     DeviceViewModel.setGenerateData(false);
+                    CachedBadge.setVisible(false);
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            DataViewerFragment.this.Generate.setEnabled(true);
+                        }
+                    }, 3000);
                 }
             }
         });
@@ -415,16 +422,13 @@ public class DataViewerFragment extends Fragment {
         }
     }
 
-    public void postData(ArrayList<FileAccess.plottingData> data2, LineChart chart) {
+    public void postData(ArrayList<FileAccess.plottingData> data, LineChart chart) {
         ArrayList<Entry> values = new ArrayList<>();
         int x = 0;
-        Iterator<FileAccess.plottingData> it = data2.iterator();
-        while (it.hasNext()) {
-            int x2 = x + 1;
-            Entry newEntry = new Entry((float) x, it.next().getWaterLevel());
+        for(FileAccess.plottingData bData:data){
+            Entry newEntry = new Entry((float) x++, bData.getWaterLevel());
             values.add(newEntry);
-            Log.d("Plotter", "postData: " + values.get(values.indexOf(newEntry)).getX());
-            x = x2;
+//            Log.d("Plotter", "postData: " + values.get(values.indexOf(newEntry)).getX());
         }
         if (chart.getData() == null || ((LineData) chart.getData()).getDataSetCount() <= 0) {
             LineDataSet set1 = new LineDataSet(values, this.DeviceListOpt.getText().toString());
@@ -466,9 +470,9 @@ public class DataViewerFragment extends Fragment {
         chart.setScaleYEnabled(false);
         chart.setHighlightPerDragEnabled(true);
         chart.setPinchZoom(false);
-        CustomMarkerView mv = new CustomMarkerView(getContext(), R.layout.graph_marker);
-        mv.setChartView(chart);
-        chart.setMarker(mv);
+//        CustomMarkerView mv = new CustomMarkerView(getContext(), R.layout.graph_marker);
+//        mv.setChartView(chart);
+//        chart.setMarker(mv);
 
         chart.setDrawGridBackground(false);
         chart.setMaxHighlightDistance(300);
@@ -597,10 +601,10 @@ public class DataViewerFragment extends Fragment {
         }
 
         public void refreshContent(Entry e, Highlight highlight) {
-            this.tValueY.setText(String.valueOf(e.getY()));
+            tValueY.setText(String.valueOf(e.getY()));
             long timestamp = ((FileAccess.plottingData) DataViewerFragment.this.data.get((int) e.getX())).getTimestamp();
-            this.tValueX1.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date(timestamp)));
-            this.tValueX2.setText(new SimpleDateFormat("HH:mm:00").format(new Date(timestamp)));
+            tValueX1.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date(timestamp)));
+            tValueX2.setText(new SimpleDateFormat("HH:mm:ss").format(new Date(timestamp)));
             super.refreshContent(e, highlight);
         }
 

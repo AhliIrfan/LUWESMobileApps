@@ -219,7 +219,7 @@ public class DevicePageFragment extends Fragment {
             else{
                 TransitionManager.beginDelayedTransition(SettingCard, new AutoTransition());
                 SettingLayout.setVisibility(View.VISIBLE);
-                if(!DeviceViewModel.getRealTimeStatus().getValue()&&DeviceViewModel.getRealTimeStatus().getValue()!=null) {
+                if(!DeviceViewModel.getRealTimeStatus().getValue()&&!DeviceViewModel.getDownloadStatus().getValue()) {
                     if (DeviceViewModel.getConnectStatus().getValue() == 1)
                         listener.BTSend("LWST,7000000#\r\n");
                     else if (DeviceViewModel.getConnectStatus().getValue() == 2)

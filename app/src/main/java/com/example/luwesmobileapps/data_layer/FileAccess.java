@@ -93,12 +93,12 @@ public class FileAccess {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             plottingData that = (plottingData) o;
-            return timestamp == that.timestamp && Float.compare(that.waterLevel, waterLevel) == 0 && Float.compare(that.batteryPercentage, batteryPercentage) == 0;
+            return timestamp == that.timestamp;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(timestamp, waterLevel, batteryPercentage);
+            return Objects.hash(timestamp);
         }
     }
 
@@ -233,9 +233,10 @@ public class FileAccess {
                     assert DateToConvert != null;
                     long timestamp = DateToConvert.getTime();
                     if(DownloadLength>28)
-                        timestamp = timestamp*360000/360000;
+                        timestamp = (timestamp/3600000)*3600000;
                     else
-                        timestamp = timestamp*60000/60000;
+                        timestamp = (timestamp/60000)*60000;
+                    Log.d("TAG", "LoadPlotData: "+ String.valueOf(timestamp));
                     float waterLevel = Float.parseFloat(bufferData[1]);
                     float batteryPercentage = Float.parseFloat(bufferData[3]);
                     //Creating Student object for every student record and adding it to ArrayList

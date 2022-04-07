@@ -72,6 +72,7 @@ public class BTService extends Service {
         super.onCreate();
         deviceData = new SharedData();
         deviceData.postDownloadStatus(false);
+        deviceData.postRealTimeStatus(false);
     }
 
     @SuppressLint("MissingPermission")

@@ -26,7 +26,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/DeviceInfoTitle"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textAlignment="textStart"
                     android:layout_height="wrap_content"
                     android:text="Device Info"
                     android:textSize="@dimen/text_subtitle"
@@ -140,7 +141,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/RecordHistoryTitle"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textAlignment="textStart"
                     android:layout_height="wrap_content"
                     android:text="Record History"
                     android:textSize="@dimen/text_subtitle"
@@ -217,7 +219,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/SettingParameterTitle"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textAlignment="textStart"
                     android:layout_height="wrap_content"
                     android:text="Setting Parameter"
                     android:textSize="@dimen/text_subtitle"
@@ -510,7 +513,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/DataLogDownloadTitle"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textAlignment="textStart"
                     android:layout_height="wrap_content"
                     android:text="Data Log Download"
                     android:textSize="@dimen/text_subtitle"

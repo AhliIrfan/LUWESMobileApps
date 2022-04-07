@@ -446,9 +446,9 @@ public class DataViewerFragment extends Fragment {
         @Override
         public String getAxisLabel(float value, AxisBase axis) {
             if(Tabs2.getSelectedTabPosition()==0)
-                return String.format("%.2f m",value);
+                return String.format("%.2f",value)+" m";
             else
-                return String.format("%.2f",value);
+                return String.format("%.2f",value)+"%";
         }
     }
 
@@ -643,9 +643,9 @@ public class DataViewerFragment extends Fragment {
 
         public void refreshContent(Entry e, Highlight highlight) {
             if(Tabs2.getSelectedTabPosition()==0)
-                tValueY.setText(String.valueOf(e.getY())+" m");
+                tValueY.setText(String.format("%.2f",e.getY()) +" m");
             else
-                tValueY.setText(String.valueOf(e.getY())+"%");
+                tValueY.setText(String.format("%.2f",e.getY()) +"%");
             long timestamp = ((FileAccess.plottingData) DataViewerFragment.this.data.get((int) e.getX())).getTimestamp();
             tValueX1.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date(timestamp)));
             tValueX2.setText(new SimpleDateFormat("HH:mm:ss").format(new Date(timestamp)));

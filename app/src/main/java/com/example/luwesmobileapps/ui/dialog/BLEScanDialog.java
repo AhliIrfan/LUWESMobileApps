@@ -14,12 +14,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.core.content.ContextCompat;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.luwesmobileapps.R;
 import com.example.luwesmobileapps.service.BLEService;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import java.util.Objects;
 
 public class BLEScanDialog extends AppCompatDialogFragment {
     private fragmentListener listener;
@@ -30,9 +34,9 @@ public class BLEScanDialog extends AppCompatDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireActivity());
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.ble_scan_dialog, null);
 
         builder.setView(view);
@@ -64,7 +68,7 @@ public class BLEScanDialog extends AppCompatDialogFragment {
                 listener.BLEStopScan();
                 Intent BLEServiceIntent = new Intent(getActivity(), BLEService.class);
                 BLEServiceIntent.putExtra("Device Input",device);
-                ContextCompat.startForegroundService(getActivity(),BLEServiceIntent);
+                ContextCompat.startForegroundService(requireActivity(),BLEServiceIntent);
                 dismiss();
             }
         });

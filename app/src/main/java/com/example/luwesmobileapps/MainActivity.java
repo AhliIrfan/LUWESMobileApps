@@ -12,30 +12,36 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.widget.RelativeLayout;
+import android.widget.Toolbar;
 
 import com.example.luwesmobileapps.data_layer.SharedData;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
@@ -49,9 +55,11 @@ import com.example.luwesmobileapps.ui.home.HomeFragment;
 import com.example.luwesmobileapps.ui.setting.SettingFragment;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
+import androidx.core.splashscreen.SplashScreen;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -94,12 +102,12 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+//        setTheme(R.style.AppTheme);
         MainActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView BotNav = findViewById(R.id.bottom_navigation);
-//        Toolbar toolbar = findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
         RelativeLayout ScanAction = findViewById(R.id.connectmenu);
         fab = findViewById(R.id.fab);
         FloatingActionButton BTScan = findViewById(R.id.action_bluetoothscan);
@@ -114,6 +122,8 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         registerReceiver(BTReceiver,filter4);
         registerReceiver(BTReceiver,filter5);
         DeviceViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
+
+
 
         int nightModeFlags =
                 this.getResources().getConfiguration().uiMode &
@@ -135,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
                 break;
         }
 
-        if (Build.VERSION.SDK_INT >= 30) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
                 DeviceViewModel.setBTPermission(true);
             } else {
@@ -161,10 +171,12 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
             DeviceViewModel.setFilePermission(false);
         }
 
+
+
         DeviceViewModel.getBTPermission().observe(this, aBoolean -> {
             if(aBoolean){
                 fabBT=true;
-                if(aBoolean&&fabLoc)
+                if(fabLoc)
                     fab.setVisibility(View.VISIBLE);
             }else{
                 fab.setVisibility(View.GONE);
@@ -174,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         DeviceViewModel.getLocPermission().observe(this, aBoolean -> {
             if(aBoolean){
                 fabLoc=true;
-                if(aBoolean&&fabBT)
+                if(fabBT)
                     fab.setVisibility(View.VISIBLE);
             }else{
                 fab.setVisibility(View.GONE);
@@ -234,8 +246,6 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
             TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
             ScanAction.setVisibility(View.INVISIBLE);
         });
-//        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-//        NavigationView navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         Menu nav_menu = BotNav.getMenu();
@@ -269,14 +279,21 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
                     RealtimeBadge.setVisible(false);
             }
         });
-//
-//        mAppBarConfiguration = new AppBarConfiguration.Builder(
-//                R.id.nav_home, R.id.nav_setting, R.id.nav_devicepage, R.id.nav_graph)
-//                .setOpenableLayout(drawer)
-//                .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(BotNav, navController);
+
+
+        if (!(DeviceViewModel.getLocPermission().getValue() &&
+                DeviceViewModel.getBTPermission().getValue() &&
+                DeviceViewModel.getFilePermission().getValue())) {
+            AlertDialog myDialog = new MaterialAlertDialogBuilder(this)
+                    .setTitle("Missing Permission")
+                    .setMessage("There is some missing permission to fully run the apps. Please allow the required permission" +
+                            " through the apps setting page.")
+                    .setPositiveButton("Dismiss", (dialogInterface, i) -> dialogInterface.dismiss())
+                    .create();
+            myDialog.show();
+        }
 
     }
 
@@ -334,11 +351,6 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
                     btScanDialog.ScanButton(4,true);
                 Log.d("Device Discovery","Stop Discovering");
             }
-//            if(BluetoothDevice.ACTION_PAIRING_REQUEST.equals(intent.getAction())){
-//                Log.d("TAG", "onReceive: Req Pairing");
-//                BluetoothDevice myDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-//                myDevice.setPin("2912".getBytes());
-//            }
         }
     }
 
@@ -397,7 +409,21 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
 //        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 //        }
 //        else {
-             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                     Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Environment.isExternalStorageManager()){
+                // If you don't have access, launch a new activity to show the user the system's dialog
+                // to allow access to the external storage
+            }else{
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                Uri uri = Uri.fromParts("package", this.getPackageName(), null);
+                intent.setData(uri);
+                startActivity(intent);
+            }
+        }
 //        }
     }
 
@@ -421,6 +447,11 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
                 ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.BLUETOOTH_CONNECT,
                         Manifest.permission.BLUETOOTH_SCAN,}, 3);
+            }
+            else{
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.BLUETOOTH_ADMIN,
+                        Manifest.permission.BLUETOOTH,}, 3);
             }
 //        }
     }
@@ -501,7 +532,7 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
                 public void onScanResult(int callbackType, ScanResult result) {
                     super.onScanResult(callbackType, result);
                     BluetoothDevice ScannedDevice = result.getDevice();
-                    if(!ScannedDeviceList.contains(ScannedDevice.getName())) {
+                    if(!ScannedDeviceList.contains(ScannedDevice.getName())&&ScannedDevice!=null){
                         bleScanDialog.AddScannedDevice(ScannedDevice);
                         ScannedDeviceList.add(ScannedDevice.getName());
                     }

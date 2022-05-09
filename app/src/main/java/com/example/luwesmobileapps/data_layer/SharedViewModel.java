@@ -37,7 +37,7 @@ public class SharedViewModel extends ViewModel {
     private MutableLiveData<Boolean> LocPermission = new MutableLiveData<>();
     private MutableLiveData<Boolean> FilePermission = new MutableLiveData<>();
     private MutableLiveData<Boolean> NightMode = new MutableLiveData<>();
-    private MutableLiveData<Boolean> GenerateData = new MutableLiveData<>();
+    private MutableLiveData<Integer> GenerateData = new MutableLiveData<>();
     private MutableLiveData<Integer> ConnectStatus;
 
     public SharedViewModel() {
@@ -60,12 +60,12 @@ public class SharedViewModel extends ViewModel {
         RecordStatus = DeviceData.getRecordStatus();
         InternetConnectionStatus = DeviceData.getInternetConnectionStatus();
         //Device Logic Data//
-        SettingStatus = DeviceData.getSettingStatus();
-        SyncStatus = DeviceData.getSyncStatus();
-        RealTimeStatus = DeviceData.getRealTimeStatus();
-        ConnectStatus = DeviceData.getConnectStatus();
-        DownloadStatus = DeviceData.getDownloadStatus();
-        DeviceDataChanged = DeviceData.getDeviceDataChanged();
+        SettingStatus = SharedData.getSettingStatus();
+        SyncStatus = SharedData.getSyncStatus();
+        RealTimeStatus = SharedData.getRealTimeStatus();
+        ConnectStatus = SharedData.getConnectStatus();
+        DownloadStatus = SharedData.getDownloadStatus();
+        DeviceDataChanged = SharedData.getDeviceDataChanged();
     }
 
     public LiveData<String> getSiteName() {
@@ -160,7 +160,7 @@ public class SharedViewModel extends ViewModel {
         return DownloadStatus;
     }
 
-    public LiveData<Boolean> getGenerateData() {
+    public LiveData<Integer> getGenerateData() {
         return GenerateData;
     }
 
@@ -277,11 +277,11 @@ public class SharedViewModel extends ViewModel {
         DownloadStatus.setValue(DownloadStatusSet);
     }
 
-    public void postGenerateData(boolean generateData) {
+    public void postGenerateData(int generateData) {
         GenerateData.postValue(generateData);
     }
 
-    public void setGenerateData(boolean generateData) {
+    public void setGenerateData(Integer generateData) {
         GenerateData.setValue(generateData);
     }
 

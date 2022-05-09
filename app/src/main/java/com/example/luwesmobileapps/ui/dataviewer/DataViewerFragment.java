@@ -53,7 +53,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class DataViewerFragment extends Fragment {
@@ -72,7 +72,9 @@ public class DataViewerFragment extends Fragment {
     private TextView RecordStatus;
     private TextView InternetConnectionStatus;
     private MaterialButton Listen;
-
+    private String prevTimeStamp;
+    private long FirstTimestamp;
+    //Cached Data Group
     private LineChart CachedCharts;
     private LineChart LiveCharts;
     private CircularProgressIndicator LoadProgress;
@@ -80,9 +82,9 @@ public class DataViewerFragment extends Fragment {
     private AutoCompleteTextView DeviceListOpt;
     private TextInputLayout StartDate;
     private TextInputLayout EndDate;
+    private MaterialButton Plot;
     private MaterialButton Generate;
     private ArrayList<FileAccess.plottingData> data = new ArrayList<>();
-    private String prevTimeStamp;
 
     public interface fragmentListener{
         void BTSend(String string);
@@ -115,11 +117,12 @@ public class DataViewerFragment extends Fragment {
         Tabs2 = root.findViewById(R.id.Tab2);
         //Cached Data Group
         CachedDataGroup = root.findViewById(R.id.CachedDataGroup);
-        LoadProgress = (CircularProgressIndicator) root.findViewById(R.id.loadProgress);
+        LoadProgress = root.findViewById(R.id.loadProgress);
         DetailsGroup = root.findViewById(R.id.DetailsContainer);
         DeviceListOpt = root.findViewById(R.id.selectDeviceContent);
         StartDate = root.findViewById(R.id.startDate);
         EndDate = root.findViewById(R.id.endDate);
+        Plot = root.findViewById(R.id.Plot);
         Generate = root.findViewById(R.id.Generate);
         //Live Data Group
         LiveDataGroup = root.findViewById(R.id.LiveDataGroup);
@@ -129,11 +132,11 @@ public class DataViewerFragment extends Fragment {
         RecordStatus = root.findViewById(R.id.Record);
         InternetConnectionStatus = root.findViewById(R.id.InternetConnection);
         Listen = root.findViewById(R.id.realtimebutton);
-        BadgeDrawable LiveBadge = Tabs.getTabAt(1).getOrCreateBadge();
-        BadgeDrawable CachedBadge = Tabs.getTabAt(0).getOrCreateBadge();
-        LiveBadge.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.colorSecondary));
+        BadgeDrawable LiveBadge = Objects.requireNonNull(Tabs.getTabAt(1)).getOrCreateBadge();
+        BadgeDrawable CachedBadge = Objects.requireNonNull(Tabs.getTabAt(0)).getOrCreateBadge();
+        LiveBadge.setBackgroundColor(ContextCompat.getColor(requireContext(),R.color.colorSecondary));
         LiveBadge.setVisible(false);
-        CachedBadge.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorSecondary));
+        CachedBadge.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.colorSecondary));
         CachedBadge.setVisible(false);
 
         Listen.setEnabled(false);
@@ -192,13 +195,13 @@ public class DataViewerFragment extends Fragment {
 
             }
         });
+//
+//        ArrayAdapter<String> DeviceListAdapter = new ArrayAdapter<>(
+//                getActivity(),
+//                R.layout.device_option,myFileAccess.LoadDeviceList()
+//        );
 
-        ArrayAdapter<String> DeviceListAdapter = new ArrayAdapter<>(
-                getActivity(),
-                R.layout.device_option,myFileAccess.LoadDeviceList()
-        );
-
-        StartDate.getEditText().setOnClickListener(view -> {
+        Objects.requireNonNull(StartDate.getEditText()).setOnClickListener(view -> {
             DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), R.style.MyDateTimePickerDialogTheme, new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
@@ -208,7 +211,7 @@ public class DataViewerFragment extends Fragment {
             datePickerDialog.show();
         });
 
-        EndDate.getEditText().setOnClickListener(view -> {
+        Objects.requireNonNull(EndDate.getEditText()).setOnClickListener(view -> {
             DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), R.style.MyDateTimePickerDialogTheme, new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
@@ -217,6 +220,33 @@ public class DataViewerFragment extends Fragment {
             }, Calendar.getInstance().get(Calendar.YEAR),Calendar.getInstance().get(Calendar.MONTH),Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
             datePickerDialog.show();
 
+        });
+
+        Plot.setOnClickListener(view -> {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            Date startDate = null;
+            try {
+                startDate = sdf.parse(StartDate.getEditText().getText().toString()+" 00:00:00");
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Date endDate = null;
+            try {
+                endDate = sdf.parse(EndDate.getEditText().getText().toString()+" 23:59:00");
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if((startDate!=null)&&(endDate!=null)&&(!DeviceListOpt.getText().toString().isEmpty())){
+                data.clear();
+                CachedCharts.getData().clearValues();
+                Thread LoadThread = new LoadData(DeviceListOpt.getText().toString(),data,startDate,endDate,true);
+                LoadThread.start();
+                Plot.setEnabled(false);
+                LoadProgress.setVisibility(View.VISIBLE);
+                CachedBadge.setVisible(true);
+            }else{
+                Snackbar.make(getContext(), requireView(),"Please input required parameter first",Snackbar.LENGTH_SHORT).show();
+            }
         });
 
         Generate.setOnClickListener(view -> {
@@ -236,13 +266,13 @@ public class DataViewerFragment extends Fragment {
             if((startDate!=null)&&(endDate!=null)&&(!DeviceListOpt.getText().toString().isEmpty())){
                 data.clear();
                 CachedCharts.getData().clearValues();
-                Thread LoadThread = new LoadData(DeviceListOpt.getText().toString(),data,startDate,endDate);
+                Thread LoadThread = new LoadData(DeviceListOpt.getText().toString(),data,startDate,endDate,false);
                 LoadThread.start();
                 Generate.setEnabled(false);
                 LoadProgress.setVisibility(View.VISIBLE);
                 CachedBadge.setVisible(true);
             }else{
-                Snackbar.make(getContext(),getView(),"Please input required parameter first",Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(getContext(), requireView(),"Please input required parameter first",Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -264,7 +294,6 @@ public class DataViewerFragment extends Fragment {
             }
         });
 
-        DeviceListOpt.setAdapter(DeviceListAdapter);
         CachedCharts = root.findViewById(R.id.lineChart);
         LiveCharts = root.findViewById(R.id.lineChart2);
         setupChart(CachedCharts,DeviceViewModel.getNightMode().getValue());
@@ -304,25 +333,30 @@ public class DataViewerFragment extends Fragment {
                 Listen.setEnabled(true);
             }
         });
-        DeviceViewModel.getGenerateData().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                if(aBoolean){if (!data.isEmpty()) {
-                    postData(data, DataViewerFragment.this.CachedCharts);
-                    CachedCharts.animateX(2000);
-                    CachedCharts.invalidate();
+        DeviceViewModel.getGenerateData().observe(getViewLifecycleOwner(), (Observer<Integer>) stat -> {
+            if(stat!=0){
+                if (!data.isEmpty()) {
+                    if(stat==1){
+                        postData(data, DataViewerFragment.this.CachedCharts);
+                        CachedCharts.animateX(2000);
+                        CachedCharts.invalidate();
+                    }
+                    else if(stat==2)
+                        Snackbar.make(requireContext(), DataViewerFragment.this.requireView(), "Batched data file successfully generated and saved in "+ DeviceListOpt.getText().toString()+" records folder", Snackbar.LENGTH_LONG).show();
                 } else {
-                    Snackbar.make(getContext(), DataViewerFragment.this.getView(), "No records for selected time span", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(requireContext(), DataViewerFragment.this.requireView(), "No records for selected time span", Snackbar.LENGTH_SHORT).show();
                 }
-                    LoadProgress.setVisibility(View.INVISIBLE);
-                    DeviceViewModel.setGenerateData(false);
-                    CachedBadge.setVisible(false);
+                LoadProgress.setVisibility(View.INVISIBLE);
+                CachedBadge.setVisible(false);
+                if(stat==1) {
                     new Handler().postDelayed(new Runnable() {
                         public void run() {
-                            DataViewerFragment.this.Generate.setEnabled(true);
-                        }
-                    }, 3000);
+                            DataViewerFragment.this.Plot.setEnabled(true); }
+                        }, 3000);
                 }
+                else if(stat==2)
+                    DataViewerFragment.this.Generate.setEnabled(true);
+                DeviceViewModel.setGenerateData(0);
             }
         });
         return root;
@@ -333,7 +367,7 @@ public class DataViewerFragment extends Fragment {
         chart.setData(data);
         chart.calculateOffsets();
         if(NightMode)
-            chart.setBackgroundColor(getContext().getResources().getColor(R.color.colorDarkGray));
+            chart.setBackgroundColor(requireContext().getResources().getColor(R.color.colorDarkGray));
         else
             chart.setBackgroundColor(Color.WHITE);
 
@@ -410,18 +444,21 @@ public class DataViewerFragment extends Fragment {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             Date startDate = null;
             try {
-                startDate = sdf.parse(DataViewerFragment.this.StartDate.getEditText().getText().toString() + " 00:00:00");
+                startDate = sdf.parse(Objects.requireNonNull(DataViewerFragment.this.StartDate.getEditText()).getText().toString() + " 00:00:00");
             } catch (ParseException e) {
                 e.printStackTrace();
             }
             Date endDate = null;
             try {
-                endDate = sdf.parse(DataViewerFragment.this.EndDate.getEditText().getText().toString() + " 23:59:00");
+                endDate = sdf.parse(Objects.requireNonNull(DataViewerFragment.this.EndDate.getEditText()).getText().toString() + " 23:59:00");
             } catch (ParseException e2) {
                 e2.printStackTrace();
             }
+            assert endDate != null;
+            assert startDate != null;
             int timeSpan = ((int) TimeUnit.DAYS.convert(endDate.getTime() - startDate.getTime(), TimeUnit.MILLISECONDS)) + 1;
-            long newValue = ((FileAccess.plottingData) DataViewerFragment.this.data.get((int) value)).getTimestamp();
+//            long newValue = ((FileAccess.plottingData) DataViewerFragment.this.data.get((int) value)).getTimestamp();
+            long newValue = ((long) value)*60000+FirstTimestamp;
             if (timeSpan <= 1) {
                 return new SimpleDateFormat("HH:mm").format(new Date(newValue));
             }
@@ -432,7 +469,7 @@ public class DataViewerFragment extends Fragment {
         }
     }
 
-    class XValueFormatterRT extends ValueFormatter{
+    static class XValueFormatterRT extends ValueFormatter{
         @Override
         public String getAxisLabel(float value,AxisBase axis) {
             long convertedValue= TimeUnit.SECONDS.toMillis((long) value);
@@ -452,7 +489,7 @@ public class DataViewerFragment extends Fragment {
         }
     }
 
-    class YValueFormatterRT extends ValueFormatter{
+    static class YValueFormatterRT extends ValueFormatter{
         @Override
         public String getAxisLabel(float value, AxisBase axis) {
             return String.format("%.2f m",value);
@@ -464,21 +501,26 @@ public class DataViewerFragment extends Fragment {
         int x = 0;
         for(FileAccess.plottingData bData:data){
             Entry newEntry;
+            if(x==0){
+                FirstTimestamp = bData.getTimestamp();
+            }
+            long newX = (bData.getTimestamp()-FirstTimestamp)/60000;
             if(Tabs2.getSelectedTabPosition()==1)
-                 newEntry = new Entry((float) x++, bData.getBatteryPercentage());
+                 newEntry = new Entry((float) newX, bData.getBatteryPercentage());
             else
-                 newEntry = new Entry((float) x++, bData.getWaterLevel());
+                 newEntry = new Entry((float) newX, bData.getWaterLevel());
             values.add(newEntry);
-//            Log.d("Plotter", "postData: " + values.get(values.indexOf(newEntry)).getX());
+            x++;
+            Log.d("Plotter", "postData: " + values.get(values.indexOf(newEntry)).getX());
         }
         if (chart.getData() == null || ((LineData) chart.getData()).getDataSetCount() <= 0) {
             LineDataSet set1 = new LineDataSet(values, this.DeviceListOpt.getText().toString());
-            set1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-            set1.setCubicIntensity(0.2f);
+//            set1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+//            set1.setCubicIntensity(0.2f);
             set1.setDrawFilled(false);
             set1.setDrawCircles(true);
-            set1.setCircleColor(ContextCompat.getColor(getContext(), R.color.colorSecondary));
-            set1.setCircleHoleColor(ContextCompat.getColor(getContext(), R.color.colorSecondary));
+            set1.setCircleColor(ContextCompat.getColor(requireContext(), R.color.colorSecondary));
+            set1.setCircleHoleColor(ContextCompat.getColor(requireContext(), R.color.colorSecondary));
             set1.setCircleRadius(3.0f);
             set1.setLineWidth(1.8f);
             set1.setHighLightColor(ContextCompat.getColor(getContext(), R.color.colorSecondary));
@@ -501,7 +543,7 @@ public class DataViewerFragment extends Fragment {
         chart.setData(data);
         chart.calculateOffsets();
         if(NightMode)
-            chart.setBackgroundColor(getContext().getResources().getColor(R.color.colorDarkGray));
+            chart.setBackgroundColor(requireContext().getResources().getColor(R.color.colorDarkGray));
         else
             chart.setBackgroundColor(Color.WHITE);
         chart.getDescription().setEnabled(false);
@@ -597,13 +639,13 @@ public class DataViewerFragment extends Fragment {
     private LineDataSet createSet() {
         LineDataSet set = new LineDataSet(null, DeviceViewModel.getSiteName().getValue());
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setColor(ContextCompat.getColor(getContext(),R.color.colorPrimary));
-        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        set.setCubicIntensity(0.2f);
+        set.setColor(ContextCompat.getColor(requireContext(),R.color.colorPrimary));
+//        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+//        set.setCubicIntensity(0.2f);
         set.setDrawFilled(false);
         set.setDrawCircles(false);
         set.setLineWidth(1.8f);
-        set.setHighLightColor(ContextCompat.getColor(getContext(),R.color.colorPrimaryVariant));
+        set.setHighLightColor(ContextCompat.getColor(requireContext(),R.color.colorSecondary));
         set.setValueTextColor(Color.WHITE);
         set.setValueTextSize(9f);
         set.setDrawValues(false);
@@ -614,20 +656,25 @@ public class DataViewerFragment extends Fragment {
         private String deviceName;
         private Date startDate;
         private Date endDate;
+        private Boolean plottable;
         private ArrayList<FileAccess.plottingData> plotData;
 
         LoadData(String deviceNameInput, ArrayList<FileAccess.plottingData> plotDataInput,
-                 Date startDateInput, Date endDateInput){
+                 Date startDateInput, Date endDateInput, Boolean plot){
             this.deviceName = deviceNameInput;
             this.startDate = startDateInput;
             this.endDate = endDateInput;
             this.plotData = plotDataInput;
+            this.plottable = plot;
         }
 
         @Override
         public void run() {
-            myFileAccess.LoadPlotData(deviceName,plotData,startDate,endDate);
-            DeviceViewModel.postGenerateData(true);
+            myFileAccess.LoadPlotData(deviceName,plotData,startDate,endDate,plottable);
+            if(plottable)
+                DeviceViewModel.postGenerateData(1);
+            else
+                DeviceViewModel.postGenerateData(2);
         }
     }
 
@@ -646,7 +693,8 @@ public class DataViewerFragment extends Fragment {
                 tValueY.setText(String.format("%.2f",e.getY()) +" m");
             else
                 tValueY.setText(String.format("%.2f",e.getY()) +"%");
-            long timestamp = ((FileAccess.plottingData) DataViewerFragment.this.data.get((int) e.getX())).getTimestamp();
+//            long timestamp = ((FileAccess.plottingData) DataViewerFragment.this.data.get((int) e.getX())).getTimestamp();
+            long timestamp = ((long) e.getX())*60000+FirstTimestamp;
             tValueX1.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date(timestamp)));
             tValueX2.setText(new SimpleDateFormat("HH:mm:ss").format(new Date(timestamp)));
             super.refreshContent(e, highlight);
@@ -655,5 +703,16 @@ public class DataViewerFragment extends Fragment {
         public MPPointF getOffset() {
             return new MPPointF((float) (-(getWidth() + 5)), (float) (-(getHeight() + 5)));
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ArrayAdapter<String> DeviceListAdapter = new ArrayAdapter<>(
+                getActivity(),
+                R.layout.device_option,myFileAccess.LoadDeviceList()
+        );
+        DeviceListOpt.getText().clear();
+        DeviceListOpt.setAdapter(DeviceListAdapter);
     }
 }

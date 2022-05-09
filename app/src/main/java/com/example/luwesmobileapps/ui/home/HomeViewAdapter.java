@@ -56,20 +56,11 @@ public class HomeViewAdapter extends ListAdapter<DeviceData ,HomeViewAdapter.BTV
         if(selectedDevice.getLastWaterLevel()!=null){
             if(!selectedDevice.getLastWaterLevel().equals(""))
                 holder.LastWaterLevel.setText(selectedDevice.getLastWaterLevel()+" m");
-            else
-                holder.LastWaterLevel.setText("Not Measured Yet");
-
         }
-        else
-            holder.LastWaterLevel.setText("Not Measured Yet");
         if(selectedDevice.getLastBattery()!=null) {
             if (!selectedDevice.getLastBattery().equals(""))
                 holder.LastBatteryLevel.setText(selectedDevice.getLastBattery() + " v");
-            else
-                holder.LastBatteryLevel.setText("Not Measured Yet");
         }
-        else
-            holder.LastBatteryLevel.setText("Not Measured Yet");
         holder.LastConnection.setText(selectedDevice.getLastConnection());
         if(selectedDevice.getDeviceModel()!=null) {
             if (selectedDevice.getDeviceModel().equals("Promithevo-U")) {
@@ -126,10 +117,6 @@ public class HomeViewAdapter extends ListAdapter<DeviceData ,HomeViewAdapter.BTV
 
     public interface OnItemClickListener {
         void onItemClick(DeviceData device);
-    }
-
-    public DeviceData getLongClickedItem(){
-        return LongClickItemHolder;
     }
 
     public void setOnItemClickListener(HomeViewAdapter.OnItemClickListener listener) {

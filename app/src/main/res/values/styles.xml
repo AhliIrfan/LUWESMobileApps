@@ -1,5 +1,13 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+<!--        <item name="windowSplashScreenBackground">@color/colorPrimary</item>-->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_xl</item>
+<!--        <item name="windowSplashScreenIconBackgroundColor">@color/colorPrimary</item>-->
+<!--        <item name="android:windowSplashScreenBrandingImage" tools:targetApi="s">@drawable/ic_company_flag</item>-->
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
+    </style>
+
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -10,28 +18,9 @@
         <item name="android:statusBarColor">@color/colorPrimary</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
     <style name="MyDateTimePickerDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
         <item name="colorAccent">@color/colorPrimary</item>
     </style>
 
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="iconPadding">0dp</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:paddingLeft">12dp</item>
-        <item name="android:paddingRight">12dp</item>
-        <item name="android:minWidth">48dp</item>
-        <item name="android:minHeight">48dp</item>
-    </style>
 
 </resources>

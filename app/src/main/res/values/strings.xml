@@ -1,28 +1,13 @@
 <resources>
     <string name="app_name">LUWES Mobile Apps</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">LUWES Mobile Apps</string>
-    <string name="nav_header_subtitle">Version 2.0.0</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_scan">Scan</string>
-    <string name="action_disconnect">Disconnect</string>
 
     <string name="menu_home">Home</string>
     <string name="menu_setting">Setting</string>
     <string name="menu_devicepage">Device Page</string>
     <string name="menu_dataviewer">Data Viewer</string>
-    <string name="bt_input">BTInput</string>
     <string-array name="interval_option_arrays">
         <item>Minutes</item>
         <item>Hours</item>
-    </string-array>
-    <string-array name="setting_option_arrays">
-        <item>[Select parameter to set]</item>
-        <item>Site Name</item>
-        <item>IP Address and Port</item>
-        <item>Sensor Offset and Zero Values</item>
-        <item>Record Interval</item>
     </string-array>
     <string name="file_permission">The apps needs file permission to store downloaded data from LUWES Logger device.</string>
     <string name="bluetooth_permission">The apps needs bluetooth permission to connect with LUWES Logger device.</string>

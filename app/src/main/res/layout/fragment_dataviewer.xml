@@ -18,7 +18,6 @@
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/CachedData"
                 android:text="Cached Data"/>
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
@@ -73,12 +72,10 @@
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/WaterLevel"
                 android:icon="@drawable/ic_water"/>
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/BatteryPercentage"
                 android:icon="@drawable/ic_battery"/>
         </com.google.android.material.tabs.TabLayout>
 
@@ -92,17 +89,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/Tab2"
-            android:layout_margin="@dimen/border_margin"
-            app:strokeWidth="@dimen/stroke_width"
-            app:strokeColor="@color/colorPrimary">
+            android:layout_marginStart="@dimen/border_margin"
+            android:layout_marginTop="@dimen/border_margin"
+            android:layout_marginEnd="@dimen/border_margin"
+            android:layout_marginBottom="@dimen/border_margin"
+            app:strokeColor="@color/colorPrimary"
+            app:strokeWidth="@dimen/stroke_width">
 
             <RelativeLayout
                 android:id="@+id/CachedDataGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
                 android:layout_marginHorizontal="@dimen/fab_margin"
-                android:layout_marginTop="@dimen/dialog_margin">
+                android:layout_marginTop="@dimen/dialog_margin"
+                android:visibility="visible">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/selectDevice"
@@ -154,7 +154,6 @@
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/startDate"
                         android:layout_weight="1"
                         android:focusableInTouchMode="false"
                         android:hint="End date"
@@ -169,15 +168,26 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/Generate"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/timeSpan"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginStart="@dimen/fab_margin"
                     android:layout_marginTop="@dimen/fab_margin"
-                    android:layout_marginEnd="@dimen/fab_margin"
                     android:layout_marginBottom="@dimen/fab_margin"
+                    android:layout_toStartOf="@id/Plot"
                     android:text="Generate" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Plot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/timeSpan"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="@dimen/dialog_margin"
+                    android:layout_marginTop="@dimen/fab_margin"
+                    android:layout_marginEnd="@dimen/dialog_margin"
+                    android:layout_marginBottom="@dimen/fab_margin"
+                    android:text="Plot" />
 
             </RelativeLayout>
 
@@ -185,11 +195,10 @@
                 android:id="@+id/LiveDataGroup"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                android:layout_margin="@dimen/fab_margin">
+                android:layout_margin="@dimen/fab_margin"
+                android:visibility="gone">
 
                 <LinearLayout
-                    android:id="@+id/RealTimeGroup"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -201,7 +210,6 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/DateTimeTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Date/Time"
@@ -225,7 +233,6 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/BatteryTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Device Battery"
@@ -248,7 +255,6 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/RecordTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Record Status"
@@ -271,7 +277,6 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/InternetConnectionTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Internet Connection"
@@ -292,17 +297,13 @@
                         android:id="@+id/realtimebutton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
+                        android:layout_gravity="end"
                         android:layout_marginTop="@dimen/dialog_margin"
                         android:text="Listen" />
                 </LinearLayout>
             </RelativeLayout>
 
         </com.google.android.material.card.MaterialCardView>
-
-
-
-
 
     </RelativeLayout>
 </ScrollView>

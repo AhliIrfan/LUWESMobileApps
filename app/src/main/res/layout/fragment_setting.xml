@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.setting.SettingFragment"
-    android:padding="@dimen/border_margin">
+    android:paddingHorizontal="@dimen/border_margin"
+    android:paddingVertical="@dimen/inner_margin">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/app_info_card"
@@ -61,7 +62,6 @@
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/permission_card"
         android:layout_below="@id/app_info_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -104,7 +104,6 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/file_permission_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="File Permission"
@@ -125,7 +124,6 @@
 
                     </LinearLayout>
                     <TextView
-                        android:id="@+id/file_permission_context"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/inner_margin"
@@ -146,7 +144,6 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/bluetooth_permission_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Bluetooth Permission"
@@ -166,7 +163,6 @@
                             app:useMaterialThemeColors="true"/>
                     </LinearLayout>
                     <TextView
-                        android:id="@+id/bluetooth_permission_context"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/inner_margin"
@@ -176,7 +172,6 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/location_permission_group"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -188,7 +183,6 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/location_permission_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Location Permission"
@@ -208,7 +202,6 @@
                             app:useMaterialThemeColors="true"/>
                     </LinearLayout>
                     <TextView
-                        android:id="@+id/location_permission_context"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/inner_margin"

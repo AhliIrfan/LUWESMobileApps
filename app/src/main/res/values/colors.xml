@@ -5,6 +5,5 @@
     <color name="colorSecondary">#FFEA00</color>
     <color name="colorSecondaryVariant">#FFF176</color>
     <color name="colorError">#E53935</color>
-    <color name="colorGranted">#8BC34A</color>
     <color name="colorDarkGray">#121212</color>
 </resources>

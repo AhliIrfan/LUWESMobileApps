@@ -22,6 +22,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.core.content.ContextCompat;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,6 +33,7 @@ import com.example.luwesmobileapps.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 
 public class BTScanDialog extends AppCompatDialogFragment {
@@ -42,10 +45,11 @@ public class BTScanDialog extends AppCompatDialogFragment {
     private ProgressBar progressBar;
     private BTViewAdapter adapter;
     private SharedViewModel DeviceViewModel;
+    @NonNull
     @SuppressLint("MissingPermission")
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.bt_scan_dialog, null);
 

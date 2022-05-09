@@ -41,10 +41,10 @@ public class BLEViewAdapter extends RecyclerView.Adapter<BLEViewAdapter.BTViewHo
         return myDeviceList.size();
     }
 
-    public void setThisDevice(List<BluetoothDevice> thisDevice) {
-        this.myDeviceList = thisDevice;
-        notifyDataSetChanged();
-    }
+//    public void setThisDevice(List<BluetoothDevice> thisDevice) {
+//        this.myDeviceList = thisDevice;
+//        notifyDataSetChanged();
+//    }
 
     class BTViewHolder extends RecyclerView.ViewHolder{
         private TextView BLEName;
@@ -65,8 +65,10 @@ public class BLEViewAdapter extends RecyclerView.Adapter<BLEViewAdapter.BTViewHo
     }
 
     public void addDevice(BluetoothDevice thisDevice) {
-        this.myDeviceList.add(thisDevice);
-        notifyDataSetChanged();
+        if(!myDeviceList.contains(thisDevice)) {
+            this.myDeviceList.add(thisDevice);
+            notifyDataSetChanged();
+        }
     }
     public interface OnItemClickListener {
         void onItemClick(BluetoothDevice device);

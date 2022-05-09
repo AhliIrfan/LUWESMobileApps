@@ -47,6 +47,7 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 public class HomeFragment extends Fragment {
     private fragmentListener listener;
@@ -133,7 +134,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                AlertDialog myDialog = new MaterialAlertDialogBuilder(getContext())
+                AlertDialog myDialog = new MaterialAlertDialogBuilder(requireContext())
                         .setTitle("Remove Item")
                         .setMessage("Do you want to remove this device from the list?")
                         .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
@@ -178,14 +179,14 @@ public class HomeFragment extends Fragment {
         BluetoothDevice thisDevice = bluetoothAdapter.getRemoteDevice(device.getDeviceAddress());
         Intent BTServiceIntent = new Intent(getActivity(), BTService.class);
         BTServiceIntent.putExtra("Device Input", thisDevice);
-        ContextCompat.startForegroundService(getActivity(), BTServiceIntent);
+        ContextCompat.startForegroundService(requireActivity(), BTServiceIntent);
     }
 
     public void ConnectBLE(DeviceData device){
         BluetoothDevice thisDevice = bluetoothAdapter.getRemoteDevice(device.getDeviceAddress());
         Intent BLEServiceIntent = new Intent(getActivity(), BLEService.class);
         BLEServiceIntent.putExtra("Device Input", thisDevice);
-        ContextCompat.startForegroundService(getActivity(), BLEServiceIntent);
+        ContextCompat.startForegroundService(requireActivity(), BLEServiceIntent);
     }
 
     @Override

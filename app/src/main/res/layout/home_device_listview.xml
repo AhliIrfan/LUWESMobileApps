@@ -75,7 +75,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/lastWaterLevelTitle"
                             android:layout_width="100sp"
                             android:layout_height="wrap_content"
                             android:text="Water Level"
@@ -86,8 +85,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="5dp"
-                            android:layout_toEndOf="@id/lastWaterLevelTitle"
-                            android:text="TextView"
+                            android:text="Not Measured Yet"
                             android:textSize="@dimen/text_content2" />
                     </LinearLayout>
 
@@ -96,10 +94,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/lastBatteryTitle"
                             android:layout_width="100sp"
                             android:layout_height="wrap_content"
-                            android:layout_below="@id/lastWaterLevel"
                             android:text="Battery Level"
                             android:textSize="@dimen/text_content2" />
 
@@ -107,9 +103,7 @@
                             android:id="@+id/lastBattery"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_below="@id/lastWaterLevel"
-                            android:layout_toEndOf="@id/lastBatteryTitle"
-                            android:text="TextView"
+                            android:text="Not Measured Yet"
                             android:textSize="@dimen/text_content2" />
                     </LinearLayout>
                 </LinearLayout>
@@ -118,7 +112,6 @@
 
 
             <TextView
-                android:id="@+id/lastConnectionTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/dataContainer"

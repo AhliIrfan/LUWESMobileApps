@@ -8,7 +8,8 @@
         android:id="@+id/MainLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/border_margin"
+        android:paddingHorizontal="@dimen/border_margin"
+        android:paddingVertical="@dimen/inner_margin"
         tools:context=".ui.devicepage.DevicePageFragment">
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/DeviceInfoCard"
@@ -48,7 +49,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/DeviceNameTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Site Name"
@@ -68,7 +68,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/DeviceModelTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Device Model"
@@ -88,7 +87,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/FirmwareVersionTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Firmware Version"
@@ -108,7 +106,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/MACAddressTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="MAC Address"
@@ -164,7 +161,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/FirstRecordDateTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="First Recorded Date"
@@ -184,7 +180,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/LastRecordedDateTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Last Recorded Date"
@@ -252,7 +247,6 @@
                         android:orientation="horizontal"
                         android:layout_marginTop="@dimen/inner_margin">
                         <TextView
-                            android:id="@+id/SiteNameTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Site Name"
@@ -272,7 +266,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/IPAddressTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="IP Address"
@@ -293,7 +286,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/PortTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Port"
@@ -313,7 +305,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/SensorOffsetTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Offset (mm)"
@@ -333,7 +324,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/ZeroValueTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Zero Value (mm)"
@@ -353,7 +343,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/IntervalTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Record Interval"
@@ -369,7 +358,7 @@
                             style="@style/Widget.AppCompat.EditText"/>
                         <TextView
                             android:id="@+id/spinner3"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
                             android:layout_weight=".35"
@@ -386,7 +375,6 @@
                         android:textStyle="bold"
                         android:layout_marginVertical="@dimen/inner_margin"/>
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/spinner2"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -419,6 +407,7 @@
                             android:layout_marginStart="@dimen/start_margin"
                             android:singleLine="true"
                             android:textAlignment="textEnd"
+                            android:longClickable="false"
                             android:textSize="@dimen/text_content"/>
                     </LinearLayout>
 
@@ -441,6 +430,7 @@
                             android:layout_marginStart="@dimen/start_margin"
                             android:singleLine="true"
                             android:textAlignment="textEnd"
+                            android:longClickable="false"
                             android:textSize="@dimen/text_content"/>
                     </LinearLayout>
                     <LinearLayout
@@ -450,7 +440,6 @@
                         android:id="@+id/SettingInputInterval"
                         android:visibility="gone">
                         <TextView
-                            android:id="@+id/IntervalInputTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Record Interval"
@@ -463,10 +452,11 @@
                             android:singleLine="true"
                             android:textAlignment="textEnd"
                             android:textSize="@dimen/text_content"
-                            android:inputType="number"/>
+                            android:inputType="number"
+                            android:longClickable="false"/>
                         <Spinner
                             android:id="@+id/spinner4"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
                             android:layout_weight=".35"
@@ -536,7 +526,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/StartDateTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="Start Date"
@@ -549,6 +538,7 @@
                             android:textAlignment="textEnd"
                             android:focusableInTouchMode="false"
                             android:textSize="@dimen/text_content"
+                            android:longClickable="false"
                             android:hint="Input start date here"/>
                     </LinearLayout>
                     <LinearLayout
@@ -556,7 +546,6 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/EndDateTitle"
                             android:layout_width="@dimen/title_size"
                             android:layout_height="wrap_content"
                             android:text="End Date"
@@ -570,6 +559,7 @@
                             android:textAlignment="textEnd"
                             android:focusableInTouchMode="false"
                             android:textSize="@dimen/text_content"
+                            android:longClickable="false"
                             android:hint="Input end date here"/>
                     </LinearLayout>
                     <com.google.android.material.button.MaterialButton

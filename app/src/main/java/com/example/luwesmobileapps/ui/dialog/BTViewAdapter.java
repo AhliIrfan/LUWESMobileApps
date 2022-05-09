@@ -41,14 +41,16 @@ public class BTViewAdapter extends RecyclerView.Adapter<BTViewAdapter.BTViewHold
         return myDeviceList.size();
     }
 
-    public void addDeviceList(List<BluetoothDevice> thisDevice) {
-        this.myDeviceList=thisDevice;
-        notifyDataSetChanged();
-    }
+//    public void addDeviceList(List<BluetoothDevice> thisDevice) {
+//        this.myDeviceList=thisDevice;
+//        notifyDataSetChanged();
+//    }
 
     public void addDevice(BluetoothDevice thisDevice) {
-        this.myDeviceList.add(thisDevice);
-        notifyDataSetChanged();
+        if(!myDeviceList.contains(thisDevice)) {
+            this.myDeviceList.add(thisDevice);
+            notifyDataSetChanged();
+        }
     }
 
     class BTViewHolder extends RecyclerView.ViewHolder{

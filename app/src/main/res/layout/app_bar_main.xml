@@ -14,15 +14,13 @@
 <!--            android:id="@+id/toolbar"-->
 <!--            android:layout_width="match_parent"-->
 <!--            android:layout_height="?attr/actionBarSize"-->
-<!--            app:menu="@menu/activity_main_appbar"-->
-<!--            style="@style/Widget.MaterialComponents.Toolbar.Primary"/>-->
+<!--            style="@style/Widget.MaterialComponents.Toolbar.Primary"-->
+<!--            android:visibility="gone"/>-->
 
 <!--    </com.google.android.material.appbar.AppBarLayout>-->
 
 
-    <include
-        android:id="@+id/include"
-        layout="@layout/content_main"
+    <include layout="@layout/content_main"
         />
 
     <RelativeLayout
@@ -31,14 +29,13 @@
         android:layout_margin="@dimen/border_margin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         app:layout_anchor="@id/fab"
         app:layout_anchorGravity="top"
         android:visibility="gone">
         <com.google.android.material.chip.Chip
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/action_blescan"
+            android:layout_toRightOf="@id/action_blescan"
             android:text="BLE Scan"
             android:elevation="2dp"
             android:checkable="false"
@@ -49,7 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentLeft="true"
             android:layout_gravity="end"
             app:backgroundTint="@color/colorPrimary"
             app:tint="@color/cardview_light_background"
@@ -62,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/action_blescan"
             android:layout_marginVertical="@dimen/inner_margin"
-            android:layout_toLeftOf="@id/action_bluetoothscan"
+            android:layout_toRightOf="@id/action_bluetoothscan"
             android:checkable="false"
             android:clickable="false"
             android:elevation="2dp"
@@ -74,7 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/action_blescan"
             android:layout_marginVertical="@dimen/inner_margin"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentLeft="true"
             android:layout_gravity="end"
             app:backgroundTint="@color/colorPrimary"
             app:tint="@color/cardview_light_background"
@@ -85,7 +82,7 @@
         <com.google.android.material.chip.Chip
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/action_disconnect"
+            android:layout_toRightOf="@id/action_disconnect"
             android:layout_below="@id/action_bluetoothscan"
             android:checkable="false"
             android:clickable="false"
@@ -97,7 +94,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/action_bluetoothscan"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentLeft="true"
             android:layout_marginBottom="@dimen/inner_margin"
             app:backgroundTint="@color/colorPrimary"
             app:tint="@color/cardview_light_background"
@@ -111,7 +108,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
-        android:layout_gravity="end|bottom"
+        android:layout_gravity="start|bottom"
         app:backgroundTint="@color/colorPrimary"
         app:elevation="2dp"
         app:srcCompat="@drawable/ic_search"

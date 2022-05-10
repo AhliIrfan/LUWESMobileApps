@@ -341,8 +341,22 @@ public class DataViewerFragment extends Fragment {
                         CachedCharts.animateX(2000);
                         CachedCharts.invalidate();
                     }
-                    else if(stat==2)
-                        Snackbar.make(requireContext(), DataViewerFragment.this.requireView(), "Batched data file successfully generated and saved in "+ DeviceListOpt.getText().toString()+" records folder", Snackbar.LENGTH_LONG).show();
+                    else if(stat==2) {
+                        Thread thread = new Thread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                try  {
+                                    //Your code goes here
+                                    myFileAccess.UploadFile();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                        thread.start();
+                        Snackbar.make(requireContext(), DataViewerFragment.this.requireView(), "Batched data file successfully generated and saved in " + DeviceListOpt.getText().toString() + " records folder", Snackbar.LENGTH_LONG).show();
+                    }
                 } else {
                     Snackbar.make(requireContext(), DataViewerFragment.this.requireView(), "No records for selected time span", Snackbar.LENGTH_SHORT).show();
                 }

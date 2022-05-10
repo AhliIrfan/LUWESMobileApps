@@ -4,12 +4,19 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -228,7 +235,7 @@ public class FileAccess {
         int DownloadLength = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
         int DoY = (int) TimeUnit.DAYS.convert(diff2, TimeUnit.MILLISECONDS) + 1;
         int FirstDoY = (int) TimeUnit.DAYS.convert(diff2, TimeUnit.MILLISECONDS) + 1;
-        int LastDoY = FirstDoY+DownloadLength;
+        int LastDoY = FirstDoY+DownloadLength-1;
         if(!plot)
             DeleteDuplicateFile(DeviceName,FirstDoY,LastDoY,Year);
         for(int i=0;i<DownloadLength;i++){
@@ -343,4 +350,43 @@ public class FileAccess {
         }
     }
 
+    public void UploadFile(){
+        FTPClient ftpClient = new FTPClient();
+        try {
+            ftpClient.connect("175.158.47.234",3456);
+            ftpClient.enterLocalPassiveMode();
+            ftpClient.login("ftp-luwes", "luwes123");
+            ftpClient.changeToParentDirectory();
+            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        File root = new File(Environment.getExternalStorageDirectory(),"LUWESLogger");
+        File subRoot1 = new File(root, "Hellobejob");
+        File subRoot2 = new File(subRoot1, "Record");
+        if(!subRoot2.exists()){
+            if(subRoot2.mkdirs()){
+                Log.d("File Access", "WriteDataToFile: File created");
+            }
+            else
+                Log.d("File Access", "WriteDataToFile: Can't create file");
+        }
+        File gpxFile = new File(subRoot2, "Hellobejob2022DOY129-130.csv");
+        FileInputStream buffIn = null;
+        try {
+            buffIn = new FileInputStream(gpxFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            ftpClient.storeFile("test.csv", buffIn);
+            Log.d("TAG", "UploadFile: file uploaded");
+            buffIn.close();
+            ftpClient.logout();
+            ftpClient.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

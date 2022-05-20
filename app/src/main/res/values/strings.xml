@@ -9,6 +9,10 @@
         <item>Minutes</item>
         <item>Hours</item>
     </string-array>
+    <string-array name="measurement_option_arrays">
+        <item>Ground water</item>
+        <item>Tide gauge</item>
+    </string-array>
     <string name="file_permission">The apps needs file permission to store downloaded data from LUWES Logger device.</string>
     <string name="bluetooth_permission">The apps needs bluetooth permission to connect with LUWES Logger device.</string>
     <string name="location_permission">The apps needs location permission to scan nearby LUWES Logger device.</string>

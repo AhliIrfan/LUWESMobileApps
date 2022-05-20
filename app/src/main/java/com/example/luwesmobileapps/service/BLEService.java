@@ -152,10 +152,9 @@ public class BLEService extends Service {
                 }
                 Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
                         .setContentTitle("Device Connection")
-                        .setContentText("Connected with " + deviceData.getSiteName().getValue())
+                        .setContentText("Connected with " + mmDevice.getName())
                         .setSmallIcon(R.drawable.ic_logo_luwes)
                         .setContentIntent(pendingIntent)
-                        .setOnlyAlertOnce(true)
                         .setOngoing(false)
                         .build();
                 myNotificationManager = NotificationManagerCompat.from(getBaseContext());
@@ -178,10 +177,14 @@ public class BLEService extends Service {
                                 deviceData.postDeviceDateTime(splitString1[3]);
                                 deviceData.postWaterLevel(splitString1[4]);
                                 deviceData.postDeviceBattery(splitString1[5]);
-                                if (Integer.parseInt(splitString1[6].substring(0, 1)) > 1) {
-                                    deviceData.postInternetConnection("Connected");
-                                } else
+                                if(splitString1.length>6) {
+                                    if (Integer.parseInt(splitString1[6].substring(0, 1)) > 1) {
+                                        deviceData.postInternetConnection("Connected");
+                                    } else
+                                        deviceData.postInternetConnection("Not connected");
+                                }else{
                                     deviceData.postInternetConnection("Not connected");
+                                }
                                 deviceData.postDeviceDataChanged(true);
                                 return true;
                             case LWST:
@@ -202,6 +205,13 @@ public class BLEService extends Service {
                                     deviceData.postSensorOffset(splitString2[4]);
                                     deviceData.postSensorZeroValues(splitString2[5]);
                                     deviceData.postRecordInterval(splitString2[6]);
+                                    if (splitString2.length>7) {
+                                        if (splitString2[7].contains("0"))
+                                            deviceData.postMeasurementMode(0);
+                                        else
+                                            deviceData.postMeasurementMode(Integer.parseInt(splitString2[7]));
+                                    }else
+                                        deviceData.postMeasurementMode(0);
 
                                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                                         pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
@@ -234,13 +244,14 @@ public class BLEService extends Service {
 //                            DeviceData.postMACAddress(splitString3[4].substring(0,15));
 //                        }
                                 deviceData.postMACAddress(mmDevice.getAddress());
-                                com.example.luwesmobileapps.data_layer.DeviceData newDevice = new DeviceData(mmDevice.getAddress());
+                                DeviceData newDevice = new DeviceData(mmDevice.getAddress());
                                 if(!SharedData.deviceList.contains(newDevice)) {
                                     newDevice.setDeviceName(mmDevice.getName());
                                     newDevice.setDeviceModel(splitString3[1]);
                                     newDevice.setDeviceConnection(2);
                                     newDevice.setLastConnection(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
                                     SharedData.deviceList.add(newDevice);
+                                    deviceData.postDeviceDataChanged(true);
                                     SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
                                     SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
                                     Gson gson = new Gson();
@@ -369,6 +380,7 @@ public class BLEService extends Service {
                     setRXNotifier(gatt,mGattService, Characteristic_uuid_rx);
                     setRXNotifier(gatt,mGattService,Characteristic_uuid_MESH);
                     Log.d(TAG, "onServicesDiscovered: characteristic notification added");
+                    sendBLE("LWST,7000000#\r\n");
                 }
             }
         }

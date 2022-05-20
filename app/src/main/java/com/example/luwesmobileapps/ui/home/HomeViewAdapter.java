@@ -1,7 +1,6 @@
 package com.example.luwesmobileapps.ui.home;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,6 @@ import com.example.luwesmobileapps.data_layer.DeviceData;
 
 public class HomeViewAdapter extends ListAdapter<DeviceData ,HomeViewAdapter.BTViewHolder> {
     private OnItemClickListener clickListener;
-    private DeviceData LongClickItemHolder;
 
     protected HomeViewAdapter() {
         super(DIFF_CALLBACK);
@@ -99,17 +97,6 @@ public class HomeViewAdapter extends ListAdapter<DeviceData ,HomeViewAdapter.BTV
                 int position = getAdapterPosition();
                 if (clickListener != null && position != RecyclerView.NO_POSITION) {
                     clickListener.onItemClick(getItem(position));
-                }
-            });
-
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        LongClickItemHolder=getItem(position);
-                    }
-                    return false;
                 }
             });
         }

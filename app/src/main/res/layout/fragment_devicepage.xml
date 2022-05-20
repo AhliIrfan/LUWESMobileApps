@@ -367,6 +367,25 @@
                             android:layout_gravity="center_vertical"
                             android:focusable="false"/>
                     </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Measurement Type"
+                            android:textSize="@dimen/text_content"/>
+                        <TextView
+                            android:id="@+id/MeasurementType"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/start_margin"
+                            android:singleLine="true"
+                            android:textAlignment="textEnd"
+                            android:textSize="@dimen/text_content"
+                            style="@style/Widget.AppCompat.EditText"/>
+                    </LinearLayout>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -462,6 +481,26 @@
                             android:layout_weight=".35"
                             android:entries="@array/interval_option_arrays"
                             android:layout_gravity="center_vertical"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/SettingMeasurementType"
+                        android:visibility="gone">
+                        <TextView
+                            android:layout_width="@dimen/title_size"
+                            android:layout_height="wrap_content"
+                            android:text="Measurement Type"
+                            android:textSize="@dimen/text_content"/>
+                        <Spinner
+                            android:id="@+id/spinner5"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".35"
+                            android:textAlignment="textEnd"
+                            android:entries="@array/measurement_option_arrays"/>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="wrap_content"

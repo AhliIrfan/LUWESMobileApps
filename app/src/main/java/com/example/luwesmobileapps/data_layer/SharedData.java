@@ -2,6 +2,8 @@ package com.example.luwesmobileapps.data_layer;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 
 public class SharedData {
@@ -22,6 +24,7 @@ public class SharedData {
     private static MutableLiveData<String> RecordInterval = new MutableLiveData<>();
     private static MutableLiveData<String> RecordStatus = new MutableLiveData<>();
     private static MutableLiveData<String> InternetConnectionStatus = new MutableLiveData<>();
+    private static MutableLiveData<Integer> MeasurementMode = new MutableLiveData<>();
     //Device Logic//
     private static MutableLiveData<Boolean> SettingStatus = new MutableLiveData<>();
     private static MutableLiveData<Boolean> SyncStatus= new MutableLiveData<>();
@@ -73,6 +76,9 @@ public class SharedData {
     }
     public void postRecordInterval(String string){
         RecordInterval.postValue(string);
+    }
+    public void postMeasurementMode(int input){
+        MeasurementMode.postValue(input);
     }
     public void postRecordStatus(String string){
         RecordStatus.postValue(string);
@@ -155,6 +161,10 @@ public class SharedData {
         return RecordInterval;
     }
 
+    public MutableLiveData<Integer> getMeasurementMode() {
+        return MeasurementMode;
+    }
+
     public MutableLiveData<String> getRecordStatus() {
         return RecordStatus;
     }
@@ -187,4 +197,23 @@ public class SharedData {
         return ConnectStatus;
     }
 
+    public static class TCPSetting{
+        @SerializedName("IP")
+        private String IPAddress;
+        @SerializedName("Port")
+        private int Port;
+
+        public TCPSetting(String IPAddress, int port) {
+            this.IPAddress = IPAddress;
+            Port = port;
+        }
+
+        public String getIPAddress() {
+            return IPAddress;
+        }
+
+        public int getPort() {
+            return Port;
+        }
+    }
 }

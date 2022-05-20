@@ -24,6 +24,7 @@ public class SharedViewModel extends ViewModel {
     private MutableLiveData<String> RecordInterval;
     private MutableLiveData<String> RecordStatus;
     private MutableLiveData<String> InternetConnectionStatus;
+    private MutableLiveData<Integer> MeasurementMode;
     private MutableLiveData<String> LastLevel;
     private MutableLiveData<String> LastBattery;
     private MutableLiveData<String> LastConnection;
@@ -57,6 +58,7 @@ public class SharedViewModel extends ViewModel {
         SensorZeroValues = DeviceData.getSensorZeroValues();
         SensorOffset = DeviceData.getSensorOffset();
         RecordInterval = DeviceData.getRecordInterval();
+        MeasurementMode = DeviceData.getMeasurementMode();
         RecordStatus = DeviceData.getRecordStatus();
         InternetConnectionStatus = DeviceData.getInternetConnectionStatus();
         //Device Logic Data//
@@ -122,6 +124,10 @@ public class SharedViewModel extends ViewModel {
 
     public LiveData<String> getRecordInterval() {
         return RecordInterval;
+    }
+
+    public LiveData<Integer> getMeasurementMode() {
+        return MeasurementMode;
     }
 
     public LiveData<String> getRecordStatus() {

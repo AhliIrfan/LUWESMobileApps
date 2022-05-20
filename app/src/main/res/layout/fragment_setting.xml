@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.setting.SettingFragment"
@@ -62,6 +65,93 @@
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/tcp_setting_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/inner_margin"
+        android:layout_below="@id/permission_card"
+        android:visibility="gone"
+        app:strokeWidth="@dimen/stroke_width"
+        app:strokeColor="@color/colorPrimary">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dialog_margin">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tcp_setting_title"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TCP Setting"
+                android:textSize="@dimen/text_subtitle"
+                app:icon="@drawable/ic_cloud" />
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tcp_setting_title"
+                />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tcp_setting_title"
+                android:layout_marginHorizontal="@dimen/dialog_margin"
+                android:layout_marginBottom="@dimen/dialog_margin">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/inner_margin"
+                    android:text="IP Address"
+                    android:textSize="@dimen/text_subtitle"
+                    android:layout_alignTop="@id/TCPIP"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/TCPIP"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="@dimen/inner_margin"
+                    android:text="202.74.238.107"
+                    android:textAlignment="textEnd"
+                    android:textSize="@dimen/text_subtitle" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/inner_margin"
+                    android:layout_below="@id/TCPIP"
+                    android:text="Port"
+                    android:textSize="@dimen/text_subtitle"
+                    android:layout_alignTop="@id/TCPPort"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/TCPPort"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/TCPIP"
+                    android:layout_alignParentRight="true"
+                    android:text="1025"
+                    android:textAlignment="textEnd"
+                    android:textSize="@dimen/text_subtitle" />
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/TCPPort"
+                    android:layout_alignParentEnd="true"
+                    android:id="@+id/save"
+                    android:text="Save"/>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/permission_card"
         android:layout_below="@id/app_info_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -214,3 +304,4 @@
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 </RelativeLayout>
+</ScrollView>

@@ -24,6 +24,11 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/LiveData"
                 android:text="Live Data"/>
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ExportData"
+                android:text="Export Data"/>
         </com.google.android.material.tabs.TabLayout>
 
 
@@ -109,7 +114,8 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginVertical="@dimen/dialog_margin"
+                    android:layout_marginTop="@dimen/dialog_margin"
+                    android:layout_below="@id/selectMode"
                     android:hint="Select device"
                     app:startIconDrawable="@drawable/ic_devices">
 
@@ -120,11 +126,29 @@
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/selectMode"
+                    android:visibility="gone"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dialog_margin"
+                    android:hint="Select export mode"
+                    app:startIconDrawable="@drawable/ic_move_file">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/selectModeContent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <LinearLayout
                     android:id="@+id/timeSpan"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/selectDevice"
+                    android:layout_marginTop="@dimen/dialog_margin"
                     android:orientation="horizontal">
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -166,29 +190,71 @@
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/Generate"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/targetTCP"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/timeSpan"
+                    android:layout_marginTop="@dimen/dialog_margin"
+                    android:visibility="gone"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/ipAddress"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:focusableInTouchMode="false"
+                        android:hint="Target IP"
+                        app:startIconDrawable="@drawable/ic_internet">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/port"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginTop="@dimen/dialog_margin"
+                        android:focusableInTouchMode="false"
+                        android:hint="Target Port"
+                        app:startIconDrawable="@drawable/ic_internet">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Generate"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/targetTCP"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="@dimen/dialog_margin"
                     android:layout_marginTop="@dimen/fab_margin"
+                    android:layout_marginEnd="@dimen/dialog_margin"
                     android:layout_marginBottom="@dimen/fab_margin"
-                    android:layout_toStartOf="@id/Plot"
                     android:text="Generate" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/Plot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/timeSpan"
+                    android:layout_below="@id/targetTCP"
                     android:layout_alignParentEnd="true"
                     android:layout_marginStart="@dimen/dialog_margin"
                     android:layout_marginTop="@dimen/fab_margin"
                     android:layout_marginEnd="@dimen/dialog_margin"
                     android:layout_marginBottom="@dimen/fab_margin"
                     android:text="Plot" />
-
             </RelativeLayout>
 
             <RelativeLayout

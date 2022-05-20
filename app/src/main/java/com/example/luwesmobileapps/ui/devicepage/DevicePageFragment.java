@@ -19,6 +19,7 @@ import android.text.InputType;
 import android.text.Spanned;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,12 +78,14 @@ public class DevicePageFragment extends Fragment {
     private LinearLayout SettingInputLayoutText;
     private LinearLayout SettingInputLayoutText2;
     private LinearLayout SettingInputLayoutInterval;
+    private LinearLayout SettingInputLayoutMeasurement;
     private TextView SiteName;
     private TextView IPAddress;
     private TextView Port;
     private TextView ZeroValue;
     private TextView Offset;
     private TextView RecordInterval;
+    private TextView MeasurementMode;
     private AutoCompleteTextView SettingOpt;
     private TextView IntervalOpt;
     private EditText SettingInput;
@@ -91,6 +94,7 @@ public class DevicePageFragment extends Fragment {
     private TextView SettingInputTitle2;
     private EditText RecordIntervalInput;
     private Spinner IntervalOptInput;
+    private Spinner MeasurementModeOpt;
     private MaterialButton SetSetting;
     private MaterialButton TimeSync;
     //Download Group//
@@ -163,16 +167,19 @@ public class DevicePageFragment extends Fragment {
         SettingInputLayoutText = v.findViewById(R.id.SettingInputText);
         SettingInputLayoutText2 = v.findViewById(R.id.SettingInputText2);
         SettingInputLayoutInterval = v.findViewById(R.id.SettingInputInterval);
+        SettingInputLayoutMeasurement = v.findViewById(R.id.SettingMeasurementType);
         SiteName = v.findViewById(R.id.SiteName);
         IPAddress = v.findViewById(R.id.IPAddress);
         Port = v.findViewById(R.id.Port);
         ZeroValue = v.findViewById(R.id.ZeroValue);
         Offset = v.findViewById(R.id.SensorOffset);
         RecordInterval = v.findViewById(R.id.Interval);
+        MeasurementMode = v.findViewById(R.id.MeasurementType);
+        MeasurementModeOpt = v.findViewById(R.id.spinner5);
         SettingOpt = v.findViewById(R.id.spinner2content);
 
         String[] Options = new String[]{
-                "Site Name","IP Address and Port","Sensor Offset and Zero Values", "Record Interval"};
+                "Site Name","IP Address and Port","Sensor Offset and Zero Values", "Record Interval", "Measurement Mode"};
 
         ArrayAdapter<String> SettingAdapter = new ArrayAdapter<>(
                 getActivity(),
@@ -255,6 +262,7 @@ public class DevicePageFragment extends Fragment {
                     SettingInput.getText().clear();
                     SettingInput.setInputType(InputType.TYPE_CLASS_TEXT);
                     SettingInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
+                    SettingInputLayoutMeasurement.setVisibility(View.GONE);
 //                    SetSetting.setEnabled(true);
                     break;
                 case 1:
@@ -269,6 +277,7 @@ public class DevicePageFragment extends Fragment {
                     SettingInput.getText().clear();
                     SettingInput.setFilters(new InputFilter[]{new InputFilterIP()});
                     SettingInput2.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
+                    SettingInputLayoutMeasurement.setVisibility(View.GONE);
 //                    SetSetting.setEnabled(true);
                     break;
                 case 2:
@@ -280,6 +289,7 @@ public class DevicePageFragment extends Fragment {
                     SettingInput.getText().clear();
                     SettingInput.setInputType(InputType.TYPE_CLASS_NUMBER);
                     SettingInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(5)});
+                    SettingInputLayoutMeasurement.setVisibility(View.GONE);
 //                    SetSetting.setEnabled(true);
                     break;
                 case 3:
@@ -287,6 +297,15 @@ public class DevicePageFragment extends Fragment {
                     SettingInputLayoutText.setVisibility(View.GONE);
                     SettingInputLayoutText2.setVisibility(View.GONE);
                     SettingInputLayoutInterval.setVisibility(View.VISIBLE);
+                    SettingInputLayoutMeasurement.setVisibility(View.GONE);
+//                    SetSetting.setEnabled(true);
+                    break;
+                case 4:
+                    TransitionManager.beginDelayedTransition(SettingLayout, new AutoTransition());
+                    SettingInputLayoutText.setVisibility(View.GONE);
+                    SettingInputLayoutText2.setVisibility(View.GONE);
+                    SettingInputLayoutInterval.setVisibility(View.GONE);
+                    SettingInputLayoutMeasurement.setVisibility(View.VISIBLE);
 //                    SetSetting.setEnabled(true);
                     break;
             }
@@ -298,7 +317,7 @@ public class DevicePageFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (parent.getItemAtPosition(position).toString()){
                     case "Minutes":
-                        RecordIntervalInput.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "59")});
+                        RecordIntervalInput.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "1439")});
                         break;
                     case "Hours":
                         RecordIntervalInput.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "24")});
@@ -319,9 +338,9 @@ public class DevicePageFragment extends Fragment {
                     if (SettingInput.getText().toString().trim().length() > 4 && SettingInput.getText().toString().trim().length() < 21) {
                         if (validName(SettingInput.getText().toString().trim())) {
                             if (DeviceViewModel.getConnectStatus().getValue() == 1)
-                                listener.BTSend(("LWST,7780000#" + SettingInput.getText().toString().trim()));
+                                listener.BTSend("LWST,7780000#" + SettingInput.getText().toString().trim()+"\r\n");
                             else if (DeviceViewModel.getConnectStatus().getValue() == 2)
-                                listener.BLESend(("LWST,7780000#" + SettingInput.getText().toString().trim()));
+                                listener.BLESend("LWST,7780000#" + SettingInput.getText().toString().trim()+"\r\n");
                             DeviceViewModel.setSettingStatus(true);
                         } else
                             Snackbar.make(requireContext(), requireView(), "Site name cannot contains illegal character", Snackbar.LENGTH_SHORT).show();
@@ -336,9 +355,9 @@ public class DevicePageFragment extends Fragment {
                     else if (SettingInput.getText().toString().trim().length() != 0 && SettingInput2.getText().toString().trim().length() != 0) {
                         if (validIP(SettingInput.getText().toString().trim()) && isNumber(SettingInput2.getText().toString().trim())) {
                             if (DeviceViewModel.getConnectStatus().getValue() == 1)
-                                listener.BTSend(("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()));
+                                listener.BTSend("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()+"\r\n");
                             else if (DeviceViewModel.getConnectStatus().getValue() == 2)
-                                listener.BLESend(("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()));
+                                listener.BLESend("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()+"\r\n");
                             DeviceViewModel.setSettingStatus(true);
                         } else {
                             Snackbar.make(requireContext(), requireView(), "Please input valid IP and Port", Snackbar.LENGTH_SHORT).show();
@@ -353,9 +372,9 @@ public class DevicePageFragment extends Fragment {
                     if (SettingInput.getText().toString().trim().length() != 0) {
                         if (isNumber(SettingInput.getText().toString().trim())) {
                             if (DeviceViewModel.getConnectStatus().getValue() == 1)
-                                listener.BTSend(("LWST,7100000#" + SettingInput.getText().toString().trim()));
+                                listener.BTSend(("LWST,7100000#" + SettingInput.getText().toString().trim())+"\r\n");
                             else if (DeviceViewModel.getConnectStatus().getValue() == 2)
-                                listener.BLESend(("LWST,7100000#" + SettingInput.getText().toString().trim()));
+                                listener.BLESend("LWST,7100000#" + SettingInput.getText().toString().trim()+"\r\n");
                             DeviceViewModel.setSettingStatus(true);
                         } else
                             Snackbar.make(requireContext(), requireView(), "Offset must be a number", Snackbar.LENGTH_SHORT).show();
@@ -373,14 +392,31 @@ public class DevicePageFragment extends Fragment {
                                 interval = 3600 * Integer.parseInt(String.valueOf(RecordIntervalInput.getText()));
 
                             if (DeviceViewModel.getConnectStatus().getValue() == 1)
-                                listener.BTSend(("LWST,7220000#" + interval));
+                                listener.BTSend("LWST,7220000#" + interval +"\r\n");
                             else if (DeviceViewModel.getConnectStatus().getValue() == 2)
-                                listener.BLESend(("LWST,7220000#" + interval));
+                                listener.BLESend("LWST,7220000#" + interval +"\r\n");
                             DeviceViewModel.setSettingStatus(true);
                         } else
                             Snackbar.make(requireContext(), requireView(), "Interval must be a number", Snackbar.LENGTH_SHORT).show();
                     } else {
                         Snackbar.make(requireContext(), requireView(), "Please fill the record interval field", Snackbar.LENGTH_SHORT).show();
+                    }
+                    break;
+                case "Measurement Mode":
+                    if(DeviceViewModel.getDeviceModel().getValue().contains("Promithevo-U"))
+                        Snackbar.make(requireContext(), requireView(), "This device model doesn't support changing measurement mode", Snackbar.LENGTH_SHORT).show();
+                    else{
+                        if(DeviceViewModel.getConnectStatus().getValue() == 1){
+                            if(MeasurementModeOpt.getSelectedItemPosition()==0)
+                                listener.BTSend("LWST,6000000#1\r\n");
+                            else
+                                listener.BTSend("LWST,6000000#0\r\n");
+                        }else if(DeviceViewModel.getConnectStatus().getValue() == 2){
+                            if(MeasurementModeOpt.getSelectedItemPosition()==0)
+                                listener.BLESend("LWST,6000000#1\r\n");
+                            else
+                                listener.BLESend("LWST,6000000#0\r\n");
+                        }
                     }
                     break;
             }
@@ -432,27 +468,21 @@ public class DevicePageFragment extends Fragment {
                             e.printStackTrace();
                         }
                         Date DateToCompare2 = null;
-                        if (FirstRecordedDate.getText().toString().length()!=0
-                                ||!FirstRecordedDate.getText().toString().trim().equals("No Records")) {
-                            try {
-                                DateToCompare2 = sdf.parse(FirstRecordedDate.getText().toString());
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
+                        try {
+                            DateToCompare2 = sdf.parse(FirstRecordedDate.getText().toString());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                             DateToCompare2 = new Date();
                         }
+
                         Date DateToCompare3 = null;
-                        if (LastRecordedDate.getText().toString().length()!=0
-                                ||!LastRecordedDate.getText().toString().trim().equals("No Records")) {
-                            try {
-                                DateToCompare3 = sdf.parse(LastRecordedDate.getText().toString());
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
+                        try {
+                            DateToCompare3 = sdf.parse(LastRecordedDate.getText().toString());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                             DateToCompare3 = new Date();
                         }
+
                         assert DateToCompare != null;
                         assert DateToCompare3 != null;
                         if (DateToCompare.getTime() > DateToCompare3.getTime()) {
@@ -491,33 +521,29 @@ public class DevicePageFragment extends Fragment {
                     (view1, year, monthOfYear, dayOfMonth) -> {
                         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                         Date DateToCompare = null;
+
                         try {
                             DateToCompare = sdf.parse((dayOfMonth + "/" + (monthOfYear + 1) + "/" + year));
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
+
                         Date DateToCompare2 = null;
-                        if (FirstRecordedDate.getText().toString().trim().length()!=0||
-                                !FirstRecordedDate.getText().toString().trim().equals("No Records")) {
-                            try {
-                                DateToCompare2 = sdf.parse(FirstRecordedDate.getText().toString().trim());
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
+                        try {
+                            DateToCompare2 = sdf.parse(FirstRecordedDate.getText().toString().trim());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                             DateToCompare2 = new Date();
                         }
+
                         Date DateToCompare3 = null;
-                        if (LastRecordedDate.getText().toString().length()!=0||
-                                !LastRecordedDate.getText().toString().trim().equals("No Records")) {
-                            try {
-                                DateToCompare3 = sdf.parse(LastRecordedDate.getText().toString().trim());
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
+                        try {
+                            DateToCompare3 = sdf.parse(LastRecordedDate.getText().toString().trim());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                             DateToCompare3 = new Date();
                         }
+
                         assert DateToCompare != null;
                         assert DateToCompare3 != null;
                         if (DateToCompare.getTime() > DateToCompare3.getTime()) {
@@ -648,6 +674,13 @@ public class DevicePageFragment extends Fragment {
                 RecordInterval.setText(s);
             }
         });
+        DeviceViewModel.getMeasurementMode().observe(getViewLifecycleOwner(), integer -> {
+            if(integer==0){
+                MeasurementMode.setText("Tide gauge");
+            }
+            else if(integer==1)
+                MeasurementMode.setText("Ground water");
+        });
         DeviceViewModel.getSettingStatus().observe(getViewLifecycleOwner(), aBoolean -> {
             if(!aBoolean) {
                 Snackbar.make(requireContext(), requireView(), "Setting Success", Snackbar.LENGTH_SHORT).show();
@@ -702,7 +735,7 @@ public class DevicePageFragment extends Fragment {
     public void onResume() {
         super.onResume();
         String[] Options = new String[]{
-                "Site Name", "IP Address and Port", "Sensor Offset and Zero Values", "Record Interval"};
+                "Site Name", "IP Address and Port", "Sensor Offset and Zero Values", "Record Interval", "Measurement Mode"};
         ArrayAdapter<String> SettingAdapter = new ArrayAdapter<>(
                 getActivity(),
                 R.layout.setting_option, Options

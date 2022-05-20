@@ -217,6 +217,7 @@ public class BTService extends Service {
             myNotificationManager.notify(1, notification2);
             setRunning(true);
             deviceData.postConnectStatus(1);
+            BTStream.write("LWST,7000000#\r\n".getBytes());
         }
 
 
@@ -301,7 +302,11 @@ public class BTService extends Service {
                                 deviceData.postSensorOffset(splitString2[4]);
                                 deviceData.postSensorZeroValues(splitString2[5]);
                                 deviceData.postRecordInterval(splitString2[6]);
-
+                                String[] splitString3 = splitString2[7].split("\r");
+                                if (splitString2.length>7)
+                                    deviceData.postMeasurementMode(Integer.parseInt(splitString3[0]));
+                                else
+                                    deviceData.postMeasurementMode(0);
                                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                                     pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
                                 }else{

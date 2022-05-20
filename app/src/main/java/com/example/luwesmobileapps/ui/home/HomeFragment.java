@@ -53,6 +53,7 @@ public class HomeFragment extends Fragment {
     private fragmentListener listener;
     private HomeViewAdapter adapter;
     private SharedViewModel DeviceViewModel;
+    private int deleteReq = 0;
 
 
     @Nullable
@@ -148,6 +149,7 @@ public class HomeFragment extends Fragment {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 SharedData.deviceList.remove(adapter.getDevicePosition(viewHolder.getAdapterPosition()));
                                 listener.saveDeviceList();
+                                deleteReq=1;
                                 dialogInterface.dismiss();
                             }
                         })
@@ -156,7 +158,11 @@ public class HomeFragment extends Fragment {
                 myDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialogInterface) {
-                        adapter.notifyItemChanged(viewHolder.getAdapterPosition());
+                        if(deleteReq==0)
+                            adapter.notifyItemChanged(viewHolder.getAdapterPosition());
+                        else
+                            adapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+                        deleteReq=0;
                     }
                 });
                 myDialog.show();

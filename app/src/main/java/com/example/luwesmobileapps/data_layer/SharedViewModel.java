@@ -17,6 +17,7 @@ public class SharedViewModel extends ViewModel {
     private MutableLiveData<String> LastRecord;
     private MutableLiveData<String> WaterLevel;
     private MutableLiveData<String> DeviceBattery;
+    private MutableLiveData<String> BatteryCapacity;
     private MutableLiveData<String> IPAddress;
     private MutableLiveData<String> Port;
     private MutableLiveData<String> SensorZeroValues;
@@ -25,9 +26,6 @@ public class SharedViewModel extends ViewModel {
     private MutableLiveData<String> RecordStatus;
     private MutableLiveData<String> InternetConnectionStatus;
     private MutableLiveData<Integer> MeasurementMode;
-    private MutableLiveData<String> LastLevel;
-    private MutableLiveData<String> LastBattery;
-    private MutableLiveData<String> LastConnection;
     //Device Logic Data//
     private MutableLiveData<Boolean> SettingStatus;
     private MutableLiveData<Boolean> SyncStatus;
@@ -38,7 +36,7 @@ public class SharedViewModel extends ViewModel {
     private MutableLiveData<Boolean> LocPermission = new MutableLiveData<>();
     private MutableLiveData<Boolean> FilePermission = new MutableLiveData<>();
     private MutableLiveData<Boolean> NightMode = new MutableLiveData<>();
-    private MutableLiveData<Integer> GenerateData = new MutableLiveData<>();
+    private MutableLiveData<Integer> GenerateData;
     private MutableLiveData<Integer> ConnectStatus;
 
     public SharedViewModel() {
@@ -53,6 +51,7 @@ public class SharedViewModel extends ViewModel {
         LastRecord = DeviceData.getLastRecord();
         WaterLevel = DeviceData.getWaterLevel();
         DeviceBattery = DeviceData.getDeviceBattery();
+        BatteryCapacity = DeviceData.getBatteryCapacity();
         IPAddress = DeviceData.getIPAddress();
         Port = DeviceData.getPort();
         SensorZeroValues = DeviceData.getSensorZeroValues();
@@ -62,12 +61,13 @@ public class SharedViewModel extends ViewModel {
         RecordStatus = DeviceData.getRecordStatus();
         InternetConnectionStatus = DeviceData.getInternetConnectionStatus();
         //Device Logic Data//
-        SettingStatus = SharedData.getSettingStatus();
-        SyncStatus = SharedData.getSyncStatus();
-        RealTimeStatus = SharedData.getRealTimeStatus();
-        ConnectStatus = SharedData.getConnectStatus();
-        DownloadStatus = SharedData.getDownloadStatus();
-        DeviceDataChanged = SharedData.getDeviceDataChanged();
+        SettingStatus = DeviceData.getSettingStatus();
+        SyncStatus = DeviceData.getSyncStatus();
+        RealTimeStatus = DeviceData.getRealTimeStatus();
+        ConnectStatus = DeviceData.getConnectStatus();
+        DownloadStatus = DeviceData.getDownloadStatus();
+        DeviceDataChanged = DeviceData.getDeviceDataChanged();
+        GenerateData = DeviceData.getGenerateData();
     }
 
     public LiveData<String> getSiteName() {
@@ -104,6 +104,10 @@ public class SharedViewModel extends ViewModel {
 
     public LiveData<String> getDeviceBattery() {
         return DeviceBattery;
+    }
+
+    public LiveData<String> getBatteryCapacity() {
+        return BatteryCapacity;
     }
 
     public LiveData<String> getIPAddress() {
@@ -245,10 +249,6 @@ public class SharedViewModel extends ViewModel {
 
     public void setInternetConnectionStatus(MutableLiveData<String> internetConnectionStatus) {
         InternetConnectionStatus = internetConnectionStatus;
-    }
-
-    public void setLastConnection(String lastConnection) {
-        LastConnection.setValue(lastConnection);
     }
 
     public void setSettingStatus(boolean settingStatus) {

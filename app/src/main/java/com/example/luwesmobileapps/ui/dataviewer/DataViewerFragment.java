@@ -2,6 +2,7 @@ package com.example.luwesmobileapps.ui.dataviewer;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,9 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -34,6 +33,7 @@ import com.example.luwesmobileapps.R;
 import com.example.luwesmobileapps.data_layer.FileAccess;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.example.luwesmobileapps.filter.InputFilterIP;
+import com.example.luwesmobileapps.service.TCPClient;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
@@ -101,7 +101,7 @@ public class DataViewerFragment extends Fragment {
 
     public interface fragmentListener{
         void BTSend(String string);
-        void BLESend(String string);
+        void BLESend(String string,boolean mesh);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class DataViewerFragment extends Fragment {
         if (context instanceof fragmentListener) {
             listener = (fragmentListener) context;
         } else {
-            throw new RuntimeException(context.toString()
+            throw new RuntimeException(context
                     + " must implement fragment listener");
         }
     }
@@ -331,9 +331,16 @@ public class DataViewerFragment extends Fragment {
                 data.clear();
                 CachedCharts.getData().clearValues();
                 if(SelectMode.getEditText().getText().toString().contains("Online")){
-                    Thread UploadThread = new UploadData(DeviceListOpt.getText().toString(),TCPIP.getEditText().getText().toString()
-                            ,Integer.parseInt(TCPPort.getEditText().getText().toString()),startDate,endDate);
-                    UploadThread.start();
+                    String inputBuffer = DeviceListOpt.getText().toString()+","+TCPIP.getEditText().getText().toString()
+                            +","+Integer.parseInt(TCPPort.getEditText().getText().toString())+","+new SimpleDateFormat("dd/MM/yyyy").format(startDate)+","
+                            +new SimpleDateFormat("dd/MM/yyyy").format(endDate);
+                    Intent BLEServiceIntent = new Intent(getActivity(), TCPClient.class);
+                    BLEServiceIntent.putExtra("String Input",inputBuffer);
+                    ContextCompat.startForegroundService(requireActivity(),BLEServiceIntent);
+                    data.add(new FileAccess.plottingData(0,0,0));
+//                    Thread UploadThread = new UploadData(DeviceListOpt.getText().toString(),TCPIP.getEditText().getText().toString()
+//                            ,Integer.parseInt(TCPPort.getEditText().getText().toString()),startDate,endDate);
+//                    UploadThread.start();
                 }else{
                     Thread LoadThread = new LoadData(DeviceListOpt.getText().toString(),data,startDate,endDate,false);
                     LoadThread.start();
@@ -353,14 +360,14 @@ public class DataViewerFragment extends Fragment {
                 if(DeviceViewModel.getConnectStatus().getValue()==1)
                     listener.BTSend("LWRT,\r\n");
                 else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                    listener.BLESend("LWRT,\r\n");
+                    listener.BLESend("LWRT,\r\n",false);
                 DeviceViewModel.setRealTimeStatus(true);
             }
             else if((Listen.getText().toString()).equalsIgnoreCase("Stop")){
                 if(DeviceViewModel.getConnectStatus().getValue()==1)
                     listener.BTSend("LWST,7000000#\r\n");
                 else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                    listener.BLESend("LWST,7000000#\r\n");
+                    listener.BLESend("LWST,7000000#\r\n",false);
             }
         });
 
@@ -373,7 +380,7 @@ public class DataViewerFragment extends Fragment {
         DeviceViewModel.getDeviceDateTime().observe(getViewLifecycleOwner(), s -> DeviceDateTime.setText(s));
         DeviceViewModel.getDeviceBattery().observe(getViewLifecycleOwner(), s -> {
             if(!s.equals("")){
-                DeviceBattery.setText(s+" v");
+                DeviceBattery.setText(s+" | "+DeviceViewModel.getBatteryCapacity().getValue());
             }else{
                 DeviceBattery.setText(s);
             }
@@ -415,6 +422,8 @@ public class DataViewerFragment extends Fragment {
                         Snackbar.make(requireContext(), DataViewerFragment.this.requireView(), "Batched data file successfully generated and saved in " + DeviceListOpt.getText().toString() + " records folder", Snackbar.LENGTH_LONG).show();
                     }
                     else if(stat==3) {
+                        Intent ServiceBT = new Intent(getActivity(), TCPClient.class);
+                        getActivity().stopService(ServiceBT);
                         Snackbar.make(requireContext(), DataViewerFragment.this.requireView(), "Records successfully uploaded to the server", Snackbar.LENGTH_LONG).show();
                     }
                 } else {
@@ -752,29 +761,29 @@ public class DataViewerFragment extends Fragment {
         }
     }
 
-    class UploadData extends Thread{
-        private String deviceName;
-        private Date startDate;
-        private Date endDate;
-        private String IP;
-        private Integer Port;
-
-
-        UploadData(String deviceNameInput, String IP, Integer Port,
-                 Date startDateInput, Date endDateInput){
-            this.deviceName = deviceNameInput;
-            this.startDate = startDateInput;
-            this.endDate = endDateInput;
-            this.IP = IP;
-            this.Port = Port;
-        }
-
-        @Override
-        public void run() {
-            myFileAccess.UploadFile(deviceName,IP,Port,startDate,endDate,data);
-            DeviceViewModel.postGenerateData(3);
-        }
-    }
+//    class UploadData extends Thread{
+//        private String deviceName;
+//        private Date startDate;
+//        private Date endDate;
+//        private String IP;
+//        private Integer Port;
+//
+//
+//        UploadData(String deviceNameInput, String IP, Integer Port,
+//                 Date startDateInput, Date endDateInput){
+//            this.deviceName = deviceNameInput;
+//            this.startDate = startDateInput;
+//            this.endDate = endDateInput;
+//            this.IP = IP;
+//            this.Port = Port;
+//        }
+//
+//        @Override
+//        public void run() {
+//            myFileAccess.UploadFile(deviceName,IP,Port,startDate,endDate,data);
+//            DeviceViewModel.postGenerateData(3);
+//        }
+//    }
 
     public class CustomMarkerView extends MarkerView {
         private TextView tValueX1 = ((TextView) findViewById(R.id.tvContentX1));

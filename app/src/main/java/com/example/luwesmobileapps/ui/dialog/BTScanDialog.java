@@ -1,10 +1,7 @@
 package com.example.luwesmobileapps.ui.dialog;
 
-import static com.example.luwesmobileapps.MainActivity.bluetoothAdapter;
-
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
@@ -22,8 +19,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.core.content.ContextCompat;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,9 +26,6 @@ import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.example.luwesmobileapps.service.BTService;
 import com.example.luwesmobileapps.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
-import java.lang.reflect.Method;
-import java.util.Objects;
 
 
 public class BTScanDialog extends AppCompatDialogFragment {
@@ -83,6 +75,7 @@ public class BTScanDialog extends AppCompatDialogFragment {
 
         dismiss.setOnClickListener(view1 -> {
             listener.BTStopScan();
+            listener.dismissScan();
             dismiss();
         });
 
@@ -97,14 +90,10 @@ public class BTScanDialog extends AppCompatDialogFragment {
             Intent BTServiceIntent = new Intent(getActivity(), BTService.class);
             BTServiceIntent.putExtra("Device Input", device);
             ContextCompat.startForegroundService(getActivity(), BTServiceIntent);
+            listener.dismissScan();
             dismiss();
         });
         return builder.create();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     public void AddScannedDevice(BluetoothDevice device){
@@ -120,6 +109,7 @@ public class BTScanDialog extends AppCompatDialogFragment {
     public interface fragmentListener{
         void BTStartScan();
         void BTStopScan();
+        void dismissScan();
     }
 
     @Override
@@ -128,7 +118,7 @@ public class BTScanDialog extends AppCompatDialogFragment {
         if (context instanceof BTScanDialog.fragmentListener) {
             listener = (BTScanDialog.fragmentListener) context;
         } else {
-            throw new RuntimeException(context.toString()
+            throw new RuntimeException(context
                     + " must implement fragment listener");
         }
     }

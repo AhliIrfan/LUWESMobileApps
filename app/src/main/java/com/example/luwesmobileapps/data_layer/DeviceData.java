@@ -2,7 +2,6 @@ package com.example.luwesmobileapps.data_layer;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
 import java.util.Objects;
 
 public class DeviceData {

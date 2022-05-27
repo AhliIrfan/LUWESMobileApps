@@ -56,10 +56,13 @@ public class HomeViewAdapter extends ListAdapter<DeviceData ,HomeViewAdapter.BTV
                 holder.LastWaterLevel.setText(selectedDevice.getLastWaterLevel()+" m");
         }
         if(selectedDevice.getLastBattery()!=null) {
-            if (!selectedDevice.getLastBattery().equals(""))
-                holder.LastBatteryLevel.setText(selectedDevice.getLastBattery() + " v");
+            if (!selectedDevice.getLastBattery().contains("null"))
+                holder.LastBatteryLevel.setText(selectedDevice.getLastBattery());
         }
-        holder.LastConnection.setText(selectedDevice.getLastConnection());
+        String[] buffer = selectedDevice.getLastConnection().split(" ");
+        if(buffer.length>1)
+            holder.LastConnectionTime.setText(buffer[1]);
+        holder.LastConnectionDate.setText(buffer[0]);
         if(selectedDevice.getDeviceModel()!=null) {
             if (selectedDevice.getDeviceModel().equals("Promithevo-U")) {
                 holder.IconContainer.setImageResource(R.drawable.ic_promithevo_u);
@@ -80,7 +83,8 @@ public class HomeViewAdapter extends ListAdapter<DeviceData ,HomeViewAdapter.BTV
         private TextView DeviceAddress;
         private TextView LastWaterLevel;
         private TextView LastBatteryLevel;
-        private TextView LastConnection;
+        private TextView LastConnectionDate;
+        private TextView LastConnectionTime;
         private ImageView IconContainer;
 
 
@@ -90,7 +94,8 @@ public class HomeViewAdapter extends ListAdapter<DeviceData ,HomeViewAdapter.BTV
             DeviceAddress = itemView.findViewById(R.id.deviceAddress);
             LastWaterLevel = itemView.findViewById(R.id.lastWaterLevel);
             LastBatteryLevel = itemView.findViewById(R.id.lastBattery);
-            LastConnection = itemView.findViewById(R.id.lastConnection);
+            LastConnectionDate = itemView.findViewById(R.id.lastConnectionDate);
+            LastConnectionTime = itemView.findViewById(R.id.lastConnectionTime);
             IconContainer= itemView.findViewById(R.id.IconContainer);
 
             itemView.setOnClickListener(v -> {

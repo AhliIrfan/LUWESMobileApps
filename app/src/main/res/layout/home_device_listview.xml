@@ -115,21 +115,35 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/dataContainer"
-                android:layout_marginTop="@dimen/dialog_margin"
-                android:layout_toStartOf="@id/lastConnection"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="0dp"
+                android:layout_toStartOf="@id/lastConnectionDetails"
                 android:text="Last Connection"
                 android:textSize="@dimen/text_content2" />
 
-            <TextView
-                android:id="@+id/lastConnection"
-                android:layout_width="100sp"
+            <LinearLayout
+                android:id="@+id/lastConnectionDetails"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/dataContainer"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="@dimen/dialog_margin"
-                android:text="31/07/2022"
-                android:textAlignment="textEnd"
-                android:textSize="@dimen/text_content2" />
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/lastConnectionTime"
+                    android:layout_width="100sp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dialog_margin"
+                    android:text="12:00:00"
+                    android:textAlignment="textEnd"
+                    android:textSize="@dimen/text_content2" />
+                <TextView
+                    android:id="@+id/lastConnectionDate"
+                    android:layout_width="100sp"
+                    android:layout_height="wrap_content"
+                    android:text="31/07/2022"
+                    android:textAlignment="textEnd"
+                    android:textSize="@dimen/text_content2" />
+            </LinearLayout>
         </RelativeLayout>
 
     </com.google.android.material.card.MaterialCardView>

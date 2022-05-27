@@ -2,8 +2,6 @@ package com.example.luwesmobileapps.data_layer;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.ArrayList;
 
 public class SharedData {
@@ -17,6 +15,7 @@ public class SharedData {
     private static MutableLiveData<String> LastRecord = new MutableLiveData<>();
     private static MutableLiveData<String> WaterLevel = new MutableLiveData<>();
     private static MutableLiveData<String> DeviceBattery = new MutableLiveData<>();
+    private static MutableLiveData<String> BatteryCapacity = new MutableLiveData<>();
     private static MutableLiveData<String> IPAddress = new MutableLiveData<>();
     private static MutableLiveData<String> Port = new MutableLiveData<>();
     private static MutableLiveData<String> SensorZeroValues = new MutableLiveData<>();
@@ -32,6 +31,7 @@ public class SharedData {
     private static MutableLiveData<Boolean> DownloadStatus= new MutableLiveData<>();
     private static MutableLiveData<Boolean> DeviceDataChanged= new MutableLiveData<>();
     private static MutableLiveData<Integer> ConnectStatus= new MutableLiveData<>();
+    private static MutableLiveData<Integer> GenerateData= new MutableLiveData<>();
 
     public static ArrayList<DeviceData> deviceList = new ArrayList<>();
 
@@ -61,6 +61,9 @@ public class SharedData {
     }
     public void postDeviceBattery(String string){
         DeviceBattery.postValue(string);
+    }
+    public void postBatteryCapacity(String string){
+        BatteryCapacity.postValue(string);
     }
     public void postIPAddress(String string){
         IPAddress.postValue(string);
@@ -104,6 +107,9 @@ public class SharedData {
     public void postConnectStatus(int input){
         ConnectStatus.postValue(input);
     }
+    public void postGenerateData(int input){
+        GenerateData.postValue(input);
+    }
 
     public MutableLiveData<String> getSiteName() {
         return SiteName;
@@ -141,6 +147,10 @@ public class SharedData {
         return DeviceBattery;
     }
 
+    public MutableLiveData<String> getBatteryCapacity() {
+        return BatteryCapacity;
+    }
+
     public MutableLiveData<String> getIPAddress() {
         return IPAddress;
     }
@@ -173,47 +183,32 @@ public class SharedData {
         return InternetConnectionStatus;
     }
 
-    public static MutableLiveData<Boolean> getSettingStatus() {
+    public MutableLiveData<Boolean> getSettingStatus() {
         return SettingStatus;
     }
 
-    public static MutableLiveData<Boolean> getSyncStatus() {
+    public MutableLiveData<Boolean> getSyncStatus() {
         return SyncStatus;
     }
 
-    public static MutableLiveData<Boolean> getRealTimeStatus() {
+    public MutableLiveData<Boolean> getRealTimeStatus() {
         return RealTimeStatus;
     }
 
-    public static MutableLiveData<Boolean> getDownloadStatus() {
+    public MutableLiveData<Boolean> getDownloadStatus() {
         return DownloadStatus;
     }
 
-    public static MutableLiveData<Boolean> getDeviceDataChanged() {
+    public MutableLiveData<Boolean> getDeviceDataChanged() {
         return DeviceDataChanged;
     }
 
-    public static MutableLiveData<Integer> getConnectStatus() {
+    public MutableLiveData<Integer> getConnectStatus() {
         return ConnectStatus;
     }
 
-    public static class TCPSetting{
-        @SerializedName("IP")
-        private String IPAddress;
-        @SerializedName("Port")
-        private int Port;
-
-        public TCPSetting(String IPAddress, int port) {
-            this.IPAddress = IPAddress;
-            Port = port;
-        }
-
-        public String getIPAddress() {
-            return IPAddress;
-        }
-
-        public int getPort() {
-            return Port;
-        }
+    public MutableLiveData<Integer> getGenerateData() {
+        return GenerateData;
     }
+
 }

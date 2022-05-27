@@ -52,6 +52,7 @@
         </activity>
         <service android:name=".service.BTService"/>
         <service android:name=".service.BLEService"/>
+        <service android:name=".service.TCPClient"/>
     </application>
 
 </manifest>

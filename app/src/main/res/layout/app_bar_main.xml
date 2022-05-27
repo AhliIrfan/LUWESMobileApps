@@ -78,29 +78,6 @@
             app:elevation="2dp"
             app:fabSize="mini"
             app:srcCompat="@drawable/ic_bluetooth" />
-
-        <com.google.android.material.chip.Chip
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/action_disconnect"
-            android:layout_below="@id/action_bluetoothscan"
-            android:checkable="false"
-            android:clickable="false"
-            android:elevation="2dp"
-            android:text="Disconnect" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/action_disconnect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/action_bluetoothscan"
-            android:layout_alignParentLeft="true"
-            android:layout_marginBottom="@dimen/inner_margin"
-            app:backgroundTint="@color/colorPrimary"
-            app:tint="@color/cardview_light_background"
-            app:elevation="2dp"
-            app:fabSize="mini"
-            app:srcCompat="@drawable/ic_disconnect" />
     </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -111,7 +88,7 @@
         android:layout_gravity="start|bottom"
         app:backgroundTint="@color/colorPrimary"
         app:elevation="2dp"
-        app:srcCompat="@drawable/ic_search"
+        app:srcCompat="@drawable/ic_add"
         app:tint="@color/cardview_light_background"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

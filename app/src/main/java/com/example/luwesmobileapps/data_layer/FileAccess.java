@@ -2,27 +2,14 @@ package com.example.luwesmobileapps.data_layer;
 
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.example.luwesmobileapps.service.TCPClient;
-
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -76,6 +63,28 @@ public class FileAccess {
             FileWriter writer = new FileWriter(gpxFile,true);
             if(data!=null) {
                 writer.append(data);
+                writer.flush();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void WriteDeviceAddress(String data, String DeviceName){
+        File root = new File(Environment.getExternalStorageDirectory(),"LUWESLogger");
+        File subRoot1 = new File(root, DeviceName);
+        if(!subRoot1.exists()){
+            if(subRoot1.mkdirs()){
+                Log.d("File Access", "WriteDataToFile: File created");
+            }
+            else
+                Log.d("File Access", "WriteDataToFile: Can't create file");
+        }
+        try{
+            File gpxFile = new File(subRoot1, "Address.txt");
+            FileWriter writer = new FileWriter(gpxFile,false);
+            if(data!=null) {
+                writer.write(data);
                 writer.flush();
             }
         }catch (Exception e){
@@ -358,118 +367,120 @@ public class FileAccess {
         }
     }
 
-    public void UploadFile(String DeviceName , String IP, Integer Port , Date startDate, Date endDate, ArrayList<plottingData> TotalData){
-        InputStream mmInStream = null;
-        OutputStream mmOutStream = null;
+//    public void UploadFile(String DeviceName , String IP, Integer Port , Date startDate, Date endDate, ArrayList<plottingData> TotalData){
+//        InputStream mmInStream = null;
+//        OutputStream mmOutStream = null;
+//
+//        int numBytes;
+//        StringBuilder Payload = new StringBuilder();
+//
+//        try {
+//            InetAddress serverAddress = InetAddress.getByName(IP);
+//            TCPSocket = new Socket(serverAddress,Port);
+//            try {
+//                mmInStream=TCPSocket.getInputStream();
+//                mmOutStream=TCPSocket.getOutputStream();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        int Year = Integer.parseInt(new SimpleDateFormat("yyyy").format(startDate));
+//        Log.d("TAG", "LoadPlotData: "+Year);
+//        Date startFirstDayOfTheYear = null;
+//        try {
+//            startFirstDayOfTheYear = new SimpleDateFormat("dd/MM/yyyy").parse(1 + "/" + 1 + "/" + Year);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//
+//        long diff = endDate.getTime() - startDate.getTime();
+//        assert startFirstDayOfTheYear != null;
+//        long diff2 = startDate.getTime() - startFirstDayOfTheYear.getTime();
+//        int DownloadLength = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
+//        int DoY = (int) TimeUnit.DAYS.convert(diff2, TimeUnit.MILLISECONDS) + 1;
+//        int FirstDoY = (int) TimeUnit.DAYS.convert(diff2, TimeUnit.MILLISECONDS) + 1;
+//        int LastDoY = FirstDoY+DownloadLength-1;
+//        for(int i=0;i<DownloadLength;i++){
+//            File root = new File(Environment.getExternalStorageDirectory(),"LUWESLogger");
+//            File subRoot1 = new File(root, DeviceName);
+//            File subRoot2 = new File(subRoot1, "Record");
+//            File subRoot3 = new File(subRoot2, String.valueOf(Year));
+//            if(!subRoot3.exists()){
+//                if(subRoot3.mkdirs()){
+//                    Log.d("File Access", "WriteDataToFile: File created");
+//                }
+//                else
+//                    Log.d("File Access", "WriteDataToFile: Can't create file");
+//            }
+//            try {
+//                File gpxFile = new File(subRoot3, "DOY"+DoY+".csv");
+//                BufferedReader br
+//                        = new BufferedReader(new FileReader(gpxFile));
+//                String currentLine = br.readLine();
+//                while (currentLine!=null){
+//                    String[] bufferData = currentLine.split(",");
+//                    String[] bufferData2 = bufferData[0].split(" ");
+//                    String reDate = new SimpleDateFormat("dd-MM-yyyy").format(
+//                            new SimpleDateFormat("dd/MM/yyyy").parse(bufferData2[0]));
+//                    String TCPPayload = "0#"+DeviceName+"#000113EE2A6D81C#"+bufferData2[1]+"#"+reDate+"#"+bufferData[1]+"#0,0,0#"+bufferData[2]+"#"+bufferData[3]+"\r\n";
+//                    Log.d("TAG", "UploadFile: "+TCPPayload);
+//                    //Creating Student object for every student record and adding it to ArrayList
+//                    mmOutStream.write(TCPPayload.getBytes());
+//                    while (true) {
+//                        try {
+//                            // Read from the InputStream.
+//                            numBytes = mmInStream.read();
+//                        } catch (IOException e) {
+//                            Log.d("TAG", "Input stream was disconnected", e);
+//                            break;
+//                        }
+//                        Payload.append((char) numBytes);
+//                        if (numBytes == '\n') {
+//                            //rawData = res.toString();
+//                            Log.d("Received Data", Payload.toString());
+//                            if(Payload.toString().contains("000113EE2A6D81C")||Payload.toString().contains("Station")){
+//                                Payload.delete(0, Payload.length());
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    currentLine = br.readLine();
+//                    plottingData bData = new plottingData(DoY, 0, 0);
+//                    if (!TotalData.contains(bData))
+//                        TotalData.add(bData);
+//                }
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//            DoY++;
+//            if (DoY>365){
+//                DoY=1;
+//                Year++;
+//            }
+//        }
+//        if (mmOutStream != null) {
+//            try {
+//                mmOutStream.flush();
+//                mmOutStream.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        mmOutStream = null;
+//        mmInStream = null;
+//        try {
+//            TCPSocket.close();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
 
-        int numBytes;
-        StringBuilder Payload = new StringBuilder();
 
-        try {
-            InetAddress serverAddress = InetAddress.getByName(IP);
-            TCPSocket = new Socket(serverAddress,Port);
-            try {
-                mmInStream=TCPSocket.getInputStream();
-                mmOutStream=TCPSocket.getOutputStream();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        int Year = Integer.parseInt(new SimpleDateFormat("yyyy").format(startDate));
-        Log.d("TAG", "LoadPlotData: "+Year);
-        Date startFirstDayOfTheYear = null;
-        try {
-            startFirstDayOfTheYear = new SimpleDateFormat("dd/MM/yyyy").parse(1 + "/" + 1 + "/" + Year);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        long diff = endDate.getTime() - startDate.getTime();
-        assert startFirstDayOfTheYear != null;
-        long diff2 = startDate.getTime() - startFirstDayOfTheYear.getTime();
-        int DownloadLength = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
-        int DoY = (int) TimeUnit.DAYS.convert(diff2, TimeUnit.MILLISECONDS) + 1;
-        int FirstDoY = (int) TimeUnit.DAYS.convert(diff2, TimeUnit.MILLISECONDS) + 1;
-        int LastDoY = FirstDoY+DownloadLength-1;
-        for(int i=0;i<DownloadLength;i++){
-            File root = new File(Environment.getExternalStorageDirectory(),"LUWESLogger");
-            File subRoot1 = new File(root, DeviceName);
-            File subRoot2 = new File(subRoot1, "Record");
-            File subRoot3 = new File(subRoot2, String.valueOf(Year));
-            if(!subRoot3.exists()){
-                if(subRoot3.mkdirs()){
-                    Log.d("File Access", "WriteDataToFile: File created");
-                }
-                else
-                    Log.d("File Access", "WriteDataToFile: Can't create file");
-            }
-            try {
-                File gpxFile = new File(subRoot3, "DOY"+DoY+".csv");
-                BufferedReader br
-                        = new BufferedReader(new FileReader(gpxFile));
-                String currentLine = br.readLine();
-                while (currentLine!=null){
-                    String[] bufferData = currentLine.split(",");
-                    String[] bufferData2 = bufferData[0].split(" ");
-                    String reDate = new SimpleDateFormat("dd-MM-yyyy").format(
-                            new SimpleDateFormat("dd/MM/yyyy").parse(bufferData2[0]));
-                    String TCPPayload = "0#"+DeviceName+"#000113EE2A6D81C#"+bufferData2[1]+"#"+reDate+"#"+bufferData[1]+"#0,0,0#"+bufferData[2]+"#"+bufferData[3]+"\r\n";
-                    Log.d("TAG", "UploadFile: "+TCPPayload);
-                    //Creating Student object for every student record and adding it to ArrayList
-                    mmOutStream.write(TCPPayload.getBytes());
-                    while (true) {
-                        try {
-                            // Read from the InputStream.
-                            numBytes = mmInStream.read();
-                        } catch (IOException e) {
-                            Log.d("TAG", "Input stream was disconnected", e);
-                            break;
-                        }
-                        Payload.append((char) numBytes);
-                        if (numBytes == '\n') {
-                            //rawData = res.toString();
-                            Log.d("Received Data", Payload.toString());
-                            if(Payload.toString().contains("000113EE2A6D81C")||Payload.toString().contains("Station")){
-                                Payload.delete(0, Payload.length());
-                                break;
-                            }
-                        }
-                    }
-                    currentLine = br.readLine();
-                    plottingData bData = new plottingData(DoY, 0, 0);
-                    if (!TotalData.contains(bData))
-                        TotalData.add(bData);
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            DoY++;
-            if (DoY>365){
-                DoY=1;
-                Year++;
-            }
-        }
-        if (mmOutStream != null) {
-            try {
-                mmOutStream.flush();
-                mmOutStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        mmOutStream = null;
-        mmInStream = null;
-        try {
-            TCPSocket.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
 
 //    public void UploadFile(){
 //        FTPClient ftpClient = new FTPClient();
@@ -510,66 +521,66 @@ public class FileAccess {
 //            e.printStackTrace();
 //        }
 //    }
-    public class TCPClient extends Thread {
-        public static final String TAG = "TCPService";
-        private boolean jobCancelled = false;
-        private String IP;
-        private Integer port;
-        private Socket TCPSocket;
-        private InputStream mmInStream;
-        private OutputStream mmOutStream;
-
-        public TCPClient(String serverIP, int port) {
-            this.IP = serverIP;
-            this.port = port;
-        }
-
-        @Override
-        public void run() {
-            int numBytes;
-            StringBuilder Payload = new StringBuilder();
-            try {
-                InetAddress serverAddress = InetAddress.getByName(IP);
-                TCPSocket = new Socket(serverAddress,port);
-                try {
-                    mmInStream=TCPSocket.getInputStream();
-                    mmOutStream=TCPSocket.getOutputStream();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-
-
-        public void sendTCPData(String payload){
-            try {
-                mmOutStream.write(payload.getBytes());
-    //            Log.d(TAG, "sendTCPData: "+ payload);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        public void disconnect(){
-            if (mmOutStream != null) {
-                try {
-                    mmOutStream.flush();
-                    mmOutStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            mmOutStream = null;
-            mmInStream = null;
-            try {
-                TCPSocket.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    public class TCPClient extends Thread {
+//        public static final String TAG = "TCPService";
+//        private boolean jobCancelled = false;
+//        private String IP;
+//        private Integer port;
+//        private Socket TCPSocket;
+//        private InputStream mmInStream;
+//        private OutputStream mmOutStream;
+//
+//        public TCPClient(String serverIP, int port) {
+//            this.IP = serverIP;
+//            this.port = port;
+//        }
+//
+//        @Override
+//        public void run() {
+//            int numBytes;
+//            StringBuilder Payload = new StringBuilder();
+//            try {
+//                InetAddress serverAddress = InetAddress.getByName(IP);
+//                TCPSocket = new Socket(serverAddress,port);
+//                try {
+//                    mmInStream=TCPSocket.getInputStream();
+//                    mmOutStream=TCPSocket.getOutputStream();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//
+//
+//        public void sendTCPData(String payload){
+//            try {
+//                mmOutStream.write(payload.getBytes());
+//    //            Log.d(TAG, "sendTCPData: "+ payload);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        public void disconnect(){
+//            if (mmOutStream != null) {
+//                try {
+//                    mmOutStream.flush();
+//                    mmOutStream.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            mmOutStream = null;
+//            mmInStream = null;
+//            try {
+//                TCPSocket.close();
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 }

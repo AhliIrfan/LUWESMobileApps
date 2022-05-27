@@ -15,7 +15,6 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -23,7 +22,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -32,10 +30,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import com.example.luwesmobileapps.MainActivity;
 import com.example.luwesmobileapps.R;
-import com.example.luwesmobileapps.data_layer.DeviceData;
 import com.example.luwesmobileapps.data_layer.FileAccess;
 import com.example.luwesmobileapps.data_layer.SharedData;
-import com.google.gson.Gson;
 
 import java.lang.reflect.Method;
 import java.text.ParseException;
@@ -72,10 +68,10 @@ public class BLEService extends Service {
 
     public static final String TAG = "BLEService";
 
-    private String Characteristic_uuid_MESH = "0000ffe3-0000-1000-8000-00805f9b34fb";
-    private String Characteristic_uuid_rx = "0000ffe1-0000-1000-8000-00805f9b34fb";
-    private String Characteristic_uuid_tx = "0000ffe2-0000-1000-8000-00805f9b34fb";
-    private String Service_uuid = "0000ffe0-0000-1000-8000-00805f9b34fb";
+    private final String Characteristic_uuid_MESH = "0000ffe3-0000-1000-8000-00805f9b34fb";
+    private final String Characteristic_uuid_rx = "0000ffe1-0000-1000-8000-00805f9b34fb";
+    private final String Characteristic_uuid_tx = "0000ffe2-0000-1000-8000-00805f9b34fb";
+    private final String Service_uuid = "0000ffe0-0000-1000-8000-00805f9b34fb";
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTED = 2;
@@ -93,6 +89,7 @@ public class BLEService extends Service {
     public void onCreate() {
         super.onCreate();
         deviceData = new SharedData();
+        deviceData.postConnectStatus(3);
         deviceData.postDownloadStatus(false);
         deviceData.postRealTimeStatus(false);
     }
@@ -118,6 +115,7 @@ public class BLEService extends Service {
             connect(mmDevice.getAddress());
         } else if (isRunning()) {
             String input = intent.getStringExtra("String Input");
+            String inputMesh = intent.getStringExtra("String Input Mesh");
             try{
                 downloadLength= Integer.parseInt(input);
 
@@ -130,9 +128,10 @@ public class BLEService extends Service {
                 downloadRunNotification(downloadCounter,downloadLength);
             }catch (Exception e){
                 Log.d("Sent Data BLE", input);
-                sendBLE(input+"\r\n");
-//                if(input.contains("LWTS"))
-//                    sendBLEMesh("F10101303248656C6C6F");
+                if(inputMesh==null)
+                    sendBLE(input+"\r\n");
+                else
+                    sendBLEMesh(inputMesh);
             }
         }
         return START_NOT_STICKY;
@@ -145,22 +144,6 @@ public class BLEService extends Service {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 // successfully connected to the GATT Server
                 Log.w(TAG,String.valueOf(STATE_CONNECTED));
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                    pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
-                }else{
-                    pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, 0);
-                }
-                Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
-                        .setContentTitle("Device Connection")
-                        .setContentText("Connected with " + mmDevice.getName())
-                        .setSmallIcon(R.drawable.ic_logo_luwes)
-                        .setContentIntent(pendingIntent)
-                        .setOngoing(false)
-                        .build();
-                myNotificationManager = NotificationManagerCompat.from(getBaseContext());
-                myNotificationManager.notify(1, notification2);
-                deviceData.postMACAddress(mmDevice.getAddress());
-                deviceData.postDeviceDataChanged(true);
                 setRunning(true);
                 BLEHandlerThread = new HandlerThread("BLEMessageHandler");
                 BLEHandlerThread.start();
@@ -173,10 +156,13 @@ public class BLEService extends Service {
                             case LWRT:
                                 String RealTimeString = (String) message.obj;
                                 String[] splitString1 = RealTimeString.split(",");
-                                deviceData.postRecordStatus(splitString1[1]+"/"+splitString1[2]);
+                                deviceData.postRecordStatus(splitString1[1]+" | "+splitString1[2]);
                                 deviceData.postDeviceDateTime(splitString1[3]);
                                 deviceData.postWaterLevel(splitString1[4]);
-                                deviceData.postDeviceBattery(splitString1[5]);
+                                float batteryVoltage = Float.parseFloat(splitString1[5]);
+                                deviceData.postDeviceBattery(String.format("%.2f",batteryVoltage)+"V");
+                                float batteryPercentage = (float) (100 - ((4.20-Float.parseFloat(splitString1[5]))/0.0075));
+                                deviceData.postBatteryCapacity(String.format("%.2f",batteryPercentage)+"%");
                                 if(splitString1.length>6) {
                                     if (Integer.parseInt(splitString1[6].substring(0, 1)) > 1) {
                                         deviceData.postInternetConnection("Connected");
@@ -209,7 +195,7 @@ public class BLEService extends Service {
                                         if (splitString2[7].contains("0"))
                                             deviceData.postMeasurementMode(0);
                                         else
-                                            deviceData.postMeasurementMode(Integer.parseInt(splitString2[7]));
+                                            deviceData.postMeasurementMode(1);
                                     }else
                                         deviceData.postMeasurementMode(0);
 
@@ -228,53 +214,41 @@ public class BLEService extends Service {
                                             .build();
                                     myNotificationManager = NotificationManagerCompat.from(getBaseContext());
                                     myNotificationManager.notify(1, notification2);
+                                    if(deviceData.getSiteName().getValue()!=null||deviceData.getMACAddress().getValue()!=null)
+                                        myFileAccess.WriteDeviceAddress(deviceData.getMACAddress().getValue(),deviceData.getSiteName().getValue());
                                     deviceData.postDeviceDataChanged(true);
                                 }
                                 return true;
                             case LWDI:
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                                    pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+                                }else{
+                                    pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, 0);
+                                }
+                                Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
+                                        .setContentTitle("Device Connection")
+                                        .setContentText("Connected with " + mmDevice.getName())
+                                        .setSmallIcon(R.drawable.ic_logo_luwes)
+                                        .setContentIntent(pendingIntent)
+                                        .setOngoing(false)
+                                        .build();
+                                myNotificationManager = NotificationManagerCompat.from(getBaseContext());
+                                myNotificationManager.notify(1, notification2);
+                                deviceData.postMACAddress(mmDevice.getAddress());
+                                deviceData.postConnectStatus(2);
+
                                 String DeviceInfoString = (String) message.obj;
                                 String[] splitString3 = DeviceInfoString.split(",");
                                 deviceData.postSiteName(mmDevice.getName());
                                 deviceData.postDeviceModel(splitString3[1]);
                                 deviceData.postFirmwareVersion(splitString3[2]);
+
 //                        if((splitString3[4].length()<5)){
 //                            DeviceData.postMACAddress("Not Registered");
 //                        }
 //                        else{
-//                            DeviceData.postMACAddress(splitString3[4].substring(0,15));
+//                             DeviceData.postMACAddress(splitString3[4].substring(0,15));
 //                        }
-                                deviceData.postMACAddress(mmDevice.getAddress());
-                                DeviceData newDevice = new DeviceData(mmDevice.getAddress());
-                                if(!SharedData.deviceList.contains(newDevice)) {
-                                    newDevice.setDeviceName(mmDevice.getName());
-                                    newDevice.setDeviceModel(splitString3[1]);
-                                    newDevice.setDeviceConnection(2);
-                                    newDevice.setLastConnection(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
-                                    SharedData.deviceList.add(newDevice);
-                                    deviceData.postDeviceDataChanged(true);
-                                    SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                                    SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
-                                    Gson gson = new Gson();
-
-                                    String jsonString = gson.toJson(SharedData.deviceList);
-
-                                    prefsEditor.putString("deviceList", jsonString);
-                                    prefsEditor.commit();
-                                }
-                                else{
-                                    SharedData.deviceList.get(SharedData.deviceList.indexOf(newDevice)).setDeviceName(mmDevice.getName());
-                                    SharedData.deviceList.get(SharedData.deviceList.indexOf(newDevice)).setDeviceModel(splitString3[1]);
-                                    SharedData.deviceList.get(SharedData.deviceList.indexOf(newDevice)).setDeviceConnection(2);
-                                    SharedData.deviceList.get(SharedData.deviceList.indexOf(newDevice)).setLastConnection(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
-                                    SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                                    SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
-                                    Gson gson = new Gson();
-
-                                    String jsonString = gson.toJson(SharedData.deviceList);
-
-                                    prefsEditor.putString("deviceList", jsonString);
-                                    prefsEditor.commit();
-                                }
                                 if(splitString3[5].length()<3){
                                     deviceData.postFirstRecord("No Records");
                                 }else{
@@ -303,6 +277,7 @@ public class BLEService extends Service {
                                     if (LastRecordDate != null) {
                                         deviceData.postLastRecord(new SimpleDateFormat("dd/MM/yyyy").format(LastRecordDate));
                                     }
+                                    deviceData.postDeviceDataChanged(true);
                                 }
 
                                 return true;
@@ -359,8 +334,6 @@ public class BLEService extends Service {
                         return false;
                     }
                 });
-
-                deviceData.postConnectStatus(2);
                 bluetoothGatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
@@ -538,7 +511,10 @@ public class BLEService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if(myNotificationManager!=null)
+            myNotificationManager.cancelAll();
         deviceData.postConnectStatus(0);
+        deviceData.postDeviceDataChanged(false);
         deviceData.postDownloadStatus(false);
         deviceData.postRealTimeStatus(false);
         disconnect();
@@ -595,8 +571,11 @@ public class BLEService extends Service {
 
     @SuppressLint("MissingPermission")
     public void sendBLEMesh(String g) {
+        String[] bufferArray = g.split("#");
+        String buffer = bufferArray[0]+StringToHexString(bufferArray[1]);
+        Log.d(TAG, "sendBLEMesh: "+buffer);
         BluetoothGattCharacteristic rxMeshChar = bluetoothGatt.getService(UUID.fromString(this.Service_uuid)).getCharacteristic(UUID.fromString(this.Characteristic_uuid_MESH));
-        rxMeshChar.setValue(getBytesByString(g));
+        rxMeshChar.setValue(getBytesByString(buffer));
 //        rxMeshChar.setValue(hex));
         bluetoothGatt.writeCharacteristic(rxMeshChar);
         delay(25);
@@ -619,6 +598,16 @@ public class BLEService extends Service {
             }
         }
         return bytes;
+    }
+
+    public static String StringToHexString(String input){
+        char[] ch = input.toCharArray();
+        StringBuilder sb = new StringBuilder();
+        for (char c : ch) {
+            String hexString = Integer.toHexString(c);
+            sb.append(hexString);
+        }
+        return sb.toString();
     }
 
 

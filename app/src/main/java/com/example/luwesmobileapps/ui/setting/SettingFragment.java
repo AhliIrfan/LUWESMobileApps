@@ -1,14 +1,10 @@
 package com.example.luwesmobileapps.ui.setting;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -18,22 +14,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.luwesmobileapps.BuildConfig;
 import com.example.luwesmobileapps.R;
-import com.example.luwesmobileapps.data_layer.DeviceData;
-import com.example.luwesmobileapps.data_layer.SharedData;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
-import com.example.luwesmobileapps.service.TCPClient;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.google.gson.Gson;
-import com.google.gson.annotations.SerializedName;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 
 public class SettingFragment extends Fragment {
-    private SharedData.TCPSetting mTCPSetting;
     private fragmentListener listener;
     private TextView AppVersion;
     private SharedViewModel DeviceViewModel;
@@ -57,7 +42,7 @@ public class SettingFragment extends Fragment {
         if (context instanceof SettingFragment.fragmentListener) {
             listener = (SettingFragment.fragmentListener) context;
         } else {
-            throw new RuntimeException(context.toString()
+            throw new RuntimeException(context
                     + " must implement fragment listener");
         }
     }
@@ -66,23 +51,6 @@ public class SettingFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         listener =null;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Type TCPSetType = new TypeToken<SharedData.TCPSetting>(){}.getType();
-
-        SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        Gson gson = new Gson();
-
-        String jsonString = appSharedPrefs.getString("TCPSetting", null);
-
-        if(gson.fromJson(jsonString, TCPSetType)!=null) {
-            mTCPSetting = gson.fromJson(jsonString, TCPSetType);
-            TCPIP.setText(mTCPSetting.getIPAddress());
-            TCPPort.setText(String.valueOf(mTCPSetting.getPort()));
-        }
     }
 
     @Nullable
@@ -143,30 +111,8 @@ public class SettingFragment extends Fragment {
             }
         });
         AppVersion.setText(BuildConfig.VERSION_NAME);
-
-        SaveTCPSetting.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mTCPSetting = new SharedData.TCPSetting(TCPIP.getText().toString(),Integer.parseInt(TCPPort.getText().toString()));
-                saveTCPSetting();
-                Snackbar.make(requireContext(), requireView(), "TCP setting saved", Snackbar.LENGTH_SHORT).show();
-            }
-        });
         return v;
     }
-
-    public void saveTCPSetting(){
-        SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
-        Gson gson = new Gson();
-
-        String jsonString = gson.toJson(mTCPSetting);
-
-        prefsEditor.putString("TCPSetting", jsonString);
-        prefsEditor.commit();
-    }
-
-
 
     public void grantBT(){
         BTPermissionStat.setChecked(true);

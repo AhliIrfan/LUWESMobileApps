@@ -1,6 +1,8 @@
 package com.example.luwesmobileapps;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -12,11 +14,11 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
@@ -41,7 +43,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.widget.RelativeLayout;
-import android.widget.Toolbar;
 
 import com.example.luwesmobileapps.data_layer.SharedData;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
@@ -75,24 +76,23 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements DevicePageFragment.fragmentListener, BTScanDialog.fragmentListener,
         SettingFragment.fragmentListener, BLEScanDialog.fragmentListener, DataViewerFragment.fragmentListener, HomeFragment.fragmentListener {
-
     private AppBarConfiguration mAppBarConfiguration;
     private SharedViewModel DeviceViewModel;
     public static BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     //BLE Param//
-    private BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+    private final BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
     private BLEService bleService;
     private boolean scanning;
-    private Handler handler = new Handler();
-    private List<String> ScannedDeviceList = new ArrayList<>();
-    private UUID ServiceUUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
-    private UUID CharacteristicUUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
+    private final Handler handler = new Handler();
+    private final List<String> ScannedDeviceList = new ArrayList<>();
+    private final UUID ServiceUUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 65000;
 
     public Activity MainActivity;
     private NotificationManagerCompat myNotificationManager;
     private final actReceiver BTReceiver = new actReceiver();
+    private RelativeLayout ScanAction;
     private BTScanDialog btScanDialog;
     private BLEScanDialog bleScanDialog;
     private FloatingActionButton fab;
@@ -108,11 +108,10 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView BotNav = findViewById(R.id.bottom_navigation);
-        RelativeLayout ScanAction = findViewById(R.id.connectmenu);
+        ScanAction = findViewById(R.id.connectmenu);
         fab = findViewById(R.id.fab);
         FloatingActionButton BTScan = findViewById(R.id.action_bluetoothscan);
         FloatingActionButton BLEScan = findViewById(R.id.action_blescan);
-        FloatingActionButton Disconnect = findViewById(R.id.action_disconnect);
         IntentFilter filter2 = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
         IntentFilter filter3 = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         IntentFilter filter4 = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
@@ -134,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
                 fab.setImageTintList(getResources().getColorStateList(R.color.colorDarkGray));
                 BTScan.setImageTintList(getResources().getColorStateList(R.color.colorDarkGray));
                 BLEScan.setImageTintList(getResources().getColorStateList(R.color.colorDarkGray));
-                Disconnect.setImageTintList(getResources().getColorStateList(R.color.colorDarkGray));
                 break;
 
             case Configuration.UI_MODE_NIGHT_NO:
@@ -194,15 +192,68 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         });
 
         fab.setOnClickListener(view -> {
-            if (fab.isExpanded()){
-                fab.setExpanded(false);
-                TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
-                ScanAction.setVisibility(View.INVISIBLE);
+            if(DeviceViewModel.getConnectStatus().getValue()!=null){
+                if(DeviceViewModel.getConnectStatus().getValue()!=0) {
+                    saveDeviceList();
+                    DeviceViewModel.ClearAll();
+                    Intent ServiceBT = new Intent(MainActivity, BTService.class);
+                    stopService(ServiceBT);
+                    Intent ServiceBLE = new Intent(MainActivity, BLEService.class);
+                    stopService(ServiceBLE);
+                }else{
+                    if (fab.isExpanded()) {
+                        fab.setExpanded(false);
+                        TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
+                        ScanAction.setVisibility(View.INVISIBLE);
+                        view.animate().setDuration(200)
+                                .setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        super.onAnimationEnd(animation);
+                                    }
+                                })
+                                .rotation(0f);
+                    } else {
+                        fab.setExpanded(true);
+                        TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
+                        ScanAction.setVisibility(View.VISIBLE);
+                        view.animate().setDuration(200)
+                                .setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        super.onAnimationEnd(animation);
+                                    }
+                                })
+                                .rotation(135f);
+                    }
+                }
             }
             else{
-                fab.setExpanded(true);
-                TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
-                ScanAction.setVisibility(View.VISIBLE);
+                if (fab.isExpanded()) {
+                    view.animate().setDuration(200)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                }
+                            })
+                            .rotation(0f);
+                    fab.setExpanded(false);
+                    TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
+                    ScanAction.setVisibility(View.INVISIBLE);
+                } else {
+                    view.animate().setDuration(200)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                }
+                            })
+                            .rotation(135f);
+                    fab.setExpanded(true);
+                    TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
+                    ScanAction.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -215,6 +266,14 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
             if(bluetoothAdapter.isEnabled()) {
                 BTScanDialog();
             }
+            view.animate().setDuration(200)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                        }
+                    })
+                    .rotation(0f);
             fab.setExpanded(false);
             TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
             ScanAction.setVisibility(View.INVISIBLE);
@@ -231,17 +290,14 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
             if(bluetoothAdapter.isEnabled()) {
                 BLEScanDialog();
             }
-            fab.setExpanded(false);
-            TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
-            ScanAction.setVisibility(View.INVISIBLE);
-        });
-        Disconnect.setOnClickListener(view -> {
-            saveDeviceList();
-            DeviceViewModel.ClearAll();
-            Intent ServiceBT = new Intent(MainActivity, BTService.class);
-            stopService(ServiceBT);
-            Intent ServiceBLE = new Intent(MainActivity, BLEService.class);
-            stopService(ServiceBLE);
+            view.animate().setDuration(200)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                        }
+                    })
+                    .rotation(0f);
             fab.setExpanded(false);
             TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
             ScanAction.setVisibility(View.INVISIBLE);
@@ -264,10 +320,34 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
             if(integer==0){
                 nav_menu1.findItem(R.id.nav_devicepage).setEnabled(false);
                 ConnectBadge.setVisible(false);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorPrimary)));
+                }
+                fab.animate().setDuration(200)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                            }
+                        })
+                        .rotation(0f);
             }
             else{
-                nav_menu1.findItem(R.id.nav_devicepage).setEnabled(true);
-                ConnectBadge.setVisible(true);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    fab.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorError)));
+                }
+                fab.animate().setDuration(200)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                            }
+                        })
+                        .rotation(135f);
+                if(integer<3) {
+                    nav_menu1.findItem(R.id.nav_devicepage).setEnabled(true);
+                    ConnectBadge.setVisible(true);
+                }
             }
         });
         DeviceViewModel.getRealTimeStatus().observe(this, new Observer<Boolean>() {
@@ -388,9 +468,12 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
         startService(ServiceIntent);
     }
 
+
     @Override
-    public void BLESend(String string){
+    public void BLESend(String string,boolean mesh){
         Intent ServiceIntent = new Intent(MainActivity, BLEService.class);
+        if(mesh)
+            ServiceIntent.putExtra("String Input Mesh",string);
         ServiceIntent.putExtra("String Input",string);
         startService(ServiceIntent);
     }
@@ -459,7 +542,7 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Log.d("Result", "onRequestPermissionsResult: "+String.valueOf(requestCode));
+        Log.d("Result", "onRequestPermissionsResult: "+ requestCode);
         switch (requestCode){
             case 1:
                 if(grantResults.length > 0 &&
@@ -567,5 +650,20 @@ public class MainActivity extends AppCompatActivity implements DevicePageFragmen
 
         prefsEditor.putString("deviceList", jsonString);
         prefsEditor.commit();
+    }
+
+    @Override
+    public void dismissScan() {
+        fab.animate().setDuration(200)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                    }
+                })
+                .rotation(0f);
+        fab.setExpanded(false);
+        TransitionManager.beginDelayedTransition(ScanAction, new AutoTransition());
+        ScanAction.setVisibility(View.INVISIBLE);
     }
 }

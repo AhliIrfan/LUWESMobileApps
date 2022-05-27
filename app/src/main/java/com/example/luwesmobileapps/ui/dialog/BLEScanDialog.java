@@ -14,16 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.core.content.ContextCompat;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.luwesmobileapps.R;
 import com.example.luwesmobileapps.service.BLEService;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
-import java.util.Objects;
 
 public class BLEScanDialog extends AppCompatDialogFragment {
     private fragmentListener listener;
@@ -54,6 +50,7 @@ public class BLEScanDialog extends AppCompatDialogFragment {
 
         dismiss.setOnClickListener(view1 -> {
             listener.BLEStopScan();
+            listener.dismissScan();
             dismiss();
         });
 
@@ -69,6 +66,7 @@ public class BLEScanDialog extends AppCompatDialogFragment {
                 Intent BLEServiceIntent = new Intent(getActivity(), BLEService.class);
                 BLEServiceIntent.putExtra("Device Input",device);
                 ContextCompat.startForegroundService(requireActivity(),BLEServiceIntent);
+                listener.dismissScan();
                 dismiss();
             }
         });
@@ -78,6 +76,7 @@ public class BLEScanDialog extends AppCompatDialogFragment {
     public interface fragmentListener{
         void BLEStartScan();
         void BLEStopScan();
+        void dismissScan();
     }
 
     public void AddScannedDevice(BluetoothDevice device){
@@ -90,7 +89,7 @@ public class BLEScanDialog extends AppCompatDialogFragment {
         if (context instanceof BLEScanDialog.fragmentListener) {
             listener = (BLEScanDialog.fragmentListener) context;
         } else {
-            throw new RuntimeException(context.toString()
+            throw new RuntimeException(context
                     + " must implement fragment listener");
         }
     }

@@ -11,11 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -39,7 +35,6 @@ import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.example.luwesmobileapps.service.BLEService;
 import com.example.luwesmobileapps.service.BTService;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.dialog.MaterialDialogs;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -47,7 +42,6 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Objects;
 
 public class HomeFragment extends Fragment {
     private fragmentListener listener;
@@ -85,10 +79,12 @@ public class HomeFragment extends Fragment {
             if(!bluetoothAdapter.isEnabled()){
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 mStartForResult.launch(enableBtIntent);
+                listener.dismissScan();
             }
             if(bluetoothAdapter.isEnabled()) {
                 if (DeviceViewModel.getConnectStatus().getValue() != null) {
                     if (DeviceViewModel.getConnectStatus().getValue() == 0) {
+                        listener.dismissScan();
                         if (bluetoothAdapter.getRemoteDevice(device.getDeviceAddress()) != null) {
                             if(device.getDeviceConnection()==1){
                                 ConnectBT(device);
@@ -99,6 +95,7 @@ public class HomeFragment extends Fragment {
                     }
                 } else {
                     if (bluetoothAdapter.getRemoteDevice(device.getDeviceAddress()) != null) {
+                        listener.dismissScan();
                         if(device.getDeviceConnection()==1){
                             ConnectBT(device);
                         }else if(device.getDeviceConnection()==2){
@@ -114,14 +111,23 @@ public class HomeFragment extends Fragment {
             public void onChanged(Boolean aBoolean) {
                 if(aBoolean){
                     DeviceData thisDevice = new DeviceData(DeviceViewModel.getMACAddress().getValue());
-                    if(SharedData.deviceList.indexOf(thisDevice)!=-1){
+                    if (!SharedData.deviceList.contains(thisDevice)) {
+                        thisDevice.setDeviceName(DeviceViewModel.getSiteName().getValue());
+                        thisDevice.setDeviceModel(DeviceViewModel.getDeviceModel().getValue());
+                        thisDevice.setDeviceConnection(DeviceViewModel.getConnectStatus().getValue());
+                        thisDevice.setLastConnection(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()));
+                        SharedData.deviceList.add(thisDevice);
+                        adapter.notifyItemInserted(SharedData.deviceList.indexOf(thisDevice));
+                    } else {
                         SharedData.deviceList.get(SharedData.deviceList.indexOf(thisDevice)).setDeviceName(DeviceViewModel.getSiteName().getValue());
-                        SharedData.deviceList.get(SharedData.deviceList.indexOf(thisDevice)).setLastBattery(DeviceViewModel.getDeviceBattery().getValue());
+                        SharedData.deviceList.get(SharedData.deviceList.indexOf(thisDevice)).setLastBattery(DeviceViewModel.getDeviceBattery().getValue()+" | "
+                                +DeviceViewModel.getBatteryCapacity().getValue());
                         SharedData.deviceList.get(SharedData.deviceList.indexOf(thisDevice)).setLastWaterLevel(DeviceViewModel.getWaterLevel().getValue());
                         SharedData.deviceList.get(SharedData.deviceList.indexOf(thisDevice)).setDeviceModel(DeviceViewModel.getDeviceModel().getValue());
-                        SharedData.deviceList.get(SharedData.deviceList.indexOf(thisDevice)).setLastConnection(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
-                        listener.saveDeviceList();
+                        SharedData.deviceList.get(SharedData.deviceList.indexOf(thisDevice)).setLastConnection(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()));
+                        adapter.notifyItemChanged(SharedData.deviceList.indexOf(thisDevice));
                     }
+                    listener.saveDeviceList();
                     adapter.submitList(SharedData.deviceList);
                     DeviceViewModel.setDeviceDataChanged(false);
                 }
@@ -172,13 +178,9 @@ public class HomeFragment extends Fragment {
         return v;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
     public interface fragmentListener{
         void saveDeviceList();
+        void dismissScan();
     }
 
     public void ConnectBT(DeviceData device){
@@ -201,7 +203,7 @@ public class HomeFragment extends Fragment {
         if (context instanceof fragmentListener) {
             listener = (fragmentListener) context;
         } else {
-            throw new RuntimeException(context.toString()
+            throw new RuntimeException(context
                     + " must implement fragment listener");
         }
     }

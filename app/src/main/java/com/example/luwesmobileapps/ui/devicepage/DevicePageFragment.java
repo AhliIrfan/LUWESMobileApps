@@ -9,32 +9,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.renderscript.ScriptGroup;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.text.Spanned;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import com.example.luwesmobileapps.R;
-import com.example.luwesmobileapps.data_layer.DeviceData;
-import com.example.luwesmobileapps.data_layer.SharedData;
 import com.example.luwesmobileapps.data_layer.SharedViewModel;
 import com.example.luwesmobileapps.filter.InputFilterIP;
 import com.example.luwesmobileapps.filter.InputFilterMinMax;
@@ -46,7 +38,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class DevicePageFragment extends Fragment {
@@ -114,7 +105,7 @@ public class DevicePageFragment extends Fragment {
     public interface fragmentListener{
         void BTSend(String string);
         void BTStartDownload(int downloadLength, int startDoY, int startYear);
-        void BLESend(String string);
+        void BLESend(String string, boolean mesh);
         void BLEStartDownload(int downloadLength, int startDoY, int startYear);
         void saveDeviceList();
     }
@@ -125,7 +116,7 @@ public class DevicePageFragment extends Fragment {
         if (context instanceof fragmentListener) {
             listener = (fragmentListener) context;
         } else {
-            throw new RuntimeException(context.toString()
+            throw new RuntimeException(context
                     + " must implement fragment listener");
         }
     }
@@ -233,7 +224,7 @@ public class DevicePageFragment extends Fragment {
                     if (DeviceViewModel.getConnectStatus().getValue() == 1)
                         listener.BTSend("LWST,7000000#\r\n");
                     else if (DeviceViewModel.getConnectStatus().getValue() == 2)
-                        listener.BLESend("LWST,7000000#\r\n");
+                        listener.BLESend("LWST,7000000#\r\n",false);
                 }
             }
         });
@@ -339,8 +330,10 @@ public class DevicePageFragment extends Fragment {
                         if (validName(SettingInput.getText().toString().trim())) {
                             if (DeviceViewModel.getConnectStatus().getValue() == 1)
                                 listener.BTSend("LWST,7780000#" + SettingInput.getText().toString().trim()+"\r\n");
-                            else if (DeviceViewModel.getConnectStatus().getValue() == 2)
-                                listener.BLESend("LWST,7780000#" + SettingInput.getText().toString().trim()+"\r\n");
+                            else if (DeviceViewModel.getConnectStatus().getValue() == 2) {
+                                listener.BLESend("a2e2#" + SettingInput.getText().toString().trim(), true);
+                                listener.BLESend("LWST,7780000#" + SettingInput.getText().toString().trim() + "\r\n", false);
+                            }
                             DeviceViewModel.setSettingStatus(true);
                         } else
                             Snackbar.make(requireContext(), requireView(), "Site name cannot contains illegal character", Snackbar.LENGTH_SHORT).show();
@@ -357,7 +350,7 @@ public class DevicePageFragment extends Fragment {
                             if (DeviceViewModel.getConnectStatus().getValue() == 1)
                                 listener.BTSend("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()+"\r\n");
                             else if (DeviceViewModel.getConnectStatus().getValue() == 2)
-                                listener.BLESend("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()+"\r\n");
+                                listener.BLESend("LWST,SIP0000#" + SettingInput.getText().toString().trim() + "#" + SettingInput2.getText().toString().trim()+"\r\n",false);
                             DeviceViewModel.setSettingStatus(true);
                         } else {
                             Snackbar.make(requireContext(), requireView(), "Please input valid IP and Port", Snackbar.LENGTH_SHORT).show();
@@ -374,7 +367,7 @@ public class DevicePageFragment extends Fragment {
                             if (DeviceViewModel.getConnectStatus().getValue() == 1)
                                 listener.BTSend(("LWST,7100000#" + SettingInput.getText().toString().trim())+"\r\n");
                             else if (DeviceViewModel.getConnectStatus().getValue() == 2)
-                                listener.BLESend("LWST,7100000#" + SettingInput.getText().toString().trim()+"\r\n");
+                                listener.BLESend("LWST,7100000#" + SettingInput.getText().toString().trim()+"\r\n",false);
                             DeviceViewModel.setSettingStatus(true);
                         } else
                             Snackbar.make(requireContext(), requireView(), "Offset must be a number", Snackbar.LENGTH_SHORT).show();
@@ -394,7 +387,7 @@ public class DevicePageFragment extends Fragment {
                             if (DeviceViewModel.getConnectStatus().getValue() == 1)
                                 listener.BTSend("LWST,7220000#" + interval +"\r\n");
                             else if (DeviceViewModel.getConnectStatus().getValue() == 2)
-                                listener.BLESend("LWST,7220000#" + interval +"\r\n");
+                                listener.BLESend("LWST,7220000#" + interval +"\r\n",false);
                             DeviceViewModel.setSettingStatus(true);
                         } else
                             Snackbar.make(requireContext(), requireView(), "Interval must be a number", Snackbar.LENGTH_SHORT).show();
@@ -408,14 +401,14 @@ public class DevicePageFragment extends Fragment {
                     else{
                         if(DeviceViewModel.getConnectStatus().getValue() == 1){
                             if(MeasurementModeOpt.getSelectedItemPosition()==0)
-                                listener.BTSend("LWST,6000000#1\r\n");
-                            else
                                 listener.BTSend("LWST,6000000#0\r\n");
+                            else
+                                listener.BTSend("LWST,6000000#1\r\n");
                         }else if(DeviceViewModel.getConnectStatus().getValue() == 2){
                             if(MeasurementModeOpt.getSelectedItemPosition()==0)
-                                listener.BLESend("LWST,6000000#1\r\n");
+                                listener.BLESend("LWST,6000000#0\r\n",false);
                             else
-                                listener.BLESend("LWST,6000000#0\r\n");
+                                listener.BLESend("LWST,6000000#1\r\n",false);
                         }
                     }
                     break;
@@ -439,13 +432,13 @@ public class DevicePageFragment extends Fragment {
                 if(DeviceViewModel.getConnectStatus().getValue()==1)
                     listener.BTSend("LWTS\""+ TimeSynchronize+"+"+TimeZoneInt+"\"\r\n");
                 else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                    listener.BLESend("LWTS,"+ TimeSynchronize+"\r\n");
+                    listener.BLESend("LWTS,"+ TimeSynchronize+","+"0"+","+TimeZoneInt+","+"\r\n",false);
             }
             else{
                 if(DeviceViewModel.getConnectStatus().getValue()==1)
                     listener.BTSend("LWTS\""+ TimeSynchronize+TimeZoneInt+"\"\r\n");
                 else if(DeviceViewModel.getConnectStatus().getValue()==2)
-                    listener.BLESend("LWTS,"+ TimeSynchronize+"\"\r\n");
+                    listener.BLESend("LWTS,"+ TimeSynchronize+","+"1"+","+TimeZoneInt+","+"\"\r\n",false);
             }
             DeviceViewModel.setSyncStatus(false);
         });
@@ -621,7 +614,7 @@ public class DevicePageFragment extends Fragment {
                             listener.BTSend(String.format("LWDL,%02d,%03d,%03d,\r\n",(sYear - 2000),DayofTheYear,DownloadLength));
                         }else if(DeviceViewModel.getConnectStatus().getValue()==2){
                             listener.BLEStartDownload(DownloadLength,DayofTheYear,sYear);
-                            listener.BLESend(String.format("LWDL,%02d,%03d,%03d,\r\n",(sYear - 2000),DayofTheYear,DownloadLength));
+                            listener.BLESend(String.format("LWDL,%02d,%03d,%03d,\r\n",(sYear - 2000),DayofTheYear,DownloadLength),false);
                         }
                         DeviceViewModel.setDownloadStatus(true);
                     }
@@ -675,10 +668,10 @@ public class DevicePageFragment extends Fragment {
             }
         });
         DeviceViewModel.getMeasurementMode().observe(getViewLifecycleOwner(), integer -> {
-            if(integer==0){
+            if(integer==1){
                 MeasurementMode.setText("Tide gauge");
             }
-            else if(integer==1)
+            else if(integer==0)
                 MeasurementMode.setText("Ground water");
         });
         DeviceViewModel.getSettingStatus().observe(getViewLifecycleOwner(), aBoolean -> {

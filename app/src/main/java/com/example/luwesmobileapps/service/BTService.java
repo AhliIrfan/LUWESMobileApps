@@ -1,7 +1,6 @@
 package com.example.luwesmobileapps.service;
 
 import static com.example.luwesmobileapps.App.Channel_1_ID;
-import static com.example.luwesmobileapps.MainActivity.bluetoothAdapter;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -16,15 +15,12 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -34,7 +30,6 @@ import com.example.luwesmobileapps.R;
 import com.example.luwesmobileapps.data_layer.DeviceData;
 import com.example.luwesmobileapps.data_layer.FileAccess;
 import com.example.luwesmobileapps.data_layer.SharedData;
-import com.example.luwesmobileapps.ui.dataviewer.DataViewerFragment;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -77,6 +72,7 @@ public class BTService extends Service {
     public void onCreate() {
         super.onCreate();
         deviceData = new SharedData();
+        deviceData.postConnectStatus(3);
         deviceData.postDownloadStatus(false);
         deviceData.postRealTimeStatus(false);
     }
@@ -126,6 +122,7 @@ public class BTService extends Service {
         super.onDestroy();
         if(myNotificationManager!=null)
             myNotificationManager.cancelAll();
+        deviceData.postDeviceDataChanged(false);
         deviceData.postRealTimeStatus(false);
         deviceData.postDownloadStatus(false);
         deviceData.postConnectStatus(0);
@@ -206,17 +203,8 @@ public class BTService extends Service {
             // the connection in a separate thread.
             BTStream = new BTService.ConnectedThread(mmSocket);
             BTStream.start();
-            Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
-                    .setContentTitle("Device Connection")
-                    .setContentText("Connected with " + myDevice.getName())
-                    .setSmallIcon(R.drawable.ic_logo_luwes)
-                    .setContentIntent(pendingIntent)
-                    .setOngoing(false)
-                    .build();
-            myNotificationManager = NotificationManagerCompat.from(getBaseContext());
-            myNotificationManager.notify(1, notification2);
+
             setRunning(true);
-            deviceData.postConnectStatus(1);
             BTStream.write("LWST,7000000#\r\n".getBytes());
         }
 
@@ -274,19 +262,23 @@ public class BTService extends Service {
                         case LWRT:
                             String RealTimeString = (String) message.obj;
                             String[] splitString1 = RealTimeString.split(",");
-                            deviceData.postRecordStatus(splitString1[1]+"/"+splitString1[2]);
+                            deviceData.postRecordStatus(splitString1[1]+" | "+splitString1[2]);
                             deviceData.postDeviceDateTime(splitString1[3]);
                             deviceData.postWaterLevel(splitString1[4]);
-                            deviceData.postDeviceBattery(splitString1[5]);
-                            if (Integer.parseInt(splitString1[6].substring(0, 1)) > 1) {
+                            float batteryVoltage = Float.parseFloat(splitString1[5]);
+                            deviceData.postDeviceBattery(String.format("%.2f",batteryVoltage)+"V");
+                            float batteryPercentage = (float) (100 - ((4.20-Float.parseFloat(splitString1[5]))/0.0075));
+                            deviceData.postBatteryCapacity(String.valueOf(batteryPercentage));
+                            if (Integer.parseInt(splitString1[6].substring(0, 1)) > 1)
                                 deviceData.postInternetConnection("Connected");
-                            } else
+                            else
                                 deviceData.postInternetConnection("Not connected");
                             deviceData.postDeviceDataChanged(true);
                             return true;
                         case LWST:
                             String SettingString = (String) message.obj;
                             if(SettingString.contains("SET OK")){
+                                delay(200);
                                 write("LWST,7000000#\r\n".getBytes());
                                 deviceData.postSettingStatus(false);
                             }
@@ -322,10 +314,22 @@ public class BTService extends Service {
                                         .build();
                                 myNotificationManager = NotificationManagerCompat.from(getBaseContext());
                                 myNotificationManager.notify(1, notification2);
+                                myFileAccess.WriteDeviceAddress(deviceData.getMACAddress().getValue(),deviceData.getSiteName().getValue());
                                 deviceData.postDeviceDataChanged(true);
                             }
                             return true;
                         case LWDI:
+                            Notification notification2 = new NotificationCompat.Builder(getBaseContext(), Channel_1_ID)
+                                    .setContentTitle("Device Connection")
+                                    .setContentText("Connected with " + myDevice.getName())
+                                    .setSmallIcon(R.drawable.ic_logo_luwes)
+                                    .setContentIntent(pendingIntent)
+                                    .setOngoing(false)
+                                    .build();
+                            myNotificationManager = NotificationManagerCompat.from(getBaseContext());
+                            myNotificationManager.notify(1, notification2);
+                            deviceData.postConnectStatus(1);
+
                             String DeviceInfoString = (String) message.obj;
                             String[] splitString3 = DeviceInfoString.split(",");
                             deviceData.postSiteName(myDevice.getName());
@@ -569,6 +573,7 @@ public class BTService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
         myNotificationManager.notify(3, builder.build());
     }
+
     private void unpairDevice(BluetoothDevice device) {
         try {
             Method m = device.getClass()
@@ -576,6 +581,15 @@ public class BTService extends Service {
             m.invoke(device, (Object[]) null);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
+        }
+    }
+
+    public void delay(int ms) {
+        try {
+            Thread.currentThread();
+            Thread.sleep((long) ms);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }
